@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/go-ini/ini"
 )
 
 var (
@@ -22,5 +25,9 @@ func main() {
 		fmt.Println("Time:    ", BuildTime)
 		fmt.Println("GitHash: ", GitHash)
 		return
+	}
+	cfg, err := ini.Load("./settings.ini")
+	if err != nil {
+		log.Fatalln("无法加载当前目录下的settings.ini文件。", err)
 	}
 }
