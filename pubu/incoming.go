@@ -44,7 +44,6 @@ func (m *Incoming) Build() (io.Reader, error) {
 			return nil, fmt.Errorf("title or URL is required")
 		}
 	}
-
 	b, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
