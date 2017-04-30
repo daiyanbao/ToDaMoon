@@ -22,3 +22,14 @@ _testmain.go
 *.exe
 *.test
 *.prof
+*.out
+*.err
+*.pid
+A6
+a6s
+tdm
+debug
+.vscode
+aQuaGo*
+*.db
+*.protobuf
