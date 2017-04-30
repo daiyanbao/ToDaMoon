@@ -1,4 +1,3 @@
-// Incoming message builder.
 package pubu
 
 import (
