@@ -1,5 +1,6 @@
 # 设置编译后文件的名称
 BINARY=ToDaMoon
+FILE_PATH=`echo ${HOME}/ToDaMoon/`
 
 # 编译号文件名称
 BUILD_VERSION_FILE=Version
@@ -20,7 +21,7 @@ build:
 	@cp ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE)) ${BINARY}
 	@rm ${BUILD_NUMBER_FILE}
 	./${BINARY} version	
-
+	mv ${BINARY}* ${FILE_PATH}
 # Installs our project: copies binaries
 install:
 	go install ${LDFLAGS}

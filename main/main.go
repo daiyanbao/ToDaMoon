@@ -36,10 +36,11 @@ func main() {
 	pbKey := cfg.Section("pubu").Key("ToDaMoon").String()
 	pb := pubu.New(pbKey)
 	imOK := pubu.Msg(time.Now().String())
-	imOK.Success(
-		"ToDaMoon成功启动",
-		"详情请点击这里",
-		"https://github.com/aQuaYi/ToDaMoon",
-	)
+	imOK.Success("ToDaMoon成功启动")
+	imOK.Muted("")
+	imOK.Warning("")
+	imOK.Info("")
+	imOK.Error("")
+	imOK.Primary("")
 	pb.Send(imOK)
 }

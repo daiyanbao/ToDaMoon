@@ -26,10 +26,8 @@ type Incoming struct {
 
 //IncomingAttachment 附件格式
 type IncomingAttachment struct {
-	Title       string `json:"title"`
-	Description string `json:"descrption,omitempty"`
-	Color       color  `json:"color,omitempty"`
-	URL         string `json:"url,omitempty"`
+	Text  string `json:"title"`
+	Color color  `json:"color,omitempty"`
 }
 
 //Build 构建了消息
@@ -39,7 +37,7 @@ func (m *Incoming) Build() (io.Reader, error) {
 	}
 
 	for _, attachment := range m.Attachments {
-		if attachment.Title == "" && attachment.URL == "" {
+		if attachment.Text == "" {
 			return nil, fmt.Errorf("title or URL is required")
 		}
 	}
