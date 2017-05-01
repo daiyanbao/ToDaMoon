@@ -14,7 +14,7 @@ var once sync.Once
 func New(hook string) Interface.Notify {
 	once.Do(
 		func() {
-			icChan := make(incomeChan, 12)
+			icChan := make(incomingChan, 12)
 			pbc = &client{
 				hook:   hook,
 				icChan: icChan,
@@ -26,7 +26,7 @@ func New(hook string) Interface.Notify {
 	return pbc
 }
 
-func start(icChan incomeChan) {
+func start(icChan incomingChan) {
 	beginTime := time.Now()
 	for m := range icChan {
 		pbc.send(m)

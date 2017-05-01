@@ -7,28 +7,31 @@ import (
 	"net/http"
 )
 
-type incomeChan chan *incoming
+type incomingChan chan *incoming
 
 type client struct {
 	hook   string
-	icChan incomeChan
+	icChan incomingChan
 }
 
-func (c *client) send(ic *incoming) error {
+func (c *client) send(ic *incoming) {
 	message, err := ic.build()
 	if err != nil {
-		return err
+		log.Println("发送消息出错。", ic, "出错原因：", err)
+		return
 	}
 
 	req := &http.Client{}
 	resp, err := req.Post(c.hook, "application/json", message)
 
 	if err != nil {
-		return err
+		log.Println("发送消息出错。", ic, "出错原因：", err)
+		return
 	}
 	result, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		log.Println("发送消息出错。", ic, "出错原因：", err)
+		return
 	}
 
 	type r struct {
@@ -45,7 +48,7 @@ func (c *client) send(ic *incoming) error {
 	}
 
 	resp.Body.Close()
-	return nil
+	return
 }
 
 func (c *client) Debug(msg string) {

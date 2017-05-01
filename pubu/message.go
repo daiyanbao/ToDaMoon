@@ -21,12 +21,12 @@ const (
 
 //incoming 消息格式
 type incoming struct {
-	Text        string               `json:"text"`
-	Attachments []incomingAttachment `json:"attachments,omitempty"`
+	Text        string       `json:"text"`
+	Attachments []attachment `json:"attachments,omitempty"`
 }
 
 //incomingAttachment 附件格式
-type incomingAttachment struct {
+type attachment struct {
 	Text  string `json:"title"`
 	Color color  `json:"color,omitempty"`
 }
@@ -39,7 +39,7 @@ func (m *incoming) build() (io.Reader, error) {
 
 	for _, attachment := range m.Attachments {
 		if attachment.Text == "" {
-			return nil, fmt.Errorf("title is required")
+			return nil, fmt.Errorf("text is required")
 		}
 	}
 	b, err := json.Marshal(m)
@@ -57,8 +57,8 @@ func msgMaker(text string) *incoming {
 }
 
 //att 创建带附件的消息。
-func att(text string, color color) incomingAttachment {
-	return incomingAttachment{
+func att(text string, color color) attachment {
+	return attachment{
 		Text:  text,
 		Color: color,
 	}
