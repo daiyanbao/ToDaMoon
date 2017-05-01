@@ -7,10 +7,15 @@ import (
 	"net/http"
 )
 
+type incomeChan chan *incoming
 
+type client struct {
+	hook   string
+	icChan incomeChan
+}
 
-func (p *pubu) send(ic *Incoming) error {
-	message, err := ic.Build()
+func (c *client) send(ic *incoming) error {
+	message, err := ic.build()
 	if err != nil {
 		return err
 	}
@@ -41,4 +46,40 @@ func (p *pubu) send(ic *Incoming) error {
 
 	resp.Body.Close()
 	return nil
+}
+
+func (c *client) Debug(msg string) {
+	m := msgMaker(msg)
+	m.debug()
+	c.icChan <- m
+}
+
+func (c *client) Warning(msg string) {
+	m := msgMaker(msg)
+	m.warning()
+	c.icChan <- m
+}
+
+func (c *client) Error(msg string) {
+	m := msgMaker(msg)
+	m.error()
+	c.icChan <- m
+}
+
+func (c *client) Info(msg string) {
+	m := msgMaker(msg)
+	m.info()
+	c.icChan <- m
+}
+
+func (c *client) Good(msg string) {
+	m := msgMaker(msg)
+	m.good()
+	c.icChan <- m
+}
+
+func (c *client) Bad(msg string) {
+	m := msgMaker(msg)
+	m.bad()
+	c.icChan <- m
 }

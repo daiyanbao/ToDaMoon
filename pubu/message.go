@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 )
 
 type color string
@@ -18,27 +19,27 @@ const (
 	success color = "success"
 )
 
-//Incoming 消息格式
-type Incoming struct {
+//incoming 消息格式
+type incoming struct {
 	Text        string               `json:"text"`
-	Attachments []IncomingAttachment `json:"attachments,omitempty"`
+	Attachments []incomingAttachment `json:"attachments,omitempty"`
 }
 
-//IncomingAttachment 附件格式
-type IncomingAttachment struct {
+//incomingAttachment 附件格式
+type incomingAttachment struct {
 	Text  string `json:"title"`
 	Color color  `json:"color,omitempty"`
 }
 
-//Build 构建了消息
-func (m *Incoming) Build() (io.Reader, error) {
+//build 构建了消息
+func (m *incoming) build() (io.Reader, error) {
 	if m.Text == "" {
 		return nil, fmt.Errorf("text is required")
 	}
 
 	for _, attachment := range m.Attachments {
 		if attachment.Text == "" {
-			return nil, fmt.Errorf("title or URL is required")
+			return nil, fmt.Errorf("title is required")
 		}
 	}
 	b, err := json.Marshal(m)
@@ -47,49 +48,41 @@ func (m *Incoming) Build() (io.Reader, error) {
 	}
 	return bytes.NewBuffer(b), nil
 }
-package pubu
 
-//Msg 用于创建消息。
-func Msg(text string) *Incoming {
-	return &Incoming{
+//msg 用于创建消息。
+func msgMaker(text string) *incoming {
+	return &incoming{
 		Text: text,
 	}
 }
 
-//Att 创建带附件的消息。
-func att(text string, color color) IncomingAttachment {
-	return IncomingAttachment{
+//att 创建带附件的消息。
+func att(text string, color color) incomingAttachment {
+	return incomingAttachment{
 		Text:  text,
 		Color: color,
 	}
 }
 
-//Warning 添加WARNING消息。
-func (ic *Incoming) Warning(text string) {
-	ic.Attachments = append(ic.Attachments, att("WARNING: "+text, warning))
+func (m *incoming) debug() {
+	m.Attachments = append(m.Attachments, att("DEBUG: "+time.Now().Format("2006-01-02 15:04:05"), muted))
+}
+func (m *incoming) warning() {
+	m.Attachments = append(m.Attachments, att("WARNING: "+time.Now().Format("2006-01-02 15:04:05"), warning))
 }
 
-//Info 添加Info消息。
-func (ic *Incoming) Info(text string) {
-	ic.Attachments = append(ic.Attachments, att("INFO: "+text, info))
+func (m *incoming) error() {
+	m.Attachments = append(m.Attachments, att("ERROR: "+time.Now().Format("2006-01-02 15:04:05"), mistake))
 }
 
-//Primary 添加Primary消息。
-func (ic *Incoming) Primary(text string) {
-	ic.Attachments = append(ic.Attachments, att("PRIMARY: "+text, primary))
+func (m *incoming) info() {
+	m.Attachments = append(m.Attachments, att("INFO: "+time.Now().Format("2006-01-02 15:04:05"), info))
 }
 
-//Mistake 添加error消息
-func (ic *Incoming) Error(text string) {
-	ic.Attachments = append(ic.Attachments, att("ERROR: "+text, mistake))
+func (m *incoming) good() {
+	m.Attachments = append(m.Attachments, att("GOOD: "+time.Now().Format("2006-01-02 15:04:05"), success))
 }
 
-//Muted 添加Muted消息
-func (ic *Incoming) Muted(text string) {
-	ic.Attachments = append(ic.Attachments, att("MUTED: "+text, muted))
-}
-
-//Success 添加Success消息
-func (ic *Incoming) Success(text string) {
-	ic.Attachments = append(ic.Attachments, att("SUCCESS: "+text, success))
+func (m *incoming) bad() {
+	m.Attachments = append(m.Attachments, att("BAD: "+time.Now().Format("2006-01-02 15:04:05"), primary))
 }

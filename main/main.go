@@ -34,13 +34,7 @@ func main() {
 		log.Fatalln("无法加载当前目录下的settings.ini文件。", err)
 	}
 	pbKey := cfg.Section("pubu").Key("ToDaMoon").String()
-	pb := pubu.New(pbKey)
-	imOK := pubu.Msg(time.Now().String())
-	imOK.Success("ToDaMoon成功启动")
-	imOK.Muted("")
-	imOK.Warning("")
-	imOK.Info("")
-	imOK.Error("")
-	imOK.Primary("")
-	pb.Send(imOK)
+	pbc := pubu.New(pbKey)
+	pbc.Good("ToDaMoon成功启动。")
+	time.Sleep(time.Second * 10)
 }
