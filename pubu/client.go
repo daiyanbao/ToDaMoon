@@ -1,18 +1,15 @@
-//Package pubu API的简单封装，并根据个人需求，设置了一些预定义的消息样式。
 package pubu
 
-import "net/http"
-import "io/ioutil"
-import "encoding/json"
-import "log"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"net/http"
+)
 
-//Client 是发送消息的客户端。
-type Client struct {
-	hook string
-}
 
-//Send 给服务器发送消息
-func (c *Client) Send(ic *Incoming) error {
+
+func (p *pubu) send(ic *Incoming) error {
 	message, err := ic.Build()
 	if err != nil {
 		return err
@@ -44,9 +41,4 @@ func (c *Client) Send(ic *Incoming) error {
 
 	resp.Body.Close()
 	return nil
-}
-
-//New 创建新的客户端。
-func New(hook string) *Client {
-	return &Client{hook: hook}
 }
