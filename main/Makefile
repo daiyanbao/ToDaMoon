@@ -1,5 +1,6 @@
 # 设置编译后文件的名称
 BINARY=ToDaMoon
+# 编译后，把可执行文件移去FILE_PATH
 FILE_PATH=`echo ${HOME}/ToDaMoon/`
 
 # 编译号文件名称
