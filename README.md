@@ -12,7 +12,7 @@ ToDaMoon是我的自己的虚拟币交易系统。
 1. [Go语言小贴士4 － 后台运行](https://zhuanlan.zhihu.com/p/21839884?refer=idada) 使用这个里面的内容，可以非常方便地构建一个ToDaMoon的后台运行方式。
 我在zsh中的相关设置是
 ```shell
-alias tdm="cd ~/ToDaMoon/ && nohup ./ToDaMoon 1>tdm.out 2>tdm.err &"
+alias tdm="cd ~/ToDaMoon/ && nohup ./ToDaMoon 1>>tdm.out 2>>tdm.err &"
 alias killtdm="cd ~/ToDaMoon && kill \`cat tdm.pid\`"
 alias tto="cd ~/ToDaMoon/ && tailf tdm.out"
 alias tte="cd ~/ToDaMoon/ && tailf tdm.err"
