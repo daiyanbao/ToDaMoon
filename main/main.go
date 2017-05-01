@@ -36,5 +36,5 @@ func main() {
 	pbKey := cfg.Section("pubu").Key("ToDaMoon").String()
 	pbc := pubu.New(pbKey)
 	pbc.Good("ToDaMoon成功启动。")
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 5)
 }

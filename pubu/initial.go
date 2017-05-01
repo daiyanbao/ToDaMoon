@@ -20,7 +20,7 @@ func New(hook string) Interface.Notify {
 				icChan: icChan,
 			}
 			go start(icChan)
-			pbc.Good("零信的初始化工作完成。")
+			pbc.Info("零信的初始化工作完成。")
 		})
 
 	return pbc

@@ -21,8 +21,8 @@ build:
 	@go build ${LDFLAGS} -o ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE))
 	@cp ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE)) ${BINARY}
 	@rm ${BUILD_NUMBER_FILE}
-	./${BINARY} version	
-	mv ${BINARY}* ${FILE_PATH}
+	@./${BINARY} version	
+	@mv ${BINARY}* ${FILE_PATH}
 # Installs our project: copies binaries
 install:
 	go install ${LDFLAGS}
