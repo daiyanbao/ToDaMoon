@@ -1,0 +1,3 @@
+package pubu
+
+var notify *
