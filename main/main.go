@@ -1,8 +1,8 @@
 package main
 
 import (
-	gu "ToDaMoon/goutil"
 	"ToDaMoon/pubu"
+	"ToDaMoon/util"
 	"fmt"
 	"log"
 	"os"
@@ -18,7 +18,7 @@ const (
 )
 
 func init() {
-	gu.Init(pidFile)
+	util.Init(pidFile)
 }
 
 var (
@@ -43,7 +43,7 @@ func main() {
 		return
 	}
 
-	done := gu.WaitingKill()
+	done := util.WaitingKill()
 	//以上是程序的相关准备工作
 
 	cfg, err := ini.Load("./settings.ini")
