@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package trades;
+
+message Trade{
+    int64 tid = 1;
+    int64 date = 2;
+    double price = 3;
+    double amount =4;
+    string type =5;
+}
+
+// Our address book file is just one of these.
+message Coin {
+    repeated Trade trades = 1;
+}
