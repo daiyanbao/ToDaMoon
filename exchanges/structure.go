@@ -1,4 +1,4 @@
-// structures.go
+//Package exchanges 的structure.go定义了交易所需用到的数据格式。
 package exchanges
 
 import (
