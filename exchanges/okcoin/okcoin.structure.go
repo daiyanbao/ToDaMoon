@@ -1,7 +1,7 @@
 package okcoin
 
 import (
-	ec "aQuaGo/exchanges"
+	ec "ToDaMoon/exchanges"
 	"fmt"
 )
 

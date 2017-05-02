@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
-	ec "aQuaGo/exchanges"
+	ec "ToDaMoon/exchanges"
 )
 
 const (

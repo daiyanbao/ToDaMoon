@@ -2,7 +2,7 @@
 package exchanges
 
 import (
-	pb "aQuaGo/exchanges/trades"
+	pb "ToDaMoon/exchanges/trades"
 	"fmt"
 	"sort"
 )

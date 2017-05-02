@@ -11,10 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	db "aQuaGo/DataBase"
-	bc "aQuaGo/bearychat"
-	cm "aQuaGo/common"
-	ec "aQuaGo/exchanges"
+	db "ToDaMoon/DataBase"
+	bc "ToDaMoon/bearychat"
+	cm "ToDaMoon/common"
+	ec "ToDaMoon/exchanges"
 	"time"
 
 	"github.com/imkira/go-observer"
