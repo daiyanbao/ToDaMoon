@@ -27,6 +27,7 @@ func (t *Ticker) String() string {
 	return str
 }
 
+//Depth 记录深度信息
 type Depth struct {
 	Asks [][2]float64
 	Bids [][2]float64
