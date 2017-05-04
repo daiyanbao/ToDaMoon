@@ -7,6 +7,7 @@ import (
 	"sort"
 )
 
+//Ticker 是ticker的数据结构。
 type Ticker struct {
 	Last float64
 	Buy  float64
