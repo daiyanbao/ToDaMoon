@@ -15,34 +15,46 @@ import (
 	"ToDaMoon/pubu"
 	"ToDaMoon/util"
 
+	"github.com/go-ini/ini"
 	"github.com/imkira/go-observer"
 )
 
 var notify Interface.Notify
-
-func init() {
-	notify = pubu.New()
-}
 
 // 以下代码实现了BTC38模块的单例特性
 var btc38 *BTC38
 var once sync.Once
 
 // Instance make a singleton of btc38.com
-func Instance(cfg *Config, notify Interface.Notify) *BTC38 {
-	cfg.Check()
+func Instance() *BTC38 {
 	once.Do(func() {
+		notify = pubu.New()
+		notify.Info("开始生成BTC38的Instance")
+		cfg, err := ini.Load("./btc38.ini")
+		if err != nil {
+			msg := fmt.Sprintf("无法加载%s/btc38.ini: %s", util.PWD(), err)
+			notify.Error(msg)
+			log.Fatalf(msg)
+		}
+		btc38Cfg := new(Config)
+		if err := cfg.Section("btc38").MapTo(btc38Cfg); err != nil {
+			log.Fatalln("无法读取btc38的配置", err)
+		}
+		btc38Cfg.Check()
+
 		askChan := make(askChannel, 12)
-		btc38 = &BTC38{Config: cfg,
+		btc38 = &BTC38{Config: btc38Cfg,
 			ask:      askChan,
 			db:       map[string]db.DBM{},
 			Property: map[string]observer.Property{},
 		}
-		go start(askChan, time.Duration(cfg.MinAccessPeriodMS)*time.Millisecond)
+		go start(askChan, time.Duration(btc38Cfg.MinAccessPeriodMS)*time.Millisecond)
 
 		btc38.makeDBs()
-		btc38.makePropertys()
-		notify.Info("单例初始化完成。")
+		if btc38Cfg.RecordHistory {
+			btc38.makePropertys()
+		}
+		notify.Good("btc38的单例初始化完成。")
 	})
 
 	return btc38
@@ -70,7 +82,7 @@ func (o *BTC38) makeDBs() {
 		var err error
 		o.db[coin], err = db.New(o.DBDir, o.Name, coin, "cny")
 		if err != nil {
-			text := fmt.Sprintf("无法创建OKCoin的中%s的数据库。\n", coin)
+			text := fmt.Sprintf("无法创建btc38的中%s的数据库。\n", coin)
 			notify.Error(text)
 			log.Fatalln(text)
 		}
@@ -78,7 +90,7 @@ func (o *BTC38) makeDBs() {
 		if o.ShowDetail {
 			maxTid, _ := o.db[coin].MaxTid()
 			text := fmt.Sprintf("已经链接上了%s的数据库，其最大Tid是%d\n", coin, maxTid)
-			notify.Info(text)
+			log.Println(text)
 		}
 	}
 
@@ -129,7 +141,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 	var thdb ec.Trades
 	saveTime := time.Now()
 	requestTime := time.Now()
-	waitMS := o.CoinPeriodS
+	waitS := o.CoinPeriodS
 
 	go func() {
 		for {
@@ -164,12 +176,12 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 				}
 			}
 
-			if th.Len() < 100 { // 当th的长度较短时，是由于已经读取到最新的消息了。
-				waitMS = 1000 * 60
+			if th.Len() < 50 { // 当th的长度较短时，是由于已经读取到最新的消息了。
+				waitS = 60
 			} else {
-				waitMS = o.CoinPeriodS
+				waitS = o.CoinPeriodS
 			}
-			util.HoldOn(time.Duration(waitMS)*time.Millisecond, &requestTime)
+			util.HoldOn(time.Duration(waitS)*time.Millisecond, &requestTime)
 		}
 	}()
 }
@@ -200,14 +212,6 @@ func (o *BTC38) post(method string, v url.Values, result interface{}) (err error
 	if ans.err != nil {
 		return ans.err
 	}
-
-	// err = ec.JSONDecode([]byte(ans.body), &result)
-	// if err != nil {
-	// 	if o.ShowDetail {
-	// 		log.Println(string(ans.body))
-	// 	}
-	// 	return err
-	// }
 
 	err = ec.JSONDecode([]byte(ans.body), &result)
 	if err != nil {

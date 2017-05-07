@@ -13,16 +13,19 @@ type TickerResponse struct {
 
 // Ticker is Ticker
 type Ticker struct {
-	Buy  float64 `json:"buy,string"`
-	High float64 `json:"high,string"`
-	Last float64 `json:"last,string"`
-	Low  float64 `json:"low,string"`
-	Sell float64 `json:"sell,string"`
-	Vol  float64 `json:"vol,string"`
+	High float64 `json:"high,float64"`
+	Low  float64 `json:"low,float64"`
+	Last float64 `json:"last,float64"`
+	Vol  float64 `json:"vol,float64"`
+	Buy  float64 `json:"buy,float64"`
+	Sell float64 `json:"sell,float64"`
 }
 
-// UserInfo cantains user's details in okcoin.cn
-type UserInfo struct {
+// MyBalance cantains user's details in okcoin.cn
+type MyBalance map[string]float64
+
+// Balance cantains user's details in okcoin.cn
+type Balance struct {
 	Info struct {
 		Funds struct {
 			Asset struct {
@@ -54,7 +57,7 @@ type UserInfo struct {
 	ErrorCode int64 `json:"error_code"`
 }
 
-func (ui *UserInfo) String() string {
+func (ui *Balance) String() string {
 	str := fmt.Sprintf("Result: %t\n", ui.Result)
 	str += fmt.Sprint("Info:\n\tFunds:\n")
 	str += fmt.Sprint("\t\tAsset:\n")

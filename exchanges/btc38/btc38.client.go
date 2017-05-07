@@ -35,6 +35,7 @@ type answer struct {
 // Config contains all the ini settings
 type Config struct {
 	ShowDetail        bool
+	RecordHistory     bool   //使用数据库记录历史交易记录
 	MinAccessPeriodMS int    //两次API访问的最小间隔时间，单位为毫秒
 	CoinPeriodS       int    //查询某一个币种最新交易记录的时间间隔，单位为秒
 	IP                string //本机ip，btc38

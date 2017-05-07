@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	apiURL    = "https://www.okcoin.cn/api/v1/"
-	tickerURL = "ticker.do"
-	userinfo  = "userinfo.do"
-	hsitory   = "trade_history.do"
+	apiURL    = "http://api.btc38.com/v1/"
+	tickerURL = "ticker.php"
+	balance   = "getMyBalance.php"
+	hsitory   = "trades.php"
 	/*
 		TICKER            = "ticker.do"
 		DEPTH             = "depth.do"
@@ -47,7 +47,8 @@ func (o *BTC38) Ticker(symbol string) (*ec.Ticker, error) {
 	resp := TickerResponse{}
 
 	v := url.Values{}
-	v.Set("symbol", symbol+"_cny")
+	v.Set("c", symbol)
+	v.Set("mk_type", "cny")
 
 	ansChan := make(chan answer)
 	o.ask <- ask{Type: get,
@@ -75,14 +76,63 @@ func (o *BTC38) Ticker(symbol string) (*ec.Ticker, error) {
 	}, nil
 }
 
+//AllCoins returns okcoin's latest ticker data
+func (o *BTC38) AllCoins() ([]string, error) {
+	resp := make(map[string]interface{})
+
+	v := url.Values{}
+	v.Set("c", "all")
+	v.Set("mk_type", "cny")
+
+	ansChan := make(chan answer)
+	o.ask <- ask{Type: get,
+		Path:       ec.Path(apiURL+tickerURL, v),
+		AnswerChan: ansChan}
+	ans := <-ansChan
+
+	if ans.err != nil {
+		return nil, ans.err
+	}
+
+	err := ec.JSONDecode(ans.body, &resp)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, len(resp))
+	i := 0
+	for k := range resp {
+		result[i] = k
+		i++
+	}
+
+	return result, nil
+}
+
 /*
 以下是具体的post方法。
 */
 
+//Balance 返回账户信息
+func (o *BTC38) Balance() (MyBalance, error) {
+	result := new(MyBalance)
+	err := o.post(balance, url.Values{}, result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// if result.ErrorCode > 0 {
+	// 	s := fmt.Sprintln("获取用户信息出错:", o.restErrors[result.ErrorCode])
+	// 	return nil, errors.New(s)
+	// }
+
+	return *result, nil
+}
+
 // UserInfo give user's information
-func (o *BTC38) UserInfo() (*UserInfo, error) {
-	result := new(UserInfo)
-	err := o.post(userinfo, url.Values{}, result)
+func (o *BTC38) UserInfo() (*Balance, error) {
+	result := new(Balance)
+	err := o.post(balance, url.Values{}, result)
 
 	if err != nil {
 		return nil, err

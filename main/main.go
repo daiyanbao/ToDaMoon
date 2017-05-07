@@ -1,15 +1,13 @@
 package main
 
 import (
+	"ToDaMoon/exchanges/btc38"
 	"ToDaMoon/pubu"
 	"ToDaMoon/util"
 	"fmt"
 	"log"
 	"os"
-
 	"time"
-
-	"github.com/go-ini/ini"
 )
 
 const (
@@ -43,20 +41,23 @@ func main() {
 		return
 	}
 
+	log.Println("Version: ", Version+"."+BuildNumber)
+
 	done := util.WaitingKill()
 	//以上是程序的相关准备工作
+	pubuClient := pubu.New()
+	b38 := btc38.Instance()
+	fmt.Println(b38.Name)
+	pubuClient.Good("ToDaMoon成功启动。")
+	fmt.Println("ToDaMoon启动成功。")
+	time.Sleep(time.Second)
+	pubuClient.Good("我就看看能不能")
+	fmt.Println(b38.Ticker("btc"))
+	fmt.Println(b38.AllCoins())
 
-	cfg, err := ini.Load("./settings.ini")
-	if err != nil {
-		log.Fatalln("无法加载当前目录下的settings.ini文件。", err)
-	}
-	pbKey := cfg.Section("pubu").Key("ToDaMoon").String()
-	fmt.Println(pbKey) //TODO: 临时代码，删除。
-	pbc := pubu.New()
-	pbc.Good("ToDaMoon成功启动。")
-
+	fmt.Println(b38.Balance())
 	//等待被kill
 	<-done
-	pbc.Good("10秒后，ToDaMoon关闭。")
-	time.Sleep(time.Second * 10)
+	pubuClient.Good("3秒后，ToDaMoon关闭。")
+	time.Sleep(time.Second * 3)
 }
