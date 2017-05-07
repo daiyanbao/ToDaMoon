@@ -51,7 +51,8 @@ func main() {
 		log.Fatalln("无法加载当前目录下的settings.ini文件。", err)
 	}
 	pbKey := cfg.Section("pubu").Key("ToDaMoon").String()
-	pbc := pubu.New(pbKey)
+	fmt.Println(pbKey) //TODO: 临时代码，删除。
+	pbc := pubu.New()
 	pbc.Good("ToDaMoon成功启动。")
 
 	//等待被kill

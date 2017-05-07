@@ -13,16 +13,19 @@ import (
 	ec "ToDaMoon/exchanges"
 	"time"
 
+	"ToDaMoon/Interface"
+
 	"github.com/imkira/go-observer"
+	"ToDaMoon/pubu"
 )
 
-var notify *bc.Client
-
+var notify Interface.Notify
 func init() {
-	notify = bc.New("okcoin.cn",
-		"https://hook.bearychat.com/=bw8RF/incoming/608f2369afd71ed39e58b555f31da595")
-}
 
+	
+notify = pubu.New(name string, hook string)
+
+}
 type askChannel chan ask
 
 type ask struct {
@@ -47,7 +50,6 @@ type answer struct {
 
 // Config contains all the ini settings
 type Config struct {
-	//TODO: 加载数据后，请使用Check()方法，检查一下数据。
 	ShowDetail                     bool
 	WaitMillisecond                int
 	ListenMS                       int
@@ -77,6 +79,7 @@ type OKCoin struct {
 	restErrors map[int64]string
 	db         map[string]db.DBM
 	Property   map[string]observer.Property
+	notify     Interface.Notify
 }
 
 // 以下代码实现了okcoin模块的单例特性
@@ -84,16 +87,15 @@ var okcoin *OKCoin
 var once sync.Once
 
 // Instance make a singleton of okcoin.cn
-func Instance(cfg *Config) *OKCoin {
+func Instance(cfg *Config, notify Interface.Notify) *OKCoin {
 	cfg.Check()
 	once.Do(func() {
-		notify.Send(bc.Msg("开始初始化OKCoin的实例。"))
-
 		askChan := make(askChannel, 12)
 		okcoin = &OKCoin{Config: cfg,
 			ask:      askChan,
 			db:       map[string]db.DBM{},
-			Property: map[string]observer.Property{}}
+			Property: map[string]observer.Property{},
+			notify:   notify}
 		okcoin.setErrors()
 		go start(askChan, time.Duration(cfg.WaitMillisecond)*time.Millisecond)
 

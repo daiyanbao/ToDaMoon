@@ -3,18 +3,28 @@ package pubu
 import (
 	"ToDaMoon/Interface"
 	"ToDaMoon/util"
+	"log"
 	"sync"
 	"time"
+
+	"github.com/go-ini/ini"
 )
 
 var pbc *client
 var once sync.Once
 
 //New 返回一个单例的*client客户端
-func New(hook string) Interface.Notify {
+func New() Interface.Notify {
 	once.Do(
 		func() {
+			cfg, err := ini.Load("./pubu.ini")
+			if err != nil {
+				log.Fatalf("无法加载%s/pubu.ini: %s", util.PWD(), err)
+			}
+			hook := cfg.Section("pubu").Key("hook").String()
+
 			icChan := make(incomingChan, 12)
+
 			pbc = &client{
 				hook:   hook,
 				icChan: icChan,
