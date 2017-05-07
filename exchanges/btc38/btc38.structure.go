@@ -22,7 +22,7 @@ type Ticker struct {
 }
 
 // MyBalance cantains user's details in okcoin.cn
-type MyBalance map[string]float64
+type MyBalance map[string]string
 
 // Balance cantains user's details in okcoin.cn
 type Balance struct {

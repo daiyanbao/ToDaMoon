@@ -192,14 +192,19 @@ func (o *BTC38) post(method string, v url.Values, result interface{}) (err error
 		ErrorCode int64 `json:"error_code"`
 	}
 
-	v.Set("api_key", o.PublicKey)
-	hasher := ec.MD5([]byte(v.Encode() + "&secret_key=" + o.SecretKey))
-	v.Set("sign", strings.ToUpper(ec.HexEncodeToString(hasher)))
+	v.Set("key", o.PublicKey)
+	nowTime := fmt.Sprint(time.Now().Unix())
+	fmt.Println(nowTime)
+	v.Set("time", nowTime)
+	md5 := getMD5(nowTime)
+	fmt.Println(nowTime, md5)
+	v.Set("md5", md5)
 	encoded := v.Encode()
 	path := apiURL + method
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
+	headers["User-Agent"] = "Mozilla/4.0"
 
 	ansChan := make(chan answer)
 	o.ask <- ask{Type: post,
@@ -212,6 +217,8 @@ func (o *BTC38) post(method string, v url.Values, result interface{}) (err error
 	if ans.err != nil {
 		return ans.err
 	}
+
+	fmt.Println(string(ans.body)) //TODO: 临时打印
 
 	err = ec.JSONDecode([]byte(ans.body), &result)
 	if err != nil {

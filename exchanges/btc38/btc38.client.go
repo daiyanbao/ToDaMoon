@@ -6,6 +6,9 @@ import (
 	"log"
 
 	db "ToDaMoon/DataBase"
+	ec "ToDaMoon/exchanges"
+
+	"fmt"
 
 	observer "github.com/imkira/go-observer"
 )
@@ -76,4 +79,11 @@ type BTC38 struct {
 	ask      askChannel
 	db       map[string]db.DBM
 	Property map[string]observer.Property
+}
+
+func getMD5(time string) string {
+	md := fmt.Sprintf("%s_%d_%s_%s", btc38.PublicKey, btc38.ID, btc38.SecretKey, time)
+	fmt.Println("mdt", md)
+	md5 := ec.MD5([]byte(md))
+	return ec.HexEncodeToString(md5)
 }
