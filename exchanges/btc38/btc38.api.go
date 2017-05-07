@@ -1,7 +1,6 @@
-// Package okcoin is okcoin.cn module in singleton model
-// 此模块是单例模式，请使用okcoin.Instance()来生成实例
-package okcoin
-
+// Package btc38 wrap btc38.com api in singleton pattern 
+// 此模块是单例模式，请使用btc38.Instance()来生成实例
+package btc38
 import (
 	"errors"
 	"fmt"

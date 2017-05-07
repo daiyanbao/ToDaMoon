@@ -1,4 +1,4 @@
-package okcoin
+package btc38
 
 import (
 	ec "ToDaMoon/exchanges"

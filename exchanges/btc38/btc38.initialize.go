@@ -1,6 +1,4 @@
-// Package okcoin is okcoin.cn module in singleton model
-// 此模块是单例模式，请使用okcoin.Instance()来生成实例
-package okcoin
+package btc38
 
 import (
 	"errors"
@@ -12,8 +10,6 @@ import (
 	"sync"
 
 	db "ToDaMoon/DataBase"
-	bc "ToDaMoon/bearychat"
-	cm "ToDaMoon/common"
 	ec "ToDaMoon/exchanges"
 	"time"
 
