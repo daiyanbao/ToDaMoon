@@ -8,24 +8,23 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-
-	db "ToDaMoon/DataBase"
-	ec "ToDaMoon/exchanges"
 	"time"
 
+	db "ToDaMoon/DataBase"
 	"ToDaMoon/Interface"
+	ec "ToDaMoon/exchanges"
+	"ToDaMoon/pubu"
+	"ToDaMoon/util"
 
 	"github.com/imkira/go-observer"
-	"ToDaMoon/pubu"
 )
 
 var notify Interface.Notify
+
 func init() {
-
-	
-notify = pubu.New(name string, hook string)
-
+	notify = pubu.New()
 }
+
 type askChannel chan ask
 
 type ask struct {
@@ -101,8 +100,7 @@ func Instance(cfg *Config, notify Interface.Notify) *OKCoin {
 
 		okcoin.makeDBs()
 		okcoin.makePropertys()
-
-		notify.Send(bc.Msg("单例初始化完成。"))
+		notify.Info("单例初始化完成。")
 	})
 
 	return okcoin
@@ -121,7 +119,7 @@ func start(askChan askChannel, waitTime time.Duration) {
 		default:
 			log.Println("Wrong ask type.")
 		}
-		beginTime = cm.HoldOn(waitTime, beginTime)
+		util.HoldOn(waitTime, &beginTime)
 	}
 }
 
@@ -131,19 +129,19 @@ func (o *OKCoin) makeDBs() {
 		o.db[coin], err = db.New(o.DBDir, o.Name, coin, "cny")
 		if err != nil {
 			text := fmt.Sprintf("无法创建OKCoin的中%s的数据库。\n", coin)
-			notify.Send(bc.Msg(text))
+			notify.Error(text)
 			log.Fatalln(text)
 		}
 
 		if o.ShowDetail {
 			maxTid, _ := o.db[coin].MaxTid()
 			text := fmt.Sprintf("已经链接上了%s的数据库，其最大Tid是%d\n", coin, maxTid)
-			notify.Send(bc.Msg(text))
+			notify.Info(text)
 		}
 	}
 
 	if o.ShowDetail {
-		notify.Send(bc.Msg("已经创建了相关的数据库"))
+		notify.Debug("已经创建了相关的数据库")
 	}
 
 }
@@ -152,18 +150,18 @@ func (o *OKCoin) makePropertys() {
 	for _, coin := range o.Coins {
 		if o.ShowDetail {
 			text := fmt.Sprintf("%s: 要开始创建监听属性了。", coin)
-			notify.Send(bc.Msg(text))
+			notify.Debug(text)
 		}
 		listeningTradeHistoryAndSave(o, coin)
 		if o.ShowDetail {
 			text := fmt.Sprintf("%s: 已经创建了相关的监听属性。", coin)
-			notify.Send(bc.Msg(text))
+			notify.Debug(text)
 		}
 	}
 
 	if o.ShowDetail {
 		text := fmt.Sprintln("已经创建了所有相关的监听属性")
-		notify.Send(bc.Msg(text))
+		notify.Debug(text)
 	}
 }
 
@@ -171,12 +169,12 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 	maxTid, err := o.db[coin].MaxTid()
 	if err != nil {
 		text := fmt.Sprintf("%s: 没有读取到相关的数据库的最大值", coin)
-		notify.Send(bc.Msg(text))
+		notify.Error(text)
 		log.Fatalln(text)
 	}
 	if o.ShowDetail {
 		text := fmt.Sprintf("OKCoin的%s的MaxTid是%d\n", coin, maxTid)
-		notify.Send(bc.Msg(text))
+		notify.Debug(text)
 	}
 	th, err := o.TradeHistory(coin, maxTid)
 	if err != nil {
@@ -185,7 +183,7 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 	o.Property[coin] = observer.NewProperty(th)
 	if o.ShowDetail {
 		text := fmt.Sprintf("%s: 已经创建了监听属性。", coin)
-		notify.Send(bc.Msg(text))
+		notify.Debug(text)
 	}
 	var thdb ec.Trades
 	saveTime := time.Now()
@@ -200,8 +198,7 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 			th, err = o.TradeHistory(coin, maxTid)
 			if err != nil {
 				text := fmt.Sprintf("请求OKCoin.cn的%s的历史交易数据失败\n%s", coin, err)
-				msg := bc.Msg("# 出现重要失误，3秒后重试")
-				notify.Send(msg.Red("大事情", text))
+				notify.Error(text)
 				log.Println(text)
 				time.Sleep(time.Second * 2)
 				continue
@@ -215,23 +212,23 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 				if thdb.Len() > 20*10000 || time.Since(saveTime) > time.Hour {
 					if err := o.db[coin].Insert(thdb); err != nil {
 						text := fmt.Sprintf("往%s的%s的数据库插入数据出错:%s\n", o.Name, coin, err)
-						msg := bc.Msg("存入数据库出错")
-						notify.Send(msg.Red("大事情", text))
+						notify.Error(text)
 						log.Fatalln(text)
 					}
 					date := thdb[thdb.Len()-1].Date
-					text := fmt.Sprintf("%s的**%s数据库**的最新日期为%s", o.Name, coin, cm.DateOf(date))
-					notify.Send(bc.Msg(text))
+					text := fmt.Sprintf("%s的**%s数据库**的最新日期为%s", o.Name, coin, util.DateOf(date))
+					notify.Info(text)
 					saveTime = time.Now()
 					thdb = ec.Trades{}
 				}
 			}
+
 			if th.Len() < 100 { // 当th的长度较短时，是由于已经读取到最新的消息了。
 				waitMS = 1000 * 60 * 5
 			} else {
 				waitMS = o.ListenMS
 			}
-			requestTime = cm.HoldOn(time.Duration(waitMS)*time.Millisecond, requestTime)
+			util.HoldOn(time.Duration(waitMS)*time.Millisecond, &requestTime)
 		}
 	}()
 }

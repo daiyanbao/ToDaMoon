@@ -11,3 +11,8 @@ func HoldOn(duration time.Duration, beginTime *time.Time) {
 	time.Sleep(duration - time.Since(*beginTime))
 	*beginTime = time.Now()
 }
+
+//DateOf 返回一个unix tiemstamp的格式化。
+func DateOf(t int64) string {
+	return time.Unix(t, 0).String()
+}

@@ -2,9 +2,9 @@
 package database
 
 import (
+	ec "ToDaMoon/exchanges"
+	"ToDaMoon/util"
 	"aQuaGo/common"
-	cm "aQuaGo/common"
-	ec "aQuaGo/exchanges"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -287,7 +287,7 @@ func (dbm DBM) TradesChan(startTid, endTid int64) <-chan ec.Trades {
 
 			if ts.Len() == 0 {
 				fmt.Println("*****in the TradesChan*****")
-				fmt.Println("\tfinalDate=", finalDate, cm.DateOf(finalDate))
+				fmt.Println("\tfinalDate=", finalDate, util.DateOf(finalDate))
 				fmt.Println("\tfinalTid=", finalTid)
 				fmt.Println("***************************")
 				break
