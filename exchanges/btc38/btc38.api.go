@@ -1,9 +1,8 @@
-// Package btc38 wrap btc38.com api in singleton pattern 
+// Package btc38 wrap btc38.com api in singleton pattern
 // 此模块是单例模式，请使用btc38.Instance()来生成实例
 package btc38
+
 import (
-	"errors"
-	"fmt"
 	"net/url"
 	"strconv"
 
@@ -44,7 +43,7 @@ const (
 )
 
 // Ticker returns okcoin's latest ticker data
-func (o *OKCoin) Ticker(symbol string) (*ec.Ticker, error) {
+func (o *BTC38) Ticker(symbol string) (*ec.Ticker, error) {
 	resp := TickerResponse{}
 
 	v := url.Values{}
@@ -81,7 +80,7 @@ func (o *OKCoin) Ticker(symbol string) (*ec.Ticker, error) {
 */
 
 // UserInfo give user's information
-func (o *OKCoin) UserInfo() (*UserInfo, error) {
+func (o *BTC38) UserInfo() (*UserInfo, error) {
 	result := new(UserInfo)
 	err := o.post(userinfo, url.Values{}, result)
 
@@ -89,16 +88,16 @@ func (o *OKCoin) UserInfo() (*UserInfo, error) {
 		return nil, err
 	}
 
-	if result.ErrorCode > 0 {
-		s := fmt.Sprintln("获取用户信息出错:", o.restErrors[result.ErrorCode])
-		return nil, errors.New(s)
-	}
+	// if result.ErrorCode > 0 {
+	// 	s := fmt.Sprintln("获取用户信息出错:", o.restErrors[result.ErrorCode])
+	// 	return nil, errors.New(s)
+	// }
 
 	return result, nil
 }
 
 // TradeHistory returns trade history , no personal.
-func (o *OKCoin) TradeHistory(symbol string, TradeID int64) (ec.Trades, error) {
+func (o *BTC38) TradeHistory(symbol string, TradeID int64) (ec.Trades, error) {
 	result := []Trade{}
 	v := url.Values{}
 	v.Set("symbol", symbol+"_cny")

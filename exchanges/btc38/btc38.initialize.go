@@ -24,29 +24,28 @@ func init() {
 	notify = pubu.New()
 }
 
-// 以下代码实现了okcoin模块的单例特性
-var okcoin *OKCoin
+// 以下代码实现了BTC38模块的单例特性
+var btc38 *BTC38
 var once sync.Once
 
-// Instance make a singleton of okcoin.cn
-func Instance(cfg *Config, notify Interface.Notify) *OKCoin {
+// Instance make a singleton of btc38.com
+func Instance(cfg *Config, notify Interface.Notify) *BTC38 {
 	cfg.Check()
 	once.Do(func() {
 		askChan := make(askChannel, 12)
-		okcoin = &OKCoin{Config: cfg,
+		btc38 = &BTC38{Config: cfg,
 			ask:      askChan,
 			db:       map[string]db.DBM{},
 			Property: map[string]observer.Property{},
-			notify:   notify}
-		okcoin.setErrors()
+		}
 		go start(askChan, time.Duration(cfg.MinAccessPeriodMS)*time.Millisecond)
 
-		okcoin.makeDBs()
-		okcoin.makePropertys()
+		btc38.makeDBs()
+		btc38.makePropertys()
 		notify.Info("单例初始化完成。")
 	})
 
-	return okcoin
+	return btc38
 }
 
 func start(askChan askChannel, waitTime time.Duration) {
@@ -66,7 +65,7 @@ func start(askChan askChannel, waitTime time.Duration) {
 	}
 }
 
-func (o *OKCoin) makeDBs() {
+func (o *BTC38) makeDBs() {
 	for _, coin := range o.Coins {
 		var err error
 		o.db[coin], err = db.New(o.DBDir, o.Name, coin, "cny")
@@ -88,7 +87,7 @@ func (o *OKCoin) makeDBs() {
 	}
 }
 
-func (o *OKCoin) makePropertys() {
+func (o *BTC38) makePropertys() {
 	for _, coin := range o.Coins {
 		if o.ShowDetail {
 			text := fmt.Sprintf("%s: 要开始创建监听属性了。", coin)
@@ -107,7 +106,7 @@ func (o *OKCoin) makePropertys() {
 	}
 }
 
-func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
+func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 	maxTid, err := o.db[coin].MaxTid()
 	if err != nil {
 		text := fmt.Sprintf("%s: 没有读取到相关的数据库的最大值", coin)
@@ -175,7 +174,7 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 	}()
 }
 
-func (o *OKCoin) post(method string, v url.Values, result interface{}) (err error) {
+func (o *BTC38) post(method string, v url.Values, result interface{}) (err error) {
 	type Response struct {
 		Result    bool  `json:"result"`
 		ErrorCode int64 `json:"error_code"`
@@ -221,71 +220,12 @@ func (o *OKCoin) post(method string, v url.Values, result interface{}) (err erro
 			return errors.New(str)
 		}
 
-		if r.ErrorCode > 0 {
-			s := fmt.Sprintln("失败原因:", o.restErrors[r.ErrorCode])
-			return errors.New(s)
-		}
+		// if r.ErrorCode > 0 {
+		// 	s := fmt.Sprintln("失败原因:", o.restErrors[r.ErrorCode])
+		// 	return errors.New(s)
+		// }
 		return errors.New(str)
 	}
 
 	return nil
-}
-
-// setErrors
-func (o *OKCoin) setErrors() {
-	o.restErrors = map[int64]string{
-		10000: "必选参数不能为空",
-		10001: "用户请求过于频繁",
-		10002: "系统错误",
-		10003: "未在请求限制列表中,稍后请重试",
-		10004: "IP限制不能请求该资源",
-		10005: "密钥不存在",
-		10006: "用户不存在",
-		10007: "签名不匹配",
-		10008: "非法参数",
-		10009: "订单不存在",
-		10010: "余额不足",
-		10011: "买卖的数量小于BTC/LTC最小买卖额度",
-		10012: "当前网站暂时只支持btc_cny ltc_cny",
-		10013: "此接口只支持https请求",
-		10014: "下单价格不得≤0或≥1000000",
-		10015: "下单价格与最新成交价偏差过大",
-		10016: "币数量不足",
-		10017: "API鉴权失败",
-		10018: "借入不能小于最低限额[cny:100,btc:0.1,ltc:1]",
-		10019: "页面没有同意借贷协议",
-		10020: "费率不能大于1%",
-		10021: "费率不能小于0.01%",
-		10023: "获取最新成交价错误",
-		10024: "可借金额不足",
-		10025: "额度已满，暂时无法借款",
-		10026: "借款(含预约借款)及保证金部分不能提出",
-		10027: "修改敏感提币验证信息，24小时内不允许提现",
-		10028: "提币金额已超过今日提币限额",
-		10029: "账户有借款，请撤消借款或者还清借款后提币",
-		10031: "存在BTC/LTC充值，该部分等值金额需6个网络确认后方能提出",
-		10032: "未绑定手机或谷歌验证",
-		10033: "服务费大于最大网络手续费",
-		10034: "服务费小于最低网络手续费",
-		10035: "可用BTC/LTC不足",
-		10036: "提币数量小于最小提币数量",
-		10037: "交易密码未设置",
-		10040: "取消提币失败",
-		10041: "提币地址未认证",
-		10042: "交易密码错误",
-		10043: "合约权益错误，提币失败",
-		10044: "取消借款失败",
-		10047: "当前为子账户，此功能未开放",
-		10048: "提币信息不存在",
-		10049: "小额委托（<0.5BTC)的未成交委托数量不得大于50个",
-		10050: "重复撤单",
-		10060: "您的提现功能被冻结，请联系客服!",
-		10100: "账户被冻结",
-		10101: "订单类型错误",
-		10102: "不是本用户的订单",
-		10103: "私密订单密钥错误",
-		10104: "系统检测到您有可疑操作，暂时不可进行大宗交易!",
-		10216: "非开放API",
-		503:   "用户请求过于频繁(Http)",
-	}
 }

@@ -1,7 +1,6 @@
 package btc38
 
 import (
-	"ToDaMoon/Interface"
 	"ToDaMoon/util"
 	"io"
 	"log"
@@ -70,12 +69,10 @@ func (c *Config) Check() {
 	}
 }
 
-// OKCoin 包含了模块所需的基本参数
-type OKCoin struct {
+// BTC38 包含了模块所需的基本参数
+type BTC38 struct {
 	*Config
-	ask        askChannel
-	restErrors map[int64]string
-	db         map[string]db.DBM
-	Property   map[string]observer.Property
-	notify     Interface.Notify
+	ask      askChannel
+	db       map[string]db.DBM
+	Property map[string]observer.Property
 }
