@@ -39,7 +39,7 @@ func Instance(cfg *Config, notify Interface.Notify) *OKCoin {
 			Property: map[string]observer.Property{},
 			notify:   notify}
 		okcoin.setErrors()
-		go start(askChan, time.Duration(cfg.APIAccessPeriodMS)*time.Millisecond)
+		go start(askChan, time.Duration(cfg.MinAccessPeriodMS)*time.Millisecond)
 
 		okcoin.makeDBs()
 		okcoin.makePropertys()
@@ -86,7 +86,6 @@ func (o *OKCoin) makeDBs() {
 	if o.ShowDetail {
 		notify.Debug("已经创建了相关的数据库")
 	}
-
 }
 
 func (o *OKCoin) makePropertys() {
@@ -131,7 +130,7 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 	var thdb ec.Trades
 	saveTime := time.Now()
 	requestTime := time.Now()
-	waitMS := o.ListenMS
+	waitMS := o.CoinPeriodS
 
 	go func() {
 		for {
@@ -169,7 +168,7 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 			if th.Len() < 100 { // 当th的长度较短时，是由于已经读取到最新的消息了。
 				waitMS = 1000 * 60
 			} else {
-				waitMS = o.ListenMS
+				waitMS = o.CoinPeriodS
 			}
 			util.HoldOn(time.Duration(waitMS)*time.Millisecond, &requestTime)
 		}
@@ -182,7 +181,7 @@ func (o *OKCoin) post(method string, v url.Values, result interface{}) (err erro
 		ErrorCode int64 `json:"error_code"`
 	}
 
-	v.Set("api_key", o.APIKey)
+	v.Set("api_key", o.PublicKey)
 	hasher := ec.MD5([]byte(v.Encode() + "&secret_key=" + o.SecretKey))
 	v.Set("sign", strings.ToUpper(ec.HexEncodeToString(hasher)))
 	encoded := v.Encode()

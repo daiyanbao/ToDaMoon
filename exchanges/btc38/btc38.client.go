@@ -2,6 +2,7 @@ package btc38
 
 import (
 	"ToDaMoon/Interface"
+	"ToDaMoon/util"
 	"io"
 	"log"
 
@@ -34,25 +35,38 @@ type answer struct {
 
 // Config contains all the ini settings
 type Config struct {
-	ShowDetail                     bool
-	APIAccessPeriodMS              int //两次API访问的最小间隔时间
-	MinListenMS                    int
-	Name, APIKey, SecretKey, DBDir string
-	Coins                          []string
+	ShowDetail        bool
+	MinAccessPeriodMS int    //两次API访问的最小间隔时间，单位为毫秒
+	CoinPeriodS       int    //查询某一个币种最新交易记录的时间间隔，单位为秒
+	IP                string //本机ip，btc38
+	ID                int
+	Name              string
+	PublicKey         string
+	SecretKey         string
+	DBDir             string
+	Coins             []string
 }
 
 // Check Config for setting mistakes
 func (c *Config) Check() {
-	if len(c.APIKey) != 36 {
-		log.Fatalln("Settings.ini -> okcoin.cn -> APIKey: 长度应为36位")
+	if len(c.PublicKey) != 32 {
+		log.Fatalln("btc38的PublicKey长度应为32位")
 	}
 
-	if len(c.SecretKey) != 32 {
-		log.Fatalln("Settings.ini -> okcoin.cn -> SecretKey: 长度应为32位")
+	if len(c.SecretKey) != 64 {
+		log.Fatalln("btc38的SecretKey长度应为64位")
 	}
 
-	if c.APIAccessPeriodMS < 10 {
-		log.Fatalln("Settings.ini -> okcoin.cn -> WaitMillisecond: 等待时间过短，请核查")
+	if c.MinAccessPeriodMS < 10 {
+		log.Fatalln("btc38的API访问间隔等待时间过短，请核查")
+	}
+
+	myIP, err := util.ExternalIP()
+	if err != nil {
+		log.Fatal("无法获取本机外部IP")
+	}
+	if myIP != c.IP {
+		log.Fatal("本机外网IP地址没有在BTC38网注册")
 	}
 }
 
