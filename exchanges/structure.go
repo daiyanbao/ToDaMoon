@@ -45,6 +45,7 @@ func (d *Depth) String() string {
 	return str
 }
 
+//Trade 记录一个成交记录的细节
 type Trade struct {
 	Tid    int64
 	Date   int64
@@ -53,6 +54,7 @@ type Trade struct {
 	Type   string
 }
 
+//Attributes 返回Trade记录的细节
 func (t Trade) Attributes() (int64, int64, float64, float64, string) {
 	return t.Tid, t.Date, t.Price, t.Amount, t.Type
 }
@@ -66,6 +68,7 @@ func (t Trade) String() string {
 	str += fmt.Sprintf("Type  :%s\n", t.Type)
 	return str
 }
+
 func (t Trade) trans() *pb.Trade {
 	result := pb.Trade(t)
 	return &result
@@ -83,12 +86,7 @@ func (s TidSlice) Sort() {
 	sort.Sort(s)
 }
 
-// // SearchInt64s searches for x in a sorted slice of int64 and returns the index
-// // as specified by sort.Search. The slice must be sorted in ascending order.
-// func SearchInt64s(a []int64, x int64) int {
-// 	return sort.Search(len(a), func(i int) bool { return a[i] >= x })
-// }
-
+//Trades 是成交记录Trade的切片
 type Trades []Trade
 
 func (ts Trades) Len() int {
@@ -103,10 +101,13 @@ func (ts Trades) Swap(i, j int) {
 	ts[i], ts[j] = ts[j], ts[i]
 }
 
+//Sort 对Trades进行了排序。
 func (ts Trades) Sort() {
 	sort.Sort(ts)
 }
 
+//IsUnique 检查交易记录切片是否具有重复项
+//TODO: 修改这个方法的名称，或者删除
 func (ts Trades) IsUnique() (bool, []int64) {
 	var repeatID []int64
 	if ts.Len() < 2 {
@@ -134,12 +135,14 @@ func (ts Trades) IsUnique() (bool, []int64) {
 	return false, repeatID
 }
 
+//PrintIDDiff 是输出ID的差值
 func (ts Trades) PrintIDDiff() {
 	for i := 0; i < ts.Len()-1; i++ {
 		fmt.Print(ts[i+1].Tid-ts[i].Tid, ",")
 	}
 }
 
+//IndexOf 返回Trades中date >= 参数date的最小索引值
 func (ts Trades) IndexOf(date int64) int {
 	length := len(ts)
 	switch {
@@ -157,7 +160,7 @@ func (ts Trades) IndexOf(date int64) int {
 	panic("NEVER REACH THIS.")
 }
 
-//Result included startDate, But WITHOUT endDate.
+//CopyBetween Result included startDate, But WITHOUT endDate.
 func (ts Trades) CopyBetween(startDate, endDate int64) Trades {
 	ts.Sort()
 	s := ts.IndexOf(startDate)
@@ -170,7 +173,7 @@ func (ts Trades) CopyBetween(startDate, endDate int64) Trades {
 	return result
 }
 
-// DropBefore return Droped Data, Keep the others.
+//DropBefore return Droped Data, Keep the others.
 func (ts *Trades) DropBefore(startDate int64) Trades {
 	s := ts.IndexOf(startDate)
 	if s == 0 {
@@ -209,6 +212,7 @@ func (ts *Trades) CutFirstDate() Trades {
 	panic("NEVER BE HERE")
 }
 
+//Trans 把Trade的数据类型转变成了*pb.coin型
 func (ts Trades) Trans() *pb.Coin {
 	result := new(pb.Coin)
 	result.Trades = []*pb.Trade{}
@@ -218,4 +222,5 @@ func (ts Trades) Trans() *pb.Coin {
 	return result
 }
 
+//KLine 封装K线
 type KLine [][6]float64
