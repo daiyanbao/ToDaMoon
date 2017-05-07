@@ -3,7 +3,6 @@ package btc38
 import (
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/url"
 	"strings"
@@ -25,62 +24,6 @@ func init() {
 	notify = pubu.New()
 }
 
-type askChannel chan ask
-
-type ask struct {
-	Type       askType
-	Path       string
-	Headers    map[string]string
-	Body       io.Reader
-	AnswerChan chan<- answer
-}
-
-type askType int
-
-const (
-	get askType = iota
-	post
-)
-
-type answer struct {
-	body []byte
-	err  error
-}
-
-// Config contains all the ini settings
-type Config struct {
-	ShowDetail                     bool
-	WaitMillisecond                int
-	ListenMS                       int
-	Name, APIKey, SecretKey, DBDir string
-	Coins                          []string
-}
-
-// Check Config for setting mistakes
-func (c *Config) Check() {
-	if len(c.APIKey) != 36 {
-		log.Fatalln("Settings.ini -> okcoin.cn -> APIKey: 长度应为36位")
-	}
-
-	if len(c.SecretKey) != 32 {
-		log.Fatalln("Settings.ini -> okcoin.cn -> SecretKey: 长度应为32位")
-	}
-
-	if c.WaitMillisecond < 10 {
-		log.Fatalln("Settings.ini -> okcoin.cn -> WaitMillisecond: 等待时间过短，请核查")
-	}
-}
-
-// OKCoin 包含了模块所需的基本参数
-type OKCoin struct {
-	*Config
-	ask        askChannel
-	restErrors map[int64]string
-	db         map[string]db.DBM
-	Property   map[string]observer.Property
-	notify     Interface.Notify
-}
-
 // 以下代码实现了okcoin模块的单例特性
 var okcoin *OKCoin
 var once sync.Once
@@ -96,7 +39,7 @@ func Instance(cfg *Config, notify Interface.Notify) *OKCoin {
 			Property: map[string]observer.Property{},
 			notify:   notify}
 		okcoin.setErrors()
-		go start(askChan, time.Duration(cfg.WaitMillisecond)*time.Millisecond)
+		go start(askChan, time.Duration(cfg.APIAccessPeriodMS)*time.Millisecond)
 
 		okcoin.makeDBs()
 		okcoin.makePropertys()
@@ -224,7 +167,7 @@ func listeningTradeHistoryAndSave(o *OKCoin, coin string) {
 			}
 
 			if th.Len() < 100 { // 当th的长度较短时，是由于已经读取到最新的消息了。
-				waitMS = 1000 * 60 * 5
+				waitMS = 1000 * 60
 			} else {
 				waitMS = o.ListenMS
 			}
