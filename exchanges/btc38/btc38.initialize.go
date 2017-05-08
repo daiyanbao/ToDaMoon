@@ -169,7 +169,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 				thdb = append(thdb, th...)
 			}
 			if thdb.Len() > 0 {
-				if thdb.Len() > 10000 || time.Since(saveTime) > time.Minute*3 {
+				if thdb.Len() > 10000 || time.Since(saveTime) > time.Minute*10 {
 					if err := o.db[coin].Insert(thdb); err != nil {
 						text := fmt.Sprintf("往%s的%s的数据库插入数据出错:%s\n", o.Name, coin, err)
 						notify.Error(text)
@@ -184,7 +184,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 			}
 
 			if th.Len() < 50 { // 当th的长度较短时，是由于已经读取到最新的消息了。
-				waitS = 60
+				waitS = 300
 			} else {
 				waitS = o.CoinPeriodS
 			}
