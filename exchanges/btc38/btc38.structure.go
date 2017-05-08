@@ -83,10 +83,10 @@ func (ui *Balance) String() string {
 
 // Trade :okcoin's Trade struct
 type Trade struct {
-	Amount  float64 `json:"amount,string"`
-	Date    int64   `json:"date"`
-	Price   float64 `json:"price,string"`
-	TradeID int64   `json:"tid"`
+	Amount  float64 `json:"amount,float64"`
+	Date    int64   `json:"date,int64"`
+	Price   float64 `json:"price,float64"`
+	TradeID int64   `json:"tid,int64"`
 	Type    string  `json:"type"`
 }
 

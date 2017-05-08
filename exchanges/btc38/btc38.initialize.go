@@ -25,39 +25,46 @@ var notify Interface.Notify
 var btc38 *BTC38
 var once sync.Once
 
-// Instance make a singleton of btc38.com
+//Instance 返回 btc38的一个单例
 func Instance() *BTC38 {
-	once.Do(func() {
-		notify = pubu.New()
-		notify.Info("开始生成BTC38的Instance")
-		cfg, err := ini.Load("./btc38.ini")
-		if err != nil {
-			msg := fmt.Sprintf("无法加载%s/btc38.ini: %s", util.PWD(), err)
-			notify.Error(msg)
-			log.Fatalf(msg)
-		}
-		btc38Cfg := new(Config)
-		if err := cfg.Section("btc38").MapTo(btc38Cfg); err != nil {
-			log.Fatalln("无法读取btc38的配置", err)
-		}
-		btc38Cfg.Check()
-
-		askChan := make(askChannel, 12)
-		btc38 = &BTC38{Config: btc38Cfg,
-			ask:      askChan,
-			db:       map[string]db.DBM{},
-			Property: map[string]observer.Property{},
-		}
-		go start(askChan, time.Duration(btc38Cfg.MinAccessPeriodMS)*time.Millisecond)
-
-		btc38.makeDBs()
-		if btc38Cfg.RecordHistory {
-			btc38.makePropertys()
-		}
-		notify.Good("btc38的单例初始化完成。")
-	})
-
+	once.Do(buildBTC38)
 	return btc38
+}
+
+func buildBTC38() {
+	notify = pubu.New()
+	notify.Info("开始生成BTC38的Instance")
+
+	//读取btc38的配置
+	cfg, err := ini.Load("./btc38.ini")
+	if err != nil {
+		msg := fmt.Sprintf("无法加载%s/btc38.ini: %s", util.PWD(), err)
+		notify.Error(msg)
+		log.Fatalf(msg)
+	}
+
+	//生成btc38的配置对象
+	btc38Cfg := new(Config)
+	if err := cfg.Section("btc38").MapTo(btc38Cfg); err != nil {
+		log.Fatalln("无法读取btc38的配置", err)
+	}
+	btc38Cfg.Check()
+
+	//启动线程安全的请求通道
+	askChan := make(askChannel, 12)
+	go start(askChan, time.Duration(btc38Cfg.MinAccessPeriodMS)*time.Millisecond)
+
+	btc38 = &BTC38{Config: btc38Cfg,
+		ask:      askChan,
+		db:       map[string]db.DBM{},
+		Property: map[string]observer.Property{},
+	}
+
+	btc38.makeDBs()
+	if btc38Cfg.RecordHistory {
+		btc38.makePropertys()
+	}
+	notify.Good("btc38的单例初始化完成。")
 }
 
 func start(askChan askChannel, waitTime time.Duration) {
@@ -80,9 +87,9 @@ func start(askChan askChannel, waitTime time.Duration) {
 func (o *BTC38) makeDBs() {
 	for _, coin := range o.Coins {
 		var err error
-		o.db[coin], err = db.New(o.DBDir, o.Name, coin, "cny")
+		o.db[coin], err = db.Connect(o.DBDir, o.Name, coin, "cny")
 		if err != nil {
-			text := fmt.Sprintf("无法创建btc38的中%s的数据库。\n", coin)
+			text := fmt.Sprintf("无法连接%s\\%s的中%s的数据库。\n", o.DBDir, o.Name, coin)
 			notify.Error(text)
 			log.Fatalln(text)
 		}
@@ -95,7 +102,7 @@ func (o *BTC38) makeDBs() {
 	}
 
 	if o.ShowDetail {
-		notify.Debug("已经创建了相关的数据库")
+		notify.Debug("已经连接了所有相关的数据库")
 	}
 }
 
@@ -103,18 +110,18 @@ func (o *BTC38) makePropertys() {
 	for _, coin := range o.Coins {
 		if o.ShowDetail {
 			text := fmt.Sprintf("%s: 要开始创建监听属性了。", coin)
-			notify.Debug(text)
+			go notify.Debug(text)
 		}
 		listeningTradeHistoryAndSave(o, coin)
 		if o.ShowDetail {
 			text := fmt.Sprintf("%s: 已经创建了相关的监听属性。", coin)
-			notify.Debug(text)
+			go notify.Debug(text)
 		}
 	}
 
 	if o.ShowDetail {
 		text := fmt.Sprintln("已经创建了所有相关的监听属性")
-		notify.Debug(text)
+		go notify.Debug(text)
 	}
 }
 
@@ -126,16 +133,16 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 		log.Fatalln(text)
 	}
 	if o.ShowDetail {
-		text := fmt.Sprintf("OKCoin的%s的MaxTid是%d\n", coin, maxTid)
+		text := fmt.Sprintf("%s的%s的MaxTid是%d\n", o.Name, coin, maxTid)
 		notify.Debug(text)
 	}
 	th, err := o.TradeHistory(coin, maxTid)
 	if err != nil {
-		return
+		log.Fatalf("无法获取%s的%s的历史交易数据。\n", o.Name, coin)
 	}
 	o.Property[coin] = observer.NewProperty(th)
 	if o.ShowDetail {
-		text := fmt.Sprintf("%s: 已经创建了监听属性。", coin)
+		text := fmt.Sprintf("%s的%s: 已经创建了监听属性。", o.Name, coin)
 		notify.Debug(text)
 	}
 	var thdb ec.Trades
@@ -150,10 +157,10 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 			}
 			th, err = o.TradeHistory(coin, maxTid)
 			if err != nil {
-				text := fmt.Sprintf("请求OKCoin.cn的%s的历史交易数据失败\n%s", coin, err)
+				text := fmt.Sprintf("请求%s的%s的历史交易数据失败, 5秒后重试。\n%s", o.Name, coin, err)
 				notify.Error(text)
 				log.Println(text)
-				time.Sleep(time.Second * 2)
+				time.Sleep(time.Second * 5)
 				continue
 			}
 
@@ -218,8 +225,6 @@ func (o *BTC38) post(method string, v url.Values, result interface{}) (err error
 		return ans.err
 	}
 
-	fmt.Println(string(ans.body)) //TODO: 临时打印
-
 	err = ec.JSONDecode([]byte(ans.body), &result)
 	if err != nil {
 		str := err.Error()
@@ -231,10 +236,6 @@ func (o *BTC38) post(method string, v url.Values, result interface{}) (err error
 			return errors.New(str)
 		}
 
-		// if r.ErrorCode > 0 {
-		// 	s := fmt.Sprintln("失败原因:", o.restErrors[r.ErrorCode])
-		// 	return errors.New(s)
-		// }
 		return errors.New(str)
 	}
 

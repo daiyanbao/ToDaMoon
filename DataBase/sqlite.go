@@ -45,7 +45,7 @@ var dBMap = make(map[string]DBM)
 var mutex sync.Mutex
 
 // New makes new DBM
-func New(dir, market, coin, money string) (DBM, error) {
+func Connect(dir, market, coin, money string) (DBM, error) {
 	var dbm DBM
 	db := dbFilePath(dir, market, coin, money)
 	if !common.Exist(db) {

@@ -30,15 +30,15 @@ func Test_creat(t *testing.T) {
 }
 
 func Test_Singleton(t *testing.T) {
-	db1, _ := New(dir, market, coin, money)
-	db2, _ := New(dir, market, coin, money)
+	db1, _ := Connect(dir, market, coin, money)
+	db2, _ := Connect(dir, market, coin, money)
 	if db1 != db2 || db1 == nil {
 		t.Error("sqlite.go不是单例模式。")
 	}
 }
 
 func Test_MaxTid(t *testing.T) {
-	testDB, _ := New(dir, market, coin, money)
+	testDB, _ := Connect(dir, market, coin, money)
 	maxTid, _ := testDB.MaxTid()
 	if maxTid != 1 {
 		t.Error("无法正确地从空白数据库中读取MaxTid。")

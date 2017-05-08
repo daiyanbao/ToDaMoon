@@ -56,6 +56,8 @@ func main() {
 	fmt.Println(b38.AllCoins())
 
 	fmt.Println(b38.Balance())
+
+	fmt.Println(b38.TradeHistory("btc", 1))
 	//等待被kill
 	<-done
 	pubuClient.Good("3秒后，ToDaMoon关闭。")

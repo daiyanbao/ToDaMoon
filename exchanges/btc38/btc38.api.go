@@ -4,9 +4,9 @@ package btc38
 
 import (
 	"net/url"
-	"strconv"
 
 	ec "ToDaMoon/exchanges"
+	"fmt"
 )
 
 const (
@@ -108,6 +108,38 @@ func (o *BTC38) AllCoins() ([]string, error) {
 	return result, nil
 }
 
+//TradeHistory 返回历史交易数据。
+func (o *BTC38) TradeHistory(symbol string, TradeID int64) (ec.Trades, error) {
+	result := []Trade{}
+
+	v := url.Values{}
+	v.Set("c", symbol)
+	v.Set("mk_type", "cny")
+	v.Set("tid", fmt.Sprint(TradeID))
+
+	ansChan := make(chan answer)
+	o.ask <- ask{Type: get,
+		Path:       ec.Path(apiURL+hsitory, v),
+		AnswerChan: ansChan}
+	ans := <-ansChan
+
+	if ans.err != nil {
+		return nil, ans.err
+	}
+
+	err := ec.JSONDecode(ans.body, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	mt := ec.Trades{}
+	for _, v := range result {
+		mt = append(mt, v.Normalize())
+	}
+
+	return mt, nil
+}
+
 /*
 以下是具体的post方法。
 */
@@ -120,11 +152,6 @@ func (o *BTC38) Balance() (MyBalance, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// if result.ErrorCode > 0 {
-	// 	s := fmt.Sprintln("获取用户信息出错:", o.restErrors[result.ErrorCode])
-	// 	return nil, errors.New(s)
-	// }
 
 	return *result, nil
 }
@@ -147,22 +174,3 @@ func (o *BTC38) UserInfo() (*Balance, error) {
 }
 
 // TradeHistory returns trade history , no personal.
-func (o *BTC38) TradeHistory(symbol string, TradeID int64) (ec.Trades, error) {
-	result := []Trade{}
-	v := url.Values{}
-	v.Set("symbol", symbol+"_cny")
-	v.Set("since", strconv.FormatInt(TradeID, 10))
-
-	err := o.post(hsitory, v, &result)
-
-	if err != nil {
-		return nil, err
-	}
-
-	mt := ec.Trades{}
-	for _, v := range result {
-		mt = append(mt, v.Normalize())
-	}
-
-	return mt, nil
-}

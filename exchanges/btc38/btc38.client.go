@@ -83,7 +83,6 @@ type BTC38 struct {
 
 func getMD5(time string) string {
 	md := fmt.Sprintf("%s_%d_%s_%s", btc38.PublicKey, btc38.ID, btc38.SecretKey, time)
-	fmt.Println("mdt", md)
 	md5 := ec.MD5([]byte(md))
 	return ec.HexEncodeToString(md5)
 }
