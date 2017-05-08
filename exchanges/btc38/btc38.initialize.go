@@ -138,7 +138,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 		log.Println(text)
 	}
 
-	time.Sleep(time.Second * 10) //TODO: 观察一下，休息这一分钟，是不是可以加快启动过程。
+	time.Sleep(time.Second * 30) //TODO: 观察一下，休息这一分钟，是不是可以加快启动过程。
 
 	var thdb ec.Trades
 	saveTime := time.Now()
