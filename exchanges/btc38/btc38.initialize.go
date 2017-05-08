@@ -137,6 +137,9 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 		text := fmt.Sprintf("%s的%s: 已经创建了监听属性。", o.Name, coin)
 		log.Println(text)
 	}
+
+	time.Sleep(time.Second * 10) //TODO: 观察一下，休息这一分钟，是不是可以加快启动过程。
+
 	var thdb ec.Trades
 	saveTime := time.Now()
 	requestTime := time.Now()
