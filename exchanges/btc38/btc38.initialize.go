@@ -108,15 +108,7 @@ func (o *BTC38) makeDBs() {
 
 func (o *BTC38) makePropertys() {
 	for _, coin := range o.Coins {
-		if o.ShowDetail {
-			text := fmt.Sprintf("%s: 要开始创建监听属性了。", coin)
-			go notify.Debug(text)
-		}
-		listeningTradeHistoryAndSave(o, coin)
-		if o.ShowDetail {
-			text := fmt.Sprintf("%s: 已经创建了相关的监听属性。", coin)
-			go notify.Debug(text)
-		}
+		go listeningTradeHistoryAndSave(o, coin)
 	}
 
 	if o.ShowDetail {
@@ -133,8 +125,8 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 		log.Fatalln(text)
 	}
 	if o.ShowDetail {
-		text := fmt.Sprintf("%s的%s的MaxTid是%d\n", o.Name, coin, maxTid)
-		notify.Debug(text)
+		text := fmt.Sprintf("%s的%s的MaxTid是%d", o.Name, coin, maxTid)
+		log.Println(text)
 	}
 	th, err := o.TradeHistory(coin, maxTid)
 	if err != nil {
@@ -143,7 +135,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 	o.Property[coin] = observer.NewProperty(th)
 	if o.ShowDetail {
 		text := fmt.Sprintf("%s的%s: 已经创建了监听属性。", o.Name, coin)
-		notify.Debug(text)
+		log.Println(text)
 	}
 	var thdb ec.Trades
 	saveTime := time.Now()
@@ -169,7 +161,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 				thdb = append(thdb, th...)
 			}
 			if thdb.Len() > 0 {
-				if thdb.Len() > 10000 || time.Since(saveTime) > time.Minute*10 {
+				if thdb.Len() > 10000 || time.Since(saveTime) > time.Minute*20 {
 					if err := o.db[coin].Insert(thdb); err != nil {
 						text := fmt.Sprintf("往%s的%s的数据库插入数据出错:%s\n", o.Name, coin, err)
 						notify.Error(text)
