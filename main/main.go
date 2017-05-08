@@ -1,6 +1,7 @@
 package main
 
 import (
+	ec "ToDaMoon/exchanges"
 	"ToDaMoon/exchanges/btc38"
 	"ToDaMoon/pubu"
 	"ToDaMoon/util"
@@ -58,6 +59,29 @@ func main() {
 	fmt.Println(b38.Balance())
 
 	fmt.Println(b38.TradeHistory("btc", 1))
+	b38btcStream := b38.Property["btc"].Observe()
+	go func() {
+		for {
+			p := b38btcStream.WaitNext().(ec.Trades)
+			fmt.Println("BTC\t\t", util.DateOf(p[len(p)-1].Date))
+		}
+	}()
+
+	b38ltcStream := b38.Property["ltc"].Observe()
+	go func() {
+		for {
+			p := b38ltcStream.WaitNext().(ec.Trades)
+			fmt.Println("\tLTC\t", util.DateOf(p[len(p)-1].Date))
+		}
+	}()
+
+	b38dogeStream := b38.Property["doge"].Observe()
+	go func() {
+		for {
+			p := b38dogeStream.WaitNext().(ec.Trades)
+			fmt.Println("\t\tdoge ", util.DateOf(p[len(p)-1].Date))
+		}
+	}()
 	//等待被kill
 	<-done
 	pubuClient.Good("3秒后，ToDaMoon关闭。")

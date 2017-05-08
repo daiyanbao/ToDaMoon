@@ -201,11 +201,10 @@ func (o *BTC38) post(method string, v url.Values, result interface{}) (err error
 
 	v.Set("key", o.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
-	fmt.Println(nowTime)
 	v.Set("time", nowTime)
 	md5 := getMD5(nowTime)
-	fmt.Println(nowTime, md5)
 	v.Set("md5", md5)
+
 	encoded := v.Encode()
 	path := apiURL + method
 
