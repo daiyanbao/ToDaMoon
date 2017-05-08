@@ -164,7 +164,7 @@ func listeningTradeHistoryAndSave(o *BTC38, coin string) {
 				thdb = append(thdb, th...)
 			}
 			if thdb.Len() > 0 {
-				if thdb.Len() > 10000 || time.Since(saveTime) > time.Minute*20 {
+				if thdb.Len() > 10*10000 || time.Since(saveTime) > time.Minute*30 {
 					if err := o.db[coin].Insert(thdb); err != nil {
 						text := fmt.Sprintf("往%s的%s的数据库插入数据出错:%s\n", o.Name, coin, err)
 						notify.Error(text)

@@ -52,13 +52,15 @@ func main() {
 	pubuClient.Good("ToDaMoon成功启动。")
 	fmt.Println("ToDaMoon启动成功。")
 	time.Sleep(time.Second)
+
 	pubuClient.Good("我就看看能不能")
 	fmt.Println(b38.Ticker("btc"))
+
 	fmt.Println(b38.AllCoins())
 
-	fmt.Println(b38.Balance())
+	//fmt.Println(b38.Balance())
 
-	fmt.Println(b38.TradeHistory("btc", 1))
+	//fmt.Println(b38.TradeHistory("btc", 1))
 	b38btcStream := b38.Property["btc"].Observe()
 	go func() {
 		for {
