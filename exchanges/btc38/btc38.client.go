@@ -69,7 +69,9 @@ func (c *Config) Check() {
 		log.Fatal("无法获取本机外部IP")
 	}
 	if myIP != c.IP {
-		log.Fatal("本机外网IP地址没有在BTC38网注册")
+		text := fmt.Sprintf("本机外网IP地址%s没有在BTC38网注册", myIP)
+		notify.Bad(text)
+		log.Fatalf(text)
 	}
 }
 
