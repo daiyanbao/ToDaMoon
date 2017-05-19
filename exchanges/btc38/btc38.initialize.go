@@ -64,6 +64,7 @@ func buildBTC38() {
 	if btc38Cfg.RecordHistory {
 		btc38.makePropertys()
 	}
+	log.Println("btc38的单例初始化完成。")
 	notify.Good("btc38的单例初始化完成。")
 }
 
@@ -107,17 +108,22 @@ func (o *BTC38) makeDBs() {
 }
 
 func (o *BTC38) makePropertys() {
+	wg := &sync.WaitGroup{}
 	for _, coin := range o.Coins {
-		go listeningTradeHistoryAndSave(o, coin)
+		wg.Add(1)
+		go listeningTradeHistoryAndSave(o, coin, wg)
 	}
 
+	wg.Wait()
+	text := fmt.Sprintln("已经创建了所有相关的监听属性")
+	log.Println(text)
 	if o.ShowDetail {
-		text := fmt.Sprintln("已经创建了所有相关的监听属性")
 		go notify.Debug(text)
 	}
 }
 
-func listeningTradeHistoryAndSave(o *BTC38, coin string) {
+func listeningTradeHistoryAndSave(o *BTC38, coin string, wg *sync.WaitGroup) {
+	defer wg.Done()
 	maxTid, err := o.db[coin].MaxTid()
 	if err != nil {
 		text := fmt.Sprintf("%s: 没有读取到相关的数据库的最大值", coin)
