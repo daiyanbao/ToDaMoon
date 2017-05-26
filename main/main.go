@@ -3,6 +3,8 @@ package main
 import (
 	ec "ToDaMoon/exchanges"
 	"ToDaMoon/exchanges/btc38"
+
+	"ToDaMoon/apollo"
 	"ToDaMoon/pubu"
 	"ToDaMoon/util"
 	"fmt"
@@ -10,15 +12,6 @@ import (
 	"os"
 	"time"
 )
-
-const (
-	// pidFile 用来存储程序pid代号的文件
-	pidFile = "tdm.pid"
-)
-
-func init() {
-	util.Init(pidFile)
-}
 
 var (
 	//Version 版本号
@@ -32,8 +25,6 @@ var (
 )
 
 func main() {
-	//清理pid文件
-	defer os.Remove(pidFile)
 
 	if len(os.Args) > 1 && (os.Args[1] == "version" || os.Args[1] == "v") {
 		fmt.Println("Version: ", Version+"."+BuildNumber)
@@ -42,9 +33,11 @@ func main() {
 		return
 	}
 
-	log.Println("Version: ", Version+"."+BuildNumber)
+	log.Println("Launch, Version ", Version+"."+BuildNumber)
+	defer log.Println("Landing, Version ", Version+"."+BuildNumber)
 
-	done := util.WaitingKill()
+	apollo.Launch()
+
 	//以上是程序的相关准备工作
 	pubuClient := pubu.New()
 	b38 := btc38.Instance()
@@ -84,8 +77,4 @@ func main() {
 			fmt.Println("\t\tdoge ", util.DateOf(p[len(p)-1].Date))
 		}
 	}()
-	//等待被kill
-	<-done
-	pubuClient.Good("3秒后，ToDaMoon关闭。")
-	time.Sleep(time.Second * 3)
 }
