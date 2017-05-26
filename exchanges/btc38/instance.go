@@ -1,6 +1,7 @@
 package btc38
 
 import (
+	"ToDaMoon/exchanges"
 	"ToDaMoon/util"
 	"fmt"
 	"log"
@@ -13,6 +14,8 @@ var name = "btc38"
 
 //BTC38 包含了btc38.com的API所需的所有数据
 type BTC38 struct {
+	*config
+	exchanges.Net
 }
 
 type config struct {
@@ -37,7 +40,7 @@ func instance() *BTC38 {
 	c := getConfig()
 
 	//生成btc38实例
-	btc38 = generate(c)
+	btc38 = generateBy(c)
 	//连接btc38的全局交易数据库
 
 	//连接btc38的本人交易数据库
@@ -98,7 +101,22 @@ func (c *config) check() {
 	}
 }
 
-func generate(c *config) *BTC38 {
+func generateBy(c *config) *BTC38 {
+	n := exchanges.Net{
+		Header: genHeader(),
+	}
 
+	n.Start(c.MinAccessPeriodMS)
+
+	btc38 = &BTC38{config: c,
+		Net: n,
+	}
+	return btc38
 }
 
+func genHeader() map[string]string {
+	header := make(map[string]string)
+	header["Content-Type"] = "application/x-www-form-urlencoded"
+	header["User-Agent"] = "Mozilla/4.0"
+	return header
+}

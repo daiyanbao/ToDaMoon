@@ -32,20 +32,23 @@ type answer struct {
 	err  error
 }
 
-type net struct {
-	Header http.Header
+//Net 包含了交易所模块网络访问的基础结构
+type Net struct {
+	Header map[string]string
 	Ask    askChan
 }
 
 //Post 网络数据获取方式的封装
-func (n *net) post(path string, body io.Reader) ([]byte, error) {
+func (n *Net) post(path string, body io.Reader) ([]byte, error) {
 	req, err := http.NewRequest("POST", path, body)
 	if err != nil {
 		return nil, err
 	}
 
 	//设置访问的请求头
-	req.Header = n.Header
+	for k, v := range n.Header {
+		req.Header.Add(k, v)
+	}
 
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
@@ -58,7 +61,7 @@ func (n *net) post(path string, body io.Reader) ([]byte, error) {
 }
 
 //Get 网络数据获取方式的封装
-func (n *net) get(url string) ([]byte, error) {
+func (n *Net) get(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -82,9 +85,11 @@ func handleResp(r *http.Response) ([]byte, error) {
 	return b, nil
 }
 
-func (n *net) start(waitTime time.Duration) {
+//Start 启动了网络的核心部分
+func (n *Net) Start(waitMS int) {
 	askCh := make(askChan, 12)
 	n.Ask = askCh
+	waitTime := time.Millisecond * time.Duration(waitMS)
 
 	go func() {
 		beginTime := time.Now()

@@ -19,7 +19,7 @@ func build() {
 	//生成一个btc38的实例
 	btc38 = instance()
 
-	//展开btc38的各项任务
+	//执行btc38的各项任务
 	btc38.checkNewCoin()
 	btc38.watching()
 }
