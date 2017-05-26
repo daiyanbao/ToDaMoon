@@ -1,9 +1,4 @@
-package bourses
-
-import (
-	db "ToDaMoon/database"
-)
+package exchanges
 
 type database struct {
-	DB map[string]db.DBM
 }

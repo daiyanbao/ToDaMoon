@@ -1,4 +1,4 @@
-package bourses
+package exchanges
 
 import (
 	"ToDaMoon/util"
