@@ -1,104 +1,105 @@
-//Package exchanges 的net.go提供了交易所API访问所需的方法。
-package exchanges
+package bourses
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"encoding/json"
+	"ToDaMoon/util"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
+	"time"
 )
 
-//Get 网络数据获取方式的封装
-func Get(url string) ([]byte, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
+type askChan chan ask
 
-	if res.StatusCode != 200 {
-		log.Printf("HTTP status code: %d\n", res.StatusCode)
-		return nil, errors.New("Status code was not 200.")
-	}
+type ask struct {
+	Type       askType
+	Path       string
+	Body       io.Reader
+	AnswerChan chan<- answer
+}
 
-	contents, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
+type askType int
 
-	return contents, nil
+const (
+	get askType = iota
+	post
+)
+
+type answer struct {
+	body []byte
+	err  error
+}
+
+type net struct {
+	Header http.Header
+	Ask    askChan
 }
 
 //Post 网络数据获取方式的封装
-func Post(path string,
-	headers map[string]string,
-	body io.Reader,
-) ([]byte, error) {
+func (n *net) post(path string, body io.Reader) ([]byte, error) {
 	req, err := http.NewRequest("POST", path, body)
 	if err != nil {
 		return nil, err
 	}
 
-	for k, v := range headers {
-		req.Header.Add(k, v)
-	}
+	//设置访问的请求头
+	req.Header = n.Header
 
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
+	return handleResp(resp)
+}
 
-	contents, err := ioutil.ReadAll(resp.Body)
+//Get 网络数据获取方式的封装
+func (n *net) get(url string) ([]byte, error) {
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 
-	return contents, nil
+	defer resp.Body.Close()
+	return handleResp(resp)
 }
 
-//Path 制造请求的网址
-func Path(url string, values url.Values) string {
-	path := url
-	if len(values) > 0 {
-		path += "?" + values.Encode()
+func handleResp(r *http.Response) ([]byte, error) {
+	if r.StatusCode/100 != 2 {
+		text := fmt.Sprintf("响应码是%d\n", r.StatusCode)
+		return nil, errors.New(text)
 	}
-	return path
-}
 
-//JSONEncode 把数据转换成json格式
-func JSONEncode(v interface{}) ([]byte, error) {
-	json, err := json.Marshal(&v)
+	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return json, nil
+	return b, nil
 }
 
-//JSONDecode 解析Json格式
-func JSONDecode(data []byte, to interface{}) error {
-	err := json.Unmarshal(data, &to)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+func (n *net) start(waitTime time.Duration) {
+	askCh := make(askChan, 12)
+	n.Ask = askCh
 
-//MD5 对input的内容进行md5加密
-func MD5(input []byte) []byte {
-	hash := md5.New()
-	hash.Write(input)
-	return hash.Sum(nil)
-}
-
-//HexEncodeToString 对input的内容进行hex加密
-func HexEncodeToString(input []byte) string {
-	return hex.EncodeToString(input)
+	go func() {
+		beginTime := time.Now()
+		for ask := range n.Ask {
+			switch ask.Type {
+			case get:
+				data, err := n.get(ask.Path)
+				ask.AnswerChan <- answer{body: data, err: err}
+			case post:
+				data, err := n.post(ask.Path, ask.Body)
+				ask.AnswerChan <- answer{body: data, err: err}
+			default:
+				log.Println("错误的请求类型")
+			}
+			beginTime = util.HoldOn(waitTime, beginTime)
+		}
+	}()
 }

@@ -38,6 +38,8 @@ func main() {
 
 	apollo.Launch()
 
+	//TODO: 清除以下程序
+
 	//以上是程序的相关准备工作
 	pubuClient := pubu.New()
 	b38 := btc38.Instance()
