@@ -105,7 +105,6 @@ func generateBy(c *config) *BTC38 {
 	n := exchanges.Net{
 		Header: genHeader(),
 	}
-
 	n.Start(c.MinAccessPeriodMS)
 
 	btc38 = &BTC38{config: c,
