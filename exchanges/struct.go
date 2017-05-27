@@ -9,3 +9,12 @@ type Ticker struct {
 	Low  float64
 	Vol  float64
 }
+
+//Trade 记录一个成交记录的细节
+type Trade struct {
+	Tid    int64
+	Date   int64
+	Price  float64
+	Amount float64
+	Type   string
+}

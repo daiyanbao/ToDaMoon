@@ -2,6 +2,7 @@ package btc38
 
 import (
 	ec "ToDaMoon/exchanges"
+	"fmt"
 	"net/url"
 )
 
@@ -17,21 +18,6 @@ const (
 	getMyTradeListURL = baseURL + "getMyTradeList.php"
 )
 
-func (b *BTC38) allTicker(money string) (map[string]ec.Ticker, error) {
-	rawData, err := b.ticker("all", money)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := make(map[string]ec.Ticker)
-	err = ec.JSONDecode(rawData, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
-
 //Ticker 可以返回coin的ticker信息
 func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
 	rawData, err := b.ticker(coin, money)
@@ -39,13 +25,34 @@ func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
 		return nil, err
 	}
 
-	resp := ec.Ticker{}
+	resp := TickerResponse{}
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &resp, nil
+	return resp.Ticker.normalize(), nil
+}
+
+//AllTicker 返回money市场中全部coin的ticker
+func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
+	rawData, err := b.ticker("all", money)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make(map[string]TickerResponse)
+	fmt.Println(string(rawData))
+	err = ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*ec.Ticker)
+	for k, v := range resp {
+		result[k] = v.Ticker.normalize()
+	}
+	return result, nil
 }
 
 // Ticker returns okcoin's latest ticker data

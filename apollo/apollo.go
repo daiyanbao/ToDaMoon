@@ -33,6 +33,8 @@ func Launch() {
 	} else {
 		fmt.Println("BTC38.com BTC Ticker", b3Ticker)
 	}
+
+
 	//等待被kill
 	<-done
 }
