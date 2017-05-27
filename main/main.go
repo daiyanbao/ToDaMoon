@@ -1,16 +1,10 @@
 package main
 
 import (
-	ec "ToDaMoon/exchanges"
-	"ToDaMoon/exchanges/btc38"
-
 	"ToDaMoon/apollo"
-	"ToDaMoon/pubu"
-	"ToDaMoon/util"
 	"fmt"
 	"log"
 	"os"
-	"time"
 )
 
 var (
@@ -38,45 +32,4 @@ func main() {
 
 	apollo.Launch()
 
-	//TODO: 清除以下程序
-
-	//以上是程序的相关准备工作
-	pubuClient := pubu.New()
-	b38 := btc38.Instance()
-	fmt.Println(b38.Name)
-	pubuClient.Good("ToDaMoon成功启动。")
-	fmt.Println("ToDaMoon启动成功。")
-	time.Sleep(time.Second)
-
-	pubuClient.Good("我就看看能不能")
-	fmt.Println(b38.Ticker("btc"))
-
-	fmt.Println(b38.AllCoins())
-
-	//fmt.Println(b38.Balance())
-
-	//fmt.Println(b38.TradeHistory("btc", 1))
-	b38btcStream := b38.Property["btc"].Observe()
-	go func() {
-		for {
-			p := b38btcStream.WaitNext().(ec.Trades)
-			fmt.Println("BTC\t\t", util.DateOf(p[len(p)-1].Date))
-		}
-	}()
-
-	b38ltcStream := b38.Property["ltc"].Observe()
-	go func() {
-		for {
-			p := b38ltcStream.WaitNext().(ec.Trades)
-			fmt.Println("\tLTC\t", util.DateOf(p[len(p)-1].Date))
-		}
-	}()
-
-	b38dogeStream := b38.Property["doge"].Observe()
-	go func() {
-		for {
-			p := b38dogeStream.WaitNext().(ec.Trades)
-			fmt.Println("\t\tdoge ", util.DateOf(p[len(p)-1].Date))
-		}
-	}()
 }
