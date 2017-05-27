@@ -1,5 +1,10 @@
 package btc38
 
+import (
+	ec "ToDaMoon/exchanges"
+	"net/url"
+)
+
 const (
 	baseURL           = "http://api.btc38.com/v1/"
 	tickerURL         = baseURL + "ticker.php"
@@ -12,22 +17,54 @@ const (
 	getMyTradeListURL = baseURL + "getMyTradeList.php"
 )
 
+func (b *BTC38) allTicker(money string) ([]*ec.Ticker, error) {
+	rawData, err := b.ticker(coin, money)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := ec.Ticker{}
+
+	err = ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+//Ticker 可以返回coin的ticker信息
+func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
+	rawData, err := b.ticker(coin, money)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := ec.Ticker{}
+
+	err = ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
 // Ticker returns okcoin's latest ticker data
-func (o *BTC38) Ticker(symbol string) (*ec.Ticker, error) {
-	resp := TickerResponse{}
-
+func (b *BTC38) ticker(coin, money string) ([]byte, error) {
 	v := url.Values{}
-	v.Set("c", symbol)
-	v.Set("mk_type", "cny")
+	v.Set("c", coin)
+	v.Set("mk_type", money)
 
-	ansChan := make(chan answer)
-	o.ask <- ask{Type: get,
-		Path:       ec.Path(apiURL+tickerURL, v),
-		AnswerChan: ansChan}
+	ansChan := make(chan ec.Answer)
+	b.Ask <- ec.Ask{Type: ec.Get,
+		Path:       ec.Path(tickerURL, v),
+		AnswerChan: ansChan,
+	}
+
 	ans := <-ansChan
-
-	if ans.err != nil {
-		return nil, ans.err
+	if ans.Err != nil {
+		return nil, ans.Err
 	}
 
 	err := ec.JSONDecode(ans.body, &resp)

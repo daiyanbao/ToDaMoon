@@ -2,40 +2,45 @@ package exchanges
 
 import (
 	"ToDaMoon/util"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-type askChan chan ask
+type AskChan chan Ask
 
-type ask struct {
+type Ask struct {
 	Type       askType
 	Path       string
 	Body       io.Reader
-	AnswerChan chan<- answer
+	AnswerChan chan<- Answer
 }
 
 type askType int
 
 const (
-	get askType = iota
-	post
+	//Get method
+	Get askType = iota
+	//Post method
+	Post
 )
 
-type answer struct {
-	body []byte
-	err  error
+//Answer 是统一的应答格式
+type Answer struct {
+	Body []byte
+	Err  error
 }
 
 //Net 包含了交易所模块网络访问的基础结构
 type Net struct {
 	Header map[string]string
-	Ask    askChan
+	Ask    AskChan
 }
 
 //Post 网络数据获取方式的封装
@@ -87,7 +92,7 @@ func handleResp(r *http.Response) ([]byte, error) {
 
 //Start 启动了网络的核心部分
 func (n *Net) Start(waitMS int) {
-	askCh := make(askChan, 12)
+	askCh := make(AskChan, 12)
 	n.Ask = askCh
 	waitTime := time.Millisecond * time.Duration(waitMS)
 
@@ -95,16 +100,34 @@ func (n *Net) Start(waitMS int) {
 		beginTime := time.Now()
 		for ask := range n.Ask {
 			switch ask.Type {
-			case get:
+			case Get:
 				data, err := n.get(ask.Path)
-				ask.AnswerChan <- answer{body: data, err: err}
-			case post:
+				ask.AnswerChan <- Answer{Body: data, Err: err}
+			case Post:
 				data, err := n.post(ask.Path, ask.Body)
-				ask.AnswerChan <- answer{body: data, err: err}
+				ask.AnswerChan <- Answer{Body: data, Err: err}
 			default:
 				log.Println("错误的请求类型")
 			}
 			beginTime = util.HoldOn(waitTime, beginTime)
 		}
 	}()
+}
+
+//Path 制造请求的网址
+func Path(url string, values url.Values) string {
+	path := url
+	if len(values) > 0 {
+		path += "?" + values.Encode()
+	}
+	return path
+}
+
+//JSONDecode 解析Json格式
+func JSONDecode(data []byte, to interface{}) error {
+	err := json.Unmarshal(data, &to)
+	if err != nil {
+		return err
+	}
+	return nil
 }
