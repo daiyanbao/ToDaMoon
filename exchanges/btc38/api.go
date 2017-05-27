@@ -17,20 +17,19 @@ const (
 	getMyTradeListURL = baseURL + "getMyTradeList.php"
 )
 
-func (b *BTC38) allTicker(money string) ([]*ec.Ticker, error) {
-	rawData, err := b.ticker(coin, money)
+func (b *BTC38) allTicker(money string) (map[string]ec.Ticker, error) {
+	rawData, err := b.ticker("all", money)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := ec.Ticker{}
-
+	resp := make(map[string]ec.Ticker)
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &resp, nil
+	return resp, nil
 }
 
 //Ticker 可以返回coin的ticker信息
@@ -41,7 +40,6 @@ func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
 	}
 
 	resp := ec.Ticker{}
-
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
