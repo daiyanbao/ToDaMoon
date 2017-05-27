@@ -10,12 +10,9 @@ import (
 var once sync.Once
 var notify Interface.Notify
 
-func init() {
-	notify = pubu.New()
-}
-
 //Run 会启动btc38模块
 func Run() exchanges.Exchanger {
+	notify = pubu.New()
 	once.Do(build)
 	return btc38
 }

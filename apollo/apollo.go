@@ -27,8 +27,12 @@ func Launch() {
 
 	//在这里启动各个交易所模块
 	b3 := btc38.Run()
-	fmt.Println(b3.Ticker("btc", "cny"))
-
+	b3Ticker, err := b3.Ticker("btc", "cny")
+	if err != nil {
+		fmt.Println("BTC38.com BTC Ticker Error:", err)
+	} else {
+		fmt.Println("BTC38.com BTC Ticker", b3Ticker)
+	}
 	//等待被kill
 	<-done
 }
