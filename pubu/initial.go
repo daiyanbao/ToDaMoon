@@ -41,6 +41,6 @@ func start(icChan incomingChan) {
 	for m := range icChan {
 		pbc.send(m)
 		//由于pubu.im有API访问次数限制，“每个接入调用限制为每秒 10 次”。所以，需要暂停一下。
-		util.HoldOn(time.Millisecond*200, &beginTime)
+		beginTime = util.HoldOn(time.Millisecond*200, beginTime)
 	}
 }

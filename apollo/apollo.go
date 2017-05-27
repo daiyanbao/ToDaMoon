@@ -3,6 +3,7 @@ package apollo
 import (
 	"ToDaMoon/exchanges/btc38"
 	"ToDaMoon/util"
+	"fmt"
 	"os"
 	"sync"
 )
@@ -25,7 +26,8 @@ func Launch() {
 	done := util.WaitingKill()
 
 	//在这里启动各个交易所模块
-	btc38.Run()
+	b3 := btc38.Run()
+	fmt.Println(b3.Ticker("btc", "cny"))
 
 	//等待被kill
 	<-done
