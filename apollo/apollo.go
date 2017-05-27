@@ -24,6 +24,7 @@ func Launch() {
 	defer os.Remove(pidFile)
 	done := util.WaitingKill()
 
+	//在这里启动各个交易所模块
 	btc38.Run()
 
 	//等待被kill
