@@ -65,18 +65,5 @@ func (b *BTC38) ticker(coin, money string) ([]byte, error) {
 		return nil, ans.Err
 	}
 
-	err := ec.JSONDecode(ans.body, &resp)
-	if err != nil {
-		return nil, err
-	}
-	t := resp.Ticker
-
-	return &ec.Ticker{
-		Buy:  t.Buy,
-		High: t.High,
-		Last: t.Last,
-		Low:  t.Low,
-		Sell: t.Sell,
-		Vol:  t.Vol,
-	}, nil
+	return ans.Body, nil
 }
