@@ -19,7 +19,7 @@ const (
 
 //Ticker 可以返回coin的ticker信息
 func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
-	rawData, err := b.ticker(coin, money)
+	rawData, err := b.getTickerRawData(coin, money)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
 
 //AllTicker 返回money市场中全部coin的ticker
 func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
-	rawData, err := b.ticker("all", money)
+	rawData, err := b.getTickerRawData("all", money)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
 }
 
 // Ticker returns okcoin's latest ticker data
-func (b *BTC38) ticker(coin, money string) ([]byte, error) {
+func (b *BTC38) getTickerRawData(coin, money string) ([]byte, error) {
 	path := tickerURLMaker(coin, money)
 	return b.Get(path)
 }
@@ -69,4 +69,30 @@ func urlMaker(URL string, coin, money string) string {
 	v.Set("mk_type", money)
 
 	return ec.Path(URL, v)
+}
+
+//Depth 是反馈市场深度信息
+func (b *BTC38) Depth(coin, money string) (*ec.Depth, error) {
+	rawData, err := b.getDepthRawData(coin, money)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := ec.Depth{}
+	err = ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+// Ticker returns okcoin's latest ticker data
+func (b *BTC38) getDepthRawData(coin, money string) ([]byte, error) {
+	path := depthURLMaker(coin, money)
+	return b.Get(path)
+}
+
+func depthURLMaker(coin, money string) string {
+	return urlMaker(depthURL, coin, money)
 }

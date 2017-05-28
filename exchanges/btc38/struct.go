@@ -20,6 +20,8 @@ type Ticker struct {
 	Sell float64 `json:"sell,float64"`
 }
 
+
+
 func (t Ticker) normalize() *ec.Ticker {
 	return &ec.Ticker{
 		High: t.High,

@@ -17,6 +17,7 @@ func Run() exchanges.Exchanger {
 	once.Do(build)
 
 	//以下是测试内容
+	fmt.Println("=============================================================")
 	b3Ticker, err := btc38.Ticker("btc", "cny")
 	if err != nil {
 		fmt.Println("BTC38.com BTC Ticker Error:", err)
@@ -28,10 +29,19 @@ func Run() exchanges.Exchanger {
 	if err != nil {
 		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
 	} else {
-		fmt.Println("BTC38.com All Coins:")
+		fmt.Println("BTC38.com All Coins's Ticker:")
 		for k, v := range b3All {
 			fmt.Println(k, *v)
 		}
+	}
+
+	b3Depth, err := btc38.Depth("btc", "cny")
+	if err != nil {
+		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
+	} else {
+		fmt.Println("BTC38.com btc depth:")
+		fmt.Println(b3Depth)
+
 	}
 
 	//以上是测试内容
