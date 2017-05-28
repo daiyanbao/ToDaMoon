@@ -58,7 +58,7 @@ func Run() exchanges.Exchanger {
 	if err != nil {
 		fmt.Println("无法获取btc38的cny市场的btc的从1开始的交易记录")
 	} else {
-		fmt.Println("BTC38.com btc 最新的交易记录:")
+		fmt.Println("BTC38.com btc 从1开始的交易记录:")
 		fmt.Println(b3TradesSince1)
 	}
 	//以上是测试内容
