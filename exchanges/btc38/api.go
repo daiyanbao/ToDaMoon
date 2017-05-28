@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -170,4 +171,54 @@ func (b *BTC38) md5(time string) string {
 	md := fmt.Sprintf("%s_%d_%s_%s", b.PublicKey, b.ID, b.SecretKey, time)
 	md5 := ec.MD5([]byte(md))
 	return ec.HexEncodeToString(md5)
+}
+
+type orderType int
+
+const (
+	buy  orderType = 1
+	sell orderType = 2
+)
+
+//Order 下单交易
+//TODO: 把money改成枚举类型，所有的
+func (b *BTC38) Order(ot orderType, coin, money string, price, amount float64) (string, error) {
+	rawData, err := b.getOrderRawData(ot, coin, money, price, amount)
+	if err != nil {
+		return "", err
+	}
+
+	//TODO: 删除print
+	fmt.Println(string(rawData)) //TODO: 删除此处内容
+	//	resp := MyBalance{}
+	//	err = ec.JSONDecode(rawData, &resp)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+
+	return string(rawData), nil
+}
+
+func (b *BTC38) getOrderRawData(ot orderType, coin, money string, price, amount float64) ([]byte, error) {
+	body := b.orderBodyMaker(ot, coin, money, price, amount)
+	return b.Post(submitOrderURL, body)
+}
+
+func (b *BTC38) orderBodyMaker(ot orderType, coin, money string, price, amount float64) io.Reader {
+	v := url.Values{}
+	v.Set("key", b.PublicKey)
+	nowTime := fmt.Sprint(time.Now().Unix())
+	v.Set("time", nowTime)
+	md5 := b.md5(nowTime)
+	v.Set("md5", md5)
+
+	v.Set("type", fmt.Sprint(ot))
+	v.Set("coinname", coin)
+	v.Set("mk_type", money)
+	v.Set("price", strconv.FormatFloat(price, 'f', -1, 64))
+	v.Set("amount", strconv.FormatFloat(amount, 'f', -1, 64))
+	encoded := v.Encode()
+
+	fmt.Println(encoded) //TODO: 删除此处内容
+	return strings.NewReader(encoded)
 }
