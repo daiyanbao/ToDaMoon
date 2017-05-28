@@ -13,8 +13,10 @@ import (
 	"time"
 )
 
+//AskChan 是发送网络请求的通道
 type AskChan chan Ask
 
+//Ask 是发送网络请求的内容
 type Ask struct {
 	Type       askType
 	Path       string
@@ -25,10 +27,10 @@ type Ask struct {
 type askType int
 
 const (
-	//Get method
-	Get askType = iota
-	//Post method
-	Post
+	//GET method
+	GET askType = iota
+	//POST method
+	POST
 )
 
 //Answer 是统一的应答格式
@@ -100,10 +102,10 @@ func (n *Net) Start(waitMS int) {
 		beginTime := time.Now()
 		for ask := range n.Ask {
 			switch ask.Type {
-			case Get:
+			case GET:
 				data, err := n.get(ask.Path)
 				ask.AnswerChan <- Answer{Body: data, Err: err}
-			case Post:
+			case POST:
 				data, err := n.post(ask.Path, ask.Body)
 				ask.AnswerChan <- Answer{Body: data, Err: err}
 			default:
@@ -113,10 +115,35 @@ func (n *Net) Start(waitMS int) {
 		}
 	}()
 }
+func (n *Net) ask(t askType, path string, body io.Reader) ([]byte, error) {
+	ansChan := make(chan Answer)
+	n.Ask <- Ask{Type: t,
+		Path:       path,
+		Body:       body,
+		AnswerChan: ansChan,
+	}
+
+	ans := <-ansChan
+	if ans.Err != nil {
+		return nil, ans.Err
+	}
+
+	return ans.Body, nil
+}
+
+//Post 是一个交易所网络核心的通用Post方法。
+func (n *Net) Post(path string, body io.Reader) ([]byte, error) {
+	return n.ask(POST, path, body)
+}
+
+//Get 是一个交易所网络核心的通用Get方法。
+func (n *Net) Get(path string) ([]byte, error) {
+	return n.ask(GET, path, nil)
+}
 
 //Path 制造请求的网址
-func Path(url string, values url.Values) string {
-	path := url
+func Path(URL string, values url.Values) string {
+	path := URL
 	if len(values) > 0 {
 		path += "?" + values.Encode()
 	}

@@ -2,7 +2,6 @@ package btc38
 
 import (
 	ec "ToDaMoon/exchanges"
-	"fmt"
 	"net/url"
 )
 
@@ -42,7 +41,6 @@ func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
 	}
 
 	resp := make(map[string]TickerResponse)
-	fmt.Println(string(rawData))
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
@@ -57,20 +55,18 @@ func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
 
 // Ticker returns okcoin's latest ticker data
 func (b *BTC38) ticker(coin, money string) ([]byte, error) {
+	path := tickerURLMaker(coin, money)
+	return b.Get(path)
+}
+
+func tickerURLMaker(coin, money string) string {
+	return urlMaker(tickerURL, coin, money)
+}
+
+func urlMaker(URL string, coin, money string) string {
 	v := url.Values{}
 	v.Set("c", coin)
 	v.Set("mk_type", money)
 
-	ansChan := make(chan ec.Answer)
-	b.Ask <- ec.Ask{Type: ec.Get,
-		Path:       ec.Path(tickerURL, v),
-		AnswerChan: ansChan,
-	}
-
-	ans := <-ansChan
-	if ans.Err != nil {
-		return nil, ans.Err
-	}
-
-	return ans.Body, nil
+	return ec.Path(URL, v)
 }
