@@ -37,7 +37,7 @@ func Run() exchanges.Exchanger {
 
 	b3Depth, err := btc38.Depth("btc", "cny")
 	if err != nil {
-		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
+		fmt.Println("无法获取btc38的cny市场的btc的depth")
 	} else {
 		fmt.Println("BTC38.com btc depth:")
 		fmt.Println(b3Depth)
@@ -47,12 +47,20 @@ func Run() exchanges.Exchanger {
 	fmt.Println("=============================================================")
 	b3Trades, err := btc38.Trades("btc", "cny", 0)
 	if err != nil {
-		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
+		fmt.Println("无法获取btc38的cny市场的btc的最新交易记录")
 	} else {
 		fmt.Println("BTC38.com btc 最新的交易记录:")
 		fmt.Println(b3Trades)
 	}
 
+	fmt.Println("=============================================================")
+	b3TradesSince1, err := btc38.Trades("btc", "cny", 1)
+	if err != nil {
+		fmt.Println("无法获取btc38的cny市场的btc的从1开始的交易记录")
+	} else {
+		fmt.Println("BTC38.com btc 最新的交易记录:")
+		fmt.Println(b3TradesSince1)
+	}
 	//以上是测试内容
 
 	return btc38
