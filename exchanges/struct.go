@@ -30,3 +30,6 @@ func (t Trade) Attributes() (int64, int64, float64, float64, string) {
 }
 
 type Trades []Trade
+
+type Balance struct {
+}

@@ -3,7 +3,10 @@ package btc38
 import (
 	ec "ToDaMoon/exchanges"
 	"fmt"
+	"io"
 	"net/url"
+	"strings"
+	"time"
 )
 
 const (
@@ -11,7 +14,7 @@ const (
 	tickerURL         = baseURL + "ticker.php"
 	depthURL          = baseURL + "depth.php"
 	tradesURL         = baseURL + "trades.php"
-	getBalanceURL     = baseURL + "getMyBalance.php"
+	getMyBalanceURL   = baseURL + "getMyBalance.php"
 	submitOrderURL    = baseURL + "submitOrder.php"
 	cancelOrderURL    = baseURL + "cancelOrder.php"
 	getOrderListURL   = baseURL + "getOrderList.php"
@@ -127,4 +130,44 @@ func tradesURLMaker(coin, money string, tid int64) string {
 	}
 	postfix := fmt.Sprintf("&tid=%d", tid)
 	return path + postfix
+}
+
+//Balance 返回市场的交易记录
+//TODO: 把返回的数据修改成ec.Balance
+func (b *BTC38) Balance() (MyBalance, error) {
+	rawData, err := b.getMyBalanceRawData()
+	if err != nil {
+		return nil, err
+	}
+
+	resp := MyBalance{}
+	err = ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (b *BTC38) getMyBalanceRawData() ([]byte, error) {
+	body := b.myBalanceBodyMaker()
+	return b.Post(getMyBalanceURL, body)
+}
+
+func (b *BTC38) myBalanceBodyMaker() io.Reader {
+	v := url.Values{}
+	v.Set("key", b.PublicKey)
+	nowTime := fmt.Sprint(time.Now().Unix())
+	v.Set("time", nowTime)
+	md5 := b.md5(nowTime)
+	v.Set("md5", md5)
+
+	encoded := v.Encode()
+	return strings.NewReader(encoded)
+}
+
+func (b *BTC38) md5(time string) string {
+	md := fmt.Sprintf("%s_%d_%s_%s", b.PublicKey, b.ID, b.SecretKey, time)
+	md5 := ec.MD5([]byte(md))
+	return ec.HexEncodeToString(md5)
 }

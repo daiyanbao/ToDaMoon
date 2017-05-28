@@ -2,6 +2,8 @@ package exchanges
 
 import (
 	"ToDaMoon/util"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -157,4 +159,16 @@ func JSONDecode(data []byte, to interface{}) error {
 		return err
 	}
 	return nil
+}
+
+//MD5 对input的内容进行md5加密
+func MD5(input []byte) []byte {
+	hash := md5.New()
+	hash.Write(input)
+	return hash.Sum(nil)
+}
+
+//HexEncodeToString 对input的内容进行hex加密
+func HexEncodeToString(input []byte) string {
+	return hex.EncodeToString(input)
 }
