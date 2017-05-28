@@ -44,6 +44,15 @@ func Run() exchanges.Exchanger {
 
 	}
 
+	fmt.Println("=============================================================")
+	b3Trades, err := btc38.Trades("btc", "cny", 0)
+	if err != nil {
+		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
+	} else {
+		fmt.Println("BTC38.com btc 最新的交易记录:")
+		fmt.Println(b3Trades)
+	}
+
 	//以上是测试内容
 
 	return btc38

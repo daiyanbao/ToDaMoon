@@ -10,6 +10,12 @@ type Ticker struct {
 	Vol  float64
 }
 
+//Depth 记录深度信息
+type Depth struct {
+	Asks [][2]float64
+	Bids [][2]float64
+}
+
 //Trade 记录一个成交记录的细节
 type Trade struct {
 	Tid    int64
@@ -19,8 +25,8 @@ type Trade struct {
 	Type   string
 }
 
-//Depth 记录深度信息
-type Depth struct {
-	Asks [][2]float64
-	Bids [][2]float64
+func (t Trade) Attributes() (int64, int64, float64, float64, string) {
+	return t.Tid, t.Date, t.Price, t.Amount, t.Type
 }
+
+type Trades []Trade

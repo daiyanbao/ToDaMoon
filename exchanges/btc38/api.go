@@ -2,6 +2,7 @@ package btc38
 
 import (
 	ec "ToDaMoon/exchanges"
+	"fmt"
 	"net/url"
 )
 
@@ -95,4 +96,35 @@ func (b *BTC38) getDepthRawData(coin, money string) ([]byte, error) {
 
 func depthURLMaker(coin, money string) string {
 	return urlMaker(depthURL, coin, money)
+}
+
+//Trades 返回市场的交易记录
+//当tid<=0时，返回最新的30条记录
+func (b *BTC38) Trades(coin, money string, tid int64) (ec.Trades, error) {
+	rawData, err := b.getTradesRawData(coin, money, tid)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := ec.Trades{}
+	err = ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (b *BTC38) getTradesRawData(coin, money string, tid int64) ([]byte, error) {
+	path := tradesURLMaker(coin, money, tid)
+	return b.Get(path)
+}
+
+func tradesURLMaker(coin, money string, tid int64) string {
+	path := urlMaker(tradesURL, coin, money)
+	if tid <= 0 {
+		return path
+	}
+	postfix := fmt.Sprintf("&tid=%d", tid)
+	return path + postfix
 }
