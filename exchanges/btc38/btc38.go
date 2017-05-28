@@ -71,6 +71,14 @@ func Run() exchanges.Exchanger {
 		fmt.Println(b3Balance)
 	}
 
+	fmt.Println("=============================================================")
+	b3BuyBTC, err := btc38.Order(buy, "btc", "cny", 10000, 100.0/10000)
+	if err != nil {
+		fmt.Println("无法在btc38.com下单买btc")
+	} else {
+		fmt.Println("BTC38.com下单买btc后的消息是:")
+		fmt.Println(b3BuyBTC)
+	}
 	//以上是测试内容
 
 	return btc38
