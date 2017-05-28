@@ -16,6 +16,14 @@ func Run() exchanges.Exchanger {
 	notify = pubu.New()
 	once.Do(build)
 
+	//以下是测试内容
+	b3Ticker, err := btc38.Ticker("btc", "cny")
+	if err != nil {
+		fmt.Println("BTC38.com BTC Ticker Error:", err)
+	} else {
+		fmt.Println("BTC38.com BTC Ticker", b3Ticker)
+	}
+
 	b3All, err := btc38.allTicker("cny")
 	if err != nil {
 		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
@@ -25,6 +33,8 @@ func Run() exchanges.Exchanger {
 			fmt.Println(k, *v)
 		}
 	}
+
+	//以上是测试内容
 
 	return btc38
 }
