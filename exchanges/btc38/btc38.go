@@ -61,6 +61,16 @@ func Run() exchanges.Exchanger {
 		fmt.Println("BTC38.com btc 从1开始的交易记录:")
 		fmt.Println(b3TradesSince1)
 	}
+
+	fmt.Println("=============================================================")
+	b3Balance, err := btc38.Balance()
+	if err != nil {
+		fmt.Println("无法获取btc38的账户信息")
+	} else {
+		fmt.Println("BTC38.com 的账户信息:")
+		fmt.Println(b3Balance)
+	}
+
 	//以上是测试内容
 
 	return btc38
