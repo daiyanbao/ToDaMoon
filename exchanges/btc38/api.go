@@ -219,6 +219,6 @@ func (b *BTC38) orderBodyMaker(ot orderType, coin, money string, price, amount f
 	v.Set("amount", strconv.FormatFloat(amount, 'f', -1, 64))
 	encoded := v.Encode()
 
-	fmt.Println(encoded) //TODO: 删除此处内容
+	fmt.Println("order body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
