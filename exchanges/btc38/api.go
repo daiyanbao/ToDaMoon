@@ -276,11 +276,11 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 }
 
 type order struct {
-	ID        int       `json:"order_id,string"`
-	OrderType orderType `json:"order_type,string"`
-	Coin      string    `json:"order_coinname,string"`
-	Amount    float64   `json:"order_amount,string"`
-	Price     float64   `json:"order_price,string"`
+	ID        int     `json:"order_id,string"`
+	OrderType string  `json:"order_type,string"`
+	Coin      string  `json:"order_coinname,string"`
+	Amount    float64 `json:"order_amount,string"`
+	Price     float64 `json:"order_price,string"`
 }
 
 //getMyOrders 下单交易
@@ -317,6 +317,10 @@ func (b *BTC38) myOrdersBodyMaker(coin, money string) io.Reader {
 
 func handleMyOrdersRawData(rawData []byte) ([]order, error) {
 	resp := []order{}
+
+	//TODO: 删除此处内容
+	fmt.Println(string(rawData))
+
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err

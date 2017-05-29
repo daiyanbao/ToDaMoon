@@ -81,7 +81,7 @@ func Run() exchanges.Exchanger {
 			fmt.Println("BTC38.com下单买btc后的orderID是:")
 			fmt.Println(i, orderID)
 		}
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second)
 	}
 
 	fmt.Println("=============================================================")
@@ -94,7 +94,7 @@ func Run() exchanges.Exchanger {
 	}
 
 	fmt.Println("=====等待撤单=====")
-	for i := 20; i > 0; i-- {
+	for i := 10; i > 0; i-- {
 		fmt.Println(i)
 		time.Sleep(time.Second)
 	}
