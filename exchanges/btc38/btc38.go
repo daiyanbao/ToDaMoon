@@ -6,6 +6,7 @@ import (
 	"ToDaMoon/pubu"
 	"fmt"
 	"sync"
+	"time"
 )
 
 var once sync.Once
@@ -81,13 +82,27 @@ func Run() exchanges.Exchanger {
 	}
 
 	fmt.Println("=============================================================")
-	b3BuyBTC1000, err := btc38.Trade(BUY, "btc", "cny", 10000, 1000.0/10000)
+	orderID, err := btc38.Trade(BUY, "btc", "cny", 10000, 1000.0/10000)
 	if err != nil {
 		fmt.Println("无法在btc38.com下单买btc")
 	} else {
-		fmt.Println("BTC38.com下单买btc后的消息是:")
-		fmt.Println(b3BuyBTC1000)
+		fmt.Println("BTC38.com下单买btc后的orderID是:")
+		fmt.Println(orderID)
 	}
+
+	fmt.Println("=====等待1分钟后撤单=====")
+	for i := 60; i > 0; i-- {
+		fmt.Println(i)
+		time.Sleep(time.Second)
+	}
+
+	canceled, err := btc38.CancelOrder("btc", "cny", orderID)
+	if err != nil {
+		fmt.Println("撤销订单失败：", err)
+	} else {
+		fmt.Println("以下订单，已被撤销：", orderID, canceled)
+	}
+
 	//以上是测试内容
 
 	return btc38
