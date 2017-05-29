@@ -330,12 +330,13 @@ func handleMyOrdersRawData(rawData []byte) ([]order, error) {
 }
 
 type myTrade struct {
-	ID        int       `json:"id,string"`
-	Coin      string    `json:"coinname"`
-	OrderType orderType `json:"type,string"`
-	Amount    float64   `json:"amount,string"`
-	Price     float64   `json:"price,string"`
-	Time      string    `json:"time"`
+	ID       int     `json:"id,string"`
+	BuyerID  int     `json:"buyer_id, string"`
+	SellerID int     `json:"seller_id, string"`
+	Volume   float64 `json:"volume,string"`
+	Price    float64 `json:"price,string"`
+	Coin     string  `json:"coinname"`
+	Time     string  `json:"time"`
 }
 
 //getMyTrades 下单交易
