@@ -331,8 +331,8 @@ func handleMyOrdersRawData(rawData []byte) ([]order, error) {
 
 type myTrade struct {
 	ID       int     `json:"id,string"`
-	BuyerID  int     `json:"buyer_id,string"`
-	SellerID int     `json:"seller_id,string"`
+	BuyerID  string  `json:"buyer_id"`
+	SellerID string  `json:"seller_id"`
 	Volume   float64 `json:"volume,string"`
 	Price    float64 `json:"price,string"`
 	Coin     string  `json:"coinname"`
