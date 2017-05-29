@@ -87,7 +87,7 @@ func Run() exchanges.Exchanger {
 		time.Sleep(time.Second)
 	}
 
-	canceled, err := btc38.CancelOrder("BTC", "CNY", orderID)
+	canceled, err := btc38.CancelOrder("BTC", "cny", orderID)
 	if err != nil {
 		fmt.Println("撤销订单失败：", err)
 	} else {

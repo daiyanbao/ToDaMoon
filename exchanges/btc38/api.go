@@ -245,7 +245,7 @@ func (b *BTC38) CancelOrder(coin, money string, orderID int) (bool, error) {
 
 func (b *BTC38) getCancelOrderRawData(coin, money string, orderID int) ([]byte, error) {
 	body := b.cancelOrderBodyMaker(coin, money, orderID)
-	return b.Post(submitOrderURL, body)
+	return b.Post(cancelOrderURL, body)
 }
 
 func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader {
@@ -275,26 +275,31 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 	return false, errors.New(r)
 }
 
-/*
+type order struct {
+	ID        int       `json:"order_id,string"`
+	OrderType orderType `json:"order_type,string"`
+	Coin      string    `json:"order_coinname,string"`
+	Amount    float64   `json:"order_amount,string"`
+	Price     float64   `json:"order_price,string"`
+}
 
-
-//GetMyOrders 下单交易
+//getMyOrders 下单交易
 //TODO: 把money改成枚举类型，所有的
-func (b *BTC38) GetMyOrders(coin, money string, orderID int) (bool, error) {
-	rawData, err := b.getCancelOrderRawData(coin, money, orderID)
+func (b *BTC38) getMyOrders(coin, money string) ([]order, error) {
+	rawData, err := b.getMyOrdersRawData(coin, money)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return handleCancelOrderRawData(rawData)
+	return handleMyOrdersRawData(rawData)
 }
 
-func (b *BTC38) getCancelOrderRawData(coin, money string, orderID int) ([]byte, error) {
-	body := b.cancelOrderBodyMaker(coin, money, orderID)
-	return b.Post(submitOrderURL, body)
+func (b *BTC38) getMyOrdersRawData(coin, money string) ([]byte, error) {
+	body := b.myOrdersBodyMaker(coin, money)
+	return b.Post(getOrderListURL, body)
 }
 
-func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader {
+func (b *BTC38) myOrdersBodyMaker(coin, money string) io.Reader {
 	v := url.Values{}
 	v.Set("key", b.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -303,21 +308,18 @@ func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader 
 	v.Set("md5", md5)
 
 	v.Set("mk_type", money)
-	v.Set("order_id", strconv.Itoa(orderID))
 	v.Set("coinname", coin)
 	encoded := v.Encode()
 
-	fmt.Println("order body:", encoded) //TODO: 删除此处内容
+	fmt.Println("orders body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
 
-func handleCancelOrderRawData(rawData []byte) (bool, error) {
-	r := string(rawData)
-
-	if r == "succ" {
-		return true, nil
+func handleMyOrdersRawData(rawData []byte) ([]order, error) {
+	resp := []order{}
+	err := ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
 	}
-
-	return false, errors.New(r)
+	return resp, nil
 }
-*/
