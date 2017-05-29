@@ -190,7 +190,7 @@ func (b *BTC38) Trade(ot orderType, coin, money string, price, amount float64) (
 	if err != nil {
 		return 0, err
 	}
-
+	fmt.Println(string(rawData)) //TODO: 删除此处内容
 	return handleTradeRawData(rawData)
 }
 
