@@ -73,6 +73,18 @@ func Run() exchanges.Exchanger {
 	}
 
 	fmt.Println("=============================================================")
+	for i := 20; i <= 40; i += 10 {
+		orderID, err := btc38.Trade(BUY, "btc", "cny", 10000, float64(i)/10000)
+		if err != nil {
+			fmt.Println("无法在btc38.com下单买btc", err)
+		} else {
+			fmt.Println("BTC38.com下单买btc后的orderID是:")
+			fmt.Println(i, orderID)
+		}
+		time.Sleep(time.Second * 3)
+	}
+
+	fmt.Println("=============================================================")
 	orderID, err := btc38.Trade(BUY, "btc", "cny", 10000, 90.0/10000)
 	if err != nil {
 		fmt.Println("无法在btc38.com下单买btc", err)
@@ -87,11 +99,21 @@ func Run() exchanges.Exchanger {
 		time.Sleep(time.Second)
 	}
 
-	canceled, err := btc38.CancelOrder("BTC", "cny", orderID)
+	canceled, err := btc38.CancelOrder("btc", "cny", orderID)
 	if err != nil {
 		fmt.Println("撤销订单失败：", err)
 	} else {
 		fmt.Println("以下订单，已被撤销：", orderID, canceled)
+	}
+
+	fmt.Println("==============查看我的订单====================")
+	myOrders, err := btc38.getMyOrders("btc", "cny")
+	if err != nil {
+		fmt.Println("无法获取我的订单", err)
+	} else {
+		for _, o := range myOrders {
+			fmt.Println(o)
+		}
 	}
 
 	//以上是测试内容
