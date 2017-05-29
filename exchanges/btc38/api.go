@@ -274,3 +274,50 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 
 	return false, errors.New(r)
 }
+
+/*
+
+
+//GetMyOrders 下单交易
+//TODO: 把money改成枚举类型，所有的
+func (b *BTC38) GetMyOrders(coin, money string, orderID int) (bool, error) {
+	rawData, err := b.getCancelOrderRawData(coin, money, orderID)
+	if err != nil {
+		return false, err
+	}
+
+	return handleCancelOrderRawData(rawData)
+}
+
+func (b *BTC38) getCancelOrderRawData(coin, money string, orderID int) ([]byte, error) {
+	body := b.cancelOrderBodyMaker(coin, money, orderID)
+	return b.Post(submitOrderURL, body)
+}
+
+func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader {
+	v := url.Values{}
+	v.Set("key", b.PublicKey)
+	nowTime := fmt.Sprint(time.Now().Unix())
+	v.Set("time", nowTime)
+	md5 := b.md5(nowTime)
+	v.Set("md5", md5)
+
+	v.Set("mk_type", money)
+	v.Set("order_id", strconv.Itoa(orderID))
+	v.Set("coinname", coin)
+	encoded := v.Encode()
+
+	fmt.Println("order body:", encoded) //TODO: 删除此处内容
+	return strings.NewReader(encoded)
+}
+
+func handleCancelOrderRawData(rawData []byte) (bool, error) {
+	r := string(rawData)
+
+	if r == "succ" {
+		return true, nil
+	}
+
+	return false, errors.New(r)
+}
+*/

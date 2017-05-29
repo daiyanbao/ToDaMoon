@@ -82,12 +82,12 @@ func Run() exchanges.Exchanger {
 	}
 
 	fmt.Println("=====等待撤单=====")
-	for i := 30; i > 0; i-- {
+	for i := 20; i > 0; i-- {
 		fmt.Println(i)
 		time.Sleep(time.Second)
 	}
 
-	canceled, err := btc38.CancelOrder("btc", "cny", orderID)
+	canceled, err := btc38.CancelOrder("BTC", "CNY", orderID)
 	if err != nil {
 		fmt.Println("撤销订单失败：", err)
 	} else {
