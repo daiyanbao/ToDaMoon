@@ -73,7 +73,7 @@ func Run() exchanges.Exchanger {
 	}
 
 	fmt.Println("=============================================================")
-	orderID, err := btc38.Trade(BUY, "btc", "cny", 10000, 100.0/10000)
+	orderID, err := btc38.Trade(BUY, "btc", "cny", 10000, 90.0/10000)
 	if err != nil {
 		fmt.Println("无法在btc38.com下单买btc", err)
 	} else {

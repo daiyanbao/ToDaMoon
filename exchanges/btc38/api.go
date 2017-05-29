@@ -264,6 +264,7 @@ func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader 
 	fmt.Println("order body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
+
 func handleCancelOrderRawData(rawData []byte) (bool, error) {
 	r := string(rawData)
 
