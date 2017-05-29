@@ -2,6 +2,7 @@ package btc38
 
 import (
 	ec "ToDaMoon/exchanges"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -176,35 +177,29 @@ func (b *BTC38) md5(time string) string {
 type orderType int
 
 const (
-	buy  orderType = 1
-	sell orderType = 2
+	//BUY 是使用money换coin的过程
+	BUY orderType = 1 //不用iota是因为btc38的api指定了数字1为买入
+	//SELL 是使用coin换money的过程
+	SELL orderType = 2
 )
 
-//Order 下单交易
+//Trade 下单交易
 //TODO: 把money改成枚举类型，所有的
-func (b *BTC38) Order(ot orderType, coin, money string, price, amount float64) (string, error) {
-	rawData, err := b.getOrderRawData(ot, coin, money, price, amount)
+func (b *BTC38) Trade(ot orderType, coin, money string, price, amount float64) (int, error) {
+	rawData, err := b.getTradeRawData(ot, coin, money, price, amount)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	//TODO: 删除print
-	fmt.Println(string(rawData)) //TODO: 删除此处内容
-	//	resp := MyBalance{}
-	//	err = ec.JSONDecode(rawData, &resp)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-
-	return string(rawData), nil
+	return handleTradeRawData(rawData)
 }
 
-func (b *BTC38) getOrderRawData(ot orderType, coin, money string, price, amount float64) ([]byte, error) {
-	body := b.orderBodyMaker(ot, coin, money, price, amount)
+func (b *BTC38) getTradeRawData(ot orderType, coin, money string, price, amount float64) ([]byte, error) {
+	body := b.tradeBodyMaker(ot, coin, money, price, amount)
 	return b.Post(submitOrderURL, body)
 }
 
-func (b *BTC38) orderBodyMaker(ot orderType, coin, money string, price, amount float64) io.Reader {
+func (b *BTC38) tradeBodyMaker(ot orderType, coin, money string, price, amount float64) io.Reader {
 	v := url.Values{}
 	v.Set("key", b.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -221,4 +216,60 @@ func (b *BTC38) orderBodyMaker(ot orderType, coin, money string, price, amount f
 
 	fmt.Println("order body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
+}
+
+func handleTradeRawData(rawData []byte) (int, error) {
+	r := string(rawData)
+
+	if r[:5] == "succ|" {
+		orderID, err := strconv.Atoi(r[5:])
+		if err != nil {
+			return 0, err
+		}
+		return orderID, nil
+	}
+
+	return 0, errors.New(r)
+}
+
+//CancelOrder 下单交易
+//TODO: 把money改成枚举类型，所有的
+func (b *BTC38) CancelOrder(coin, money string, orderID int) (bool, error) {
+	rawData, err := b.getCancelOrderRawData(coin, money, orderID)
+	if err != nil {
+		return false, err
+	}
+
+	return handleCancelOrderRawData(rawData)
+}
+
+func (b *BTC38) getCancelOrderRawData(coin, money string, orderID int) ([]byte, error) {
+	body := b.cancelOrderBodyMaker(coin, money, orderID)
+	return b.Post(submitOrderURL, body)
+}
+
+func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader {
+	v := url.Values{}
+	v.Set("key", b.PublicKey)
+	nowTime := fmt.Sprint(time.Now().Unix())
+	v.Set("time", nowTime)
+	md5 := b.md5(nowTime)
+	v.Set("md5", md5)
+
+	v.Set("coinname", coin)
+	v.Set("mk_type", money)
+	v.Set("order_id", strconv.Itoa(orderID))
+	encoded := v.Encode()
+
+	fmt.Println("order body:", encoded) //TODO: 删除此处内容
+	return strings.NewReader(encoded)
+}
+func handleCancelOrderRawData(rawData []byte) (bool, error) {
+	r := string(rawData)
+
+	if r == "succ" {
+		return true, nil
+	}
+
+	return false, errors.New(r)
 }
