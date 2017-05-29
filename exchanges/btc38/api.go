@@ -277,10 +277,11 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 
 type order struct {
 	ID        int       `json:"id,string"`
+	Coin      string    `json:"coinname"`
 	OrderType orderType `json:"type,string"`
-	Coin      string    `json:"coinname,string"`
 	Amount    float64   `json:"amount,string"`
 	Price     float64   `json:"price,string"`
+	Time      string    `json:"time"`
 }
 
 //getMyOrders 下单交易
@@ -317,6 +318,61 @@ func (b *BTC38) myOrdersBodyMaker(coin, money string) io.Reader {
 
 func handleMyOrdersRawData(rawData []byte) ([]order, error) {
 	resp := []order{}
+
+	//TODO: 删除此处内容
+	fmt.Println(string(rawData))
+
+	err := ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+type myTrade struct {
+	ID        int       `json:"id,string"`
+	Coin      string    `json:"coinname"`
+	OrderType orderType `json:"type,string"`
+	Amount    float64   `json:"amount,string"`
+	Price     float64   `json:"price,string"`
+	Time      string    `json:"time"`
+}
+
+//getMyTrades 下单交易
+//TODO: 把money改成枚举类型，所有的
+func (b *BTC38) getMyTrades(coin, money string, page int) ([]myTrade, error) {
+	rawData, err := b.getMyTradesRawData(coin, money, page)
+	if err != nil {
+		return nil, err
+	}
+
+	return handleMyTradesRawData(rawData)
+}
+
+func (b *BTC38) getMyTradesRawData(coin, money string, page int) ([]byte, error) {
+	body := b.myTradesBodyMaker(coin, money, page)
+	return b.Post(getMyTradeListURL, body)
+}
+
+func (b *BTC38) myTradesBodyMaker(coin, money string, page int) io.Reader {
+	v := url.Values{}
+	v.Set("key", b.PublicKey)
+	nowTime := fmt.Sprint(time.Now().Unix())
+	v.Set("time", nowTime)
+	md5 := b.md5(nowTime)
+	v.Set("md5", md5)
+
+	v.Set("mk_type", money)
+	v.Set("coinname", coin)
+	v.Set("page", strconv.Itoa(page))
+	encoded := v.Encode()
+
+	fmt.Println("myTrades body:", encoded) //TODO: 删除此处内容
+	return strings.NewReader(encoded)
+}
+
+func handleMyTradesRawData(rawData []byte) ([]myTrade, error) {
+	resp := []myTrade{}
 
 	//TODO: 删除此处内容
 	fmt.Println(string(rawData))

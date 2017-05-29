@@ -116,6 +116,16 @@ func Run() exchanges.Exchanger {
 		}
 	}
 
+	fmt.Println("=======查看我的交易记录==========")
+	myDogeTrades, err := btc38.getMyTrades("doge", "cny", 0)
+	if err != nil {
+		fmt.Println("无法获取的doge交易记录。", err)
+	} else {
+		for _, t := range myDogeTrades {
+			fmt.Println(t)
+		}
+	}
+
 	//以上是测试内容
 
 	return btc38
