@@ -81,8 +81,8 @@ func Run() exchanges.Exchanger {
 		fmt.Println(orderID)
 	}
 
-	fmt.Println("=====等待1分钟后撤单=====")
-	for i := 60; i > 0; i-- {
+	fmt.Println("=====等待撤单=====")
+	for i := 30; i > 0; i-- {
 		fmt.Println(i)
 		time.Sleep(time.Second)
 	}

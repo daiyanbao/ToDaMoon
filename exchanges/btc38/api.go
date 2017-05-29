@@ -256,9 +256,9 @@ func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader 
 	md5 := b.md5(nowTime)
 	v.Set("md5", md5)
 
-	v.Set("coinname", coin)
 	v.Set("mk_type", money)
 	v.Set("order_id", strconv.Itoa(orderID))
+	v.Set("coinname", coin)
 	encoded := v.Encode()
 
 	fmt.Println("order body:", encoded) //TODO: 删除此处内容
