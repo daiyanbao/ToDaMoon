@@ -30,27 +30,40 @@ func main() {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return
 	}
+
+	db2, err := sql.Open("sqlite3", "./foo.db")
+	if err != nil {
+		log.Fatal("db2", err)
+	}
+	//	defer db2.Close()
+
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
+
 	go insert(db, 0, 0, wg)
-	go insert(db, time.Second*2, 100, wg)
-	go query(db)
+	go insert(db2, time.Second*2, 100, wg)
+	go query(db2)
 
 	wg.Wait()
 
-	go query(db)
 	time.Sleep(time.Millisecond * 500)
+	wg.Add(1)
+	insert(db2, time.Second*2, 10000, wg)
 }
 
 func insert(db *sql.DB, waitTime time.Duration, index int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	fmt.Printf("insert之前，先休息%d秒\n", waitTime)
 	time.Sleep(waitTime)
+
 	tx, err := db.Begin()
-	fmt.Println(index, "After begin")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer tx.Commit()
+	fmt.Println(index, "After begin")
+
 	stmt, err := tx.Prepare("insert into foo(id, name) values(?, ?)")
 	if err != nil {
 		log.Fatal(err)
@@ -62,11 +75,12 @@ func insert(db *sql.DB, waitTime time.Duration, index int, wg *sync.WaitGroup) {
 			log.Fatal(err)
 		}
 		fmt.Println(index, i)
+		if i == 10000+5 {
+			return
+		}
 		time.Sleep(time.Millisecond * 500)
 	}
-	fmt.Println(index, "Before commit")
-	tx.Commit()
-	fmt.Println(index, "After commit")
+	fmt.Println(index, "commit")
 }
 
 func query(db *sql.DB) {
