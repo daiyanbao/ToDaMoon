@@ -69,6 +69,7 @@ func insert(db *sql.DB, waitTime time.Duration, index int, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
+
 	for i := index; i < index+10; i++ {
 		_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%05d", i))
 		if err != nil {
@@ -99,13 +100,12 @@ func query(db *sql.DB) {
 			}
 			defer rows.Close()
 			for rows.Next() {
-				var id int
-				var name string
-				err = rows.Scan(&id, &name)
+				p := &people{}
+				err = rows.Scan(p.attributes()...)
 				if err != nil {
 					log.Fatal(err)
 				}
-				fmt.Println("\t\t\t", id, name)
+				fmt.Println("\t\t\t", p.id, p.name)
 			}
 			err = rows.Err()
 			if err != nil {
@@ -114,4 +114,13 @@ func query(db *sql.DB) {
 		}()
 		i++
 	}
+}
+
+type people struct {
+	id   int
+	name string
+}
+
+func (p *people) attributes() []interface{} {
+	return []interface{}{&p.id, &p.name}
 }
