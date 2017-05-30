@@ -142,13 +142,7 @@ func (b *BTC38) Balance() (MyBalance, error) {
 		return nil, err
 	}
 
-	resp := MyBalance{}
-	err = ec.JSONDecode(rawData, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
+	return handleMyBalanceRawData(rawData)
 }
 
 func (b *BTC38) getMyBalanceRawData() ([]byte, error) {
@@ -172,6 +166,16 @@ func (b *BTC38) md5(time string) string {
 	md := fmt.Sprintf("%s_%d_%s_%s", b.PublicKey, b.ID, b.SecretKey, time)
 	md5 := ec.MD5([]byte(md))
 	return ec.HexEncodeToString(md5)
+}
+
+func handleMyBalanceRawData(rawData []byte) (MyBalance, error) {
+	resp := MyBalance{}
+	err := ec.JSONDecode(rawData, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 type orderType int

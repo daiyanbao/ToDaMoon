@@ -26,9 +26,8 @@ func main() {
 		return
 	}
 
-	log.Println("Launch, Version ", Version+"."+BuildNumber)
-	defer log.Println("Landing, Version ", Version+"."+BuildNumber)
+	log.Println("LAUNCH, Version ", Version+"."+BuildNumber)
+	defer log.Println("LANDED, Version ", Version+"."+BuildNumber)
 
 	apollo.Launch()
-
 }

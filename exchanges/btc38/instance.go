@@ -35,8 +35,6 @@ type config struct {
 //instance 返回一个btc38的单例
 func instance() *BTC38 {
 	//读取配置文件
-
-	//检查配置文件
 	c := getConfig()
 
 	//生成btc38实例
@@ -57,7 +55,7 @@ func getConfig() *config {
 	iniName := getIniFileName()
 	iniFile, err := ini.Load(iniName)
 	if err != nil {
-		msg := fmt.Sprintf("无法加载%s/%s.ini: %s", util.PWD(), name, err)
+		msg := fmt.Sprintf("无法加载%s/%s: %s", util.PWD(), iniName, err)
 		log.Fatalf(msg)
 	}
 
@@ -73,7 +71,7 @@ func getConfig() *config {
 }
 
 func getIniFileName() string {
-	return fmt.Sprintf("./%s.ini", name)
+	return fmt.Sprintf("%s.ini", name)
 }
 
 // Check Config for setting mistakes

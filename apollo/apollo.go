@@ -4,15 +4,12 @@ import (
 	"ToDaMoon/exchanges/btc38"
 	"ToDaMoon/util"
 	"os"
-	"sync"
 )
 
 const (
 	// pidFile 用来存储程序pid代号的文件
 	pidFile = "tdm.pid"
 )
-
-var once sync.Once
 
 func init() {
 	util.Init(pidFile)
@@ -22,6 +19,8 @@ func init() {
 func Launch() {
 	//清理pid文件
 	defer os.Remove(pidFile)
+
+	//done等待程序结束的信号
 	done := util.WaitingKill()
 
 	//在这里启动各个交易所模块
