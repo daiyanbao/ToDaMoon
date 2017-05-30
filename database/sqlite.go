@@ -61,6 +61,7 @@ func Open(filename string, d dataer) (DBer, error) {
 	return result, nil
 }
 
+//Insert 向DB内插入数据
 func (d *DB) Insert() {
 
 }
