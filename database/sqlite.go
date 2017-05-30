@@ -2,7 +2,8 @@
 package database
 
 import (
-	ec "ToDaMoon/exchanges"
+	//TODO: 要删除这个import的原因是，避免模块之间的相互引用
+	//	ec "ToDaMoon/exchanges"
 	"ToDaMoon/util"
 	"aQuaGo/common"
 	"database/sql"
@@ -44,7 +45,6 @@ const (
 var dBMap = make(map[string]DBM)
 var mutex sync.Mutex
 
-// New makes new DBM
 func Connect(dir, market, coin, money string) (DBM, error) {
 	var dbm DBM
 	db := dbFilePath(dir, market, coin, money)
