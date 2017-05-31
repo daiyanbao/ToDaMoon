@@ -20,7 +20,7 @@ type insertier interface {
 }
 
 type querier interface {
-	QueryStatement() string
+	QueryStatement(string, []interface{}) string
 	NewItem() attributer
 	Attributes() []interface{}
 }
@@ -31,7 +31,7 @@ type attributer interface {
 type dataer interface {
 	creater
 	InsertStatement() string
-	QueryStatement() string
+	QueryStatement(string, []interface{}) string
 	NewItem() attributer
 	Attributes() []interface{}
 }
@@ -79,6 +79,7 @@ func Open(filename string, d dataer) (DBer, error) {
 //Insert 向DB内插入数据
 func (d *DB) Insert(ds []dataer) error {
 	//插入长度为0的数据，直接返回
+	//检查长度是因为，后面会用到ds[0]，如果len(ds)==0，ds[0]会引起panic
 	if len(ds) == 0 {
 		return nil
 	}
@@ -88,6 +89,7 @@ func (d *DB) Insert(ds []dataer) error {
 		msg := fmt.Sprintf("数据库%s的数据的原始类型为%T，待插入数据的原始数据类型为%T，两者不符，无法插入。", d.name, d.dataer, ds[0])
 		return errors.New(msg)
 	}
+
 	return insert(d, ds)
 }
 
@@ -121,6 +123,35 @@ func insert(db *DB, ds []dataer) error {
 	}
 
 	return nil
+}
+
+func (db *DB) QueryBy(statement string) ([]interface{}, error) {
+	rows, err := db.Query(statement)
+	if err != nil {
+		msg := fmt.Sprintf("对%s使用%s语句查询，出现错误:%s", db.name, statement, err)
+		return nil, errors.New(msg)
+	}
+	defer rows.Close()
+
+	result := []interface{}{}
+	for rows.Next() {
+		item := db.NewItem()
+		err := rows.Scan(item.Attributes())
+		if err != nil {
+			msg := fmt.Sprintf("对%s查询%s出来的rows进行Scan时，出错:%s", db.name, statement, err)
+			//TODO: 直接关闭程序是否太严格了，考虑一下换成报错
+			log.Fatalln(msg)
+		}
+		result = append(result, item)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		msg := fmt.Sprintf("对%s查询%s出来的rows，Scan完毕后，出错:%s", db.name, statement, err)
+		return nil, errors.New(msg)
+	}
+
+	return result, nil
 }
 
 func createDB(filename string, c creater) error {
