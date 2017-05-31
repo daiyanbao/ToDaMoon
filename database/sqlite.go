@@ -10,30 +10,37 @@ import (
 	"sync"
 )
 
-type creater interface {
+//Creater 返回用于创建数据库的table的语句
+type Creater interface {
 	CreateStatement() string
 }
 
-type insertier interface {
+//Inserter 向数据库插入数据的接口
+type Inserter interface {
+	//返回，向数据库中插入数据的插入语句
 	InsertStatement() string
+
+	//输出插入数据组成的切片，数据的顺序要求与插入语句中的顺序一致
+	Attributer
+}
+
+//Querier 从数据库查询内容的接口
+type Querier interface {
+	QueryStatement() string
+	NewItem() Attributer
+	Attributer
+}
+
+//Attributer 返回了struct的属性的指针位置组成的切片
+//NOTICE: 切片中元素的顺序，要与对应语句中的元素顺序相同
+type Attributer interface {
 	Attributes() []interface{}
 }
 
-type querier interface {
-	QueryStatement(string, []interface{}) string
-	NewItem() attributer
-	Attributes() []interface{}
-}
-
-type attributer interface {
-	Attributes() []interface{}
-}
-type dataer interface {
-	creater
-	InsertStatement() string
-	QueryStatement(string, []interface{}) string
-	NewItem() attributer
-	Attributes() []interface{}
+//Datar 反应了数据库中数据的特性
+type Datar interface {
+	Creater
+	NewItem() Attributer
 }
 
 //DBer 是定制数据库的接口
@@ -44,13 +51,30 @@ type DBer interface {
 type DB struct {
 	name string
 	*sql.DB
-	dataer
+	Datar
+}
+
+func (db *DB) Name() string {
+	return db.name
+}
+
+func New(filename string, d Datar) (DBer, error) {
+	db, err := open(filename, d)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DB{
+		name:  filename,
+		DB:    db,
+		Datar: d,
+	}, nil
 }
 
 var mutex sync.Mutex
 
 //Open 链接上了数据库
-func Open(filename string, d dataer) (DBer, error) {
+func open(filename string, d Datar) (*sql.DB, error) {
 	{ //为了不重复创建数据库，加个锁
 		mutex.Lock()
 
@@ -65,19 +89,15 @@ func Open(filename string, d dataer) (DBer, error) {
 
 	db, err := sql.Open("sqlite3", filename)
 	if err != nil {
-		return nil, util.Err("无法open"+filename, err)
+		msg := fmt.Sprintf("无法打开sqlite3文件%s，出错原因:%s", filename, err)
+		return nil, errors.New(msg)
 	}
 
-	result := &DB{
-		DB:     db,
-		dataer: d,
-	}
-
-	return result, nil
+	return db, nil
 }
 
 //Insert 向DB内插入数据
-func (d *DB) Insert(ds []dataer) error {
+func (db *DB) Insert(ds []Datar) error {
 	//插入长度为0的数据，直接返回
 	//检查长度是因为，后面会用到ds[0]，如果len(ds)==0，ds[0]会引起panic
 	if len(ds) == 0 {
@@ -85,15 +105,16 @@ func (d *DB) Insert(ds []dataer) error {
 	}
 
 	//如果数据库本身数据的类型与待插入数据的类型不一致，无法插入
-	if !util.IsTypeEqual(d.dataer, ds[0]) {
-		msg := fmt.Sprintf("数据库%s的数据的原始类型为%T，待插入数据的原始数据类型为%T，两者不符，无法插入。", d.name, d.dataer, ds[0])
+	item := db.NewItem()
+	if !util.IsTypeEqual(item, ds[0]) {
+		msg := fmt.Sprintf("数据库%s的数据的原始类型为%T，待插入数据的原始数据类型为%T，两者不符，无法插入。", db.name, item, ds[0])
 		return errors.New(msg)
 	}
 
-	return insert(d, ds)
+	return insert(db, ds)
 }
 
-func insert(db *DB, ds []dataer) error {
+func insert(db *DB, ds []Datar) error {
 	//启动insert事务
 	transaction, err := db.Begin()
 	if err != nil {
