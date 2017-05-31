@@ -4,6 +4,8 @@ package database
 import (
 	"ToDaMoon/util"
 	"database/sql"
+	"errors"
+	"fmt"
 	"sync"
 )
 
@@ -39,6 +41,7 @@ type DBer interface {
 
 //DB 定制的sql数据库
 type DB struct {
+	name string
 	*sql.DB
 	dataer
 }
@@ -73,7 +76,21 @@ func Open(filename string, d dataer) (DBer, error) {
 }
 
 //Insert 向DB内插入数据
-func (d *DB) Insert(ds []dataer) {
+func (d *DB) Insert(ds []dataer) error {
+	//插入长度为0的数据，直接返回
+	if len(ds) == 0 {
+		return nil
+	}
+
+	//如果数据库本身数据的类型与待插入数据的类型不一致，无法插入
+	if !util.IsTypeEqual(d.dataer, ds[0]) {
+		msg := fmt.Sprintf("数据库%s的数据的原始类型为%T，待插入数据的原始数据类型为%T，两者不符，无法插入。", d.name, d.dataer, ds[0])
+		return errors.New(msg)
+	}
+	return d.insert(ds)
+}
+
+func (d *DB) insert(ds []dataer) error {
 
 }
 
