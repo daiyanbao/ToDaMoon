@@ -11,15 +11,26 @@ type creater interface {
 	CreateStatement() string
 }
 
-type insertQuerier interface {
+type insertier interface {
 	InsertStatement() string
-	QueryStatement() string
 	Attributes() []interface{}
 }
 
+type querier interface {
+	QueryStatement() string
+	NewItem() attributer
+	Attributes() []interface{}
+}
+
+type attributer interface {
+	Attributes() []interface{}
+}
 type dataer interface {
 	creater
-	insertQuerier
+	InsertStatement() string
+	QueryStatement() string
+	NewItem() attributer
+	Attributes() []interface{}
 }
 
 //DBer 是定制数据库的接口
@@ -62,7 +73,7 @@ func Open(filename string, d dataer) (DBer, error) {
 }
 
 //Insert 向DB内插入数据
-func (d *DB) Insert() {
+func (d *DB) Insert(ds []dataer) {
 
 }
 
