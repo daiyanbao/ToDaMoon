@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 )
 
@@ -87,11 +88,39 @@ func (d *DB) Insert(ds []dataer) error {
 		msg := fmt.Sprintf("数据库%s的数据的原始类型为%T，待插入数据的原始数据类型为%T，两者不符，无法插入。", d.name, d.dataer, ds[0])
 		return errors.New(msg)
 	}
-	return d.insert(ds)
+	return insert(d, ds)
 }
 
-func (d *DB) insert(ds []dataer) error {
+func insert(db *DB, ds []dataer) error {
+	//启动insert事务
+	transaction, err := db.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("%s无法启动一个insert事务:%s", db.name, err)
+		return errors.New(msg)
+	}
+	defer transaction.Commit()
 
+	//为insert事务进行准备工作
+	statement := db.InsertStatement()
+	stmt, err := transaction.Prepare(statement)
+	if err != nil {
+		msg := fmt.Sprintf("%s的insert事务的准备工作失败: %s", db.name, err)
+		return errors.New(msg)
+	}
+	defer stmt.Close()
+
+	//按行插入
+	for _, d := range ds {
+		_, err := stmt.Exec(d.Attributes())
+		if err != nil {
+			attrs := fmt.Sprint(d.Attributes())
+			msg := fmt.Sprintf("%s在插入[%s]时出错: %s", db.name, attrs, err)
+			//TODO: 直接关闭程序是否太严格了，考虑一下换成报错
+			log.Fatalln(msg)
+		}
+	}
+
+	return nil
 }
 
 func createDB(filename string, c creater) error {
