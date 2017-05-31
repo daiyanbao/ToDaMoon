@@ -18,7 +18,7 @@ type Creater interface {
 //Inserter 向数据库插入数据的接口
 type Inserter interface {
 	//返回，向数据库中插入数据的插入语句
-	InsertStatement() string
+	Statement() string
 
 	//输出插入数据组成的切片，数据的顺序要求与插入语句中的顺序一致
 	Attributer
@@ -26,13 +26,13 @@ type Inserter interface {
 
 //Querier 从数据库查询内容的接口
 type Querier interface {
-	QueryStatement() string
+	Statement() string
 	NewItem() Attributer
 	Attributer
 }
 
 //Attributer 返回了struct的属性的指针位置组成的切片
-//NOTICE: 切片中元素的顺序，要与对应语句中的元素顺序相同
+//NOTICE: 切片中元素的顺序，要与对应查询语句中的元素顺序相同
 type Attributer interface {
 	Attributes() []interface{}
 }
@@ -54,6 +54,7 @@ type DB struct {
 	Datar
 }
 
+//Name 返回数据库的名称，其实也就是数据库的存放地址
 func (db *DB) Name() string {
 	return db.name
 }
@@ -175,7 +176,7 @@ func (db *DB) QueryBy(statement string) ([]interface{}, error) {
 	return result, nil
 }
 
-func createDB(filename string, c creater) error {
+func createDB(filename string, c Creater) error {
 	db, err := sql.Open("sqlite3", filename)
 	if err != nil {
 		return util.Err("无法创建数据库"+filename, err)
