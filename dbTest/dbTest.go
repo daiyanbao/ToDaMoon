@@ -42,6 +42,7 @@ func main() {
 
 	go insert(db, 0, 0, wg)
 	go insert(db2, time.Second*2, 100, wg)
+	go insert2(db2, time.Second*2, 100, wg)
 	go query(db2)
 
 	wg.Wait()
@@ -123,4 +124,37 @@ type people struct {
 
 func (p *people) attributes() []interface{} {
 	return []interface{}{&p.id, &p.name}
+}
+
+func insert2(db *sql.DB, waitTime time.Duration, index int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Printf("insert之前，先休息%d秒\n", waitTime)
+	time.Sleep(waitTime)
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer tx.Commit()
+	fmt.Println(index, "After begin")
+
+	stmt, err := tx.Prepare("insert into foo(id, age) values(?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	for i := index; i < index+10; i++ {
+		_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%05d", i))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(index, i)
+		if i == 10000+5 {
+			return
+		}
+		time.Sleep(time.Millisecond * 500)
+	}
+	fmt.Println(index, "commit")
 }

@@ -59,6 +59,7 @@ func (db *DB) Name() string {
 	return db.name
 }
 
+//New 返回一个数据库对象
 func New(filename string, d Datar) (DBer, error) {
 	db, err := open(filename, d)
 	if err != nil {
@@ -78,14 +79,14 @@ var mutex sync.Mutex
 func open(filename string, d Datar) (*sql.DB, error) {
 	{ //为了不重复创建数据库，加个锁
 		mutex.Lock()
+		defer mutex.Unlock()
 
+		//如果不存在数据库文件不存在，就创建一个新的
 		if !util.Exist(filename) {
 			if err := createDB(filename, d); err != nil {
 				return nil, err
 			}
 		}
-
-		mutex.Unlock()
 	}
 
 	db, err := sql.Open("sqlite3", filename)
@@ -147,6 +148,7 @@ func insert(db *DB, ds []Datar) error {
 	return nil
 }
 
+//
 func (db *DB) QueryBy(statement string) ([]interface{}, error) {
 	rows, err := db.Query(statement)
 	if err != nil {
