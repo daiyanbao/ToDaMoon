@@ -62,6 +62,7 @@ func main() {
 	go query(db2)
 
 	wg.Wait()
+	go queryMaxID(db2)
 
 	time.Sleep(time.Millisecond * 500)
 	wg.Add(1)
@@ -124,6 +125,37 @@ func query(db *sql.DB) {
 					log.Fatal(err)
 				}
 				fmt.Println("\t\t\t", p.id, p.name)
+			}
+			err = rows.Err()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+		i++
+	}
+}
+func queryMaxID(db *sql.DB) {
+	fmt.Println("entered query")
+	time.Sleep(time.Millisecond * 250)
+
+	i := 0
+	for {
+		time.Sleep(time.Millisecond * 500)
+
+		go func() {
+			fmt.Println("\t\t\t", i)
+			rows, err := db.Query("select max(id) from foo")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer rows.Close()
+			for rows.Next() {
+				result := new(int)
+				err = rows.Scan(result)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("\t\tmax id\t", *result)
 			}
 			err = rows.Err()
 			if err != nil {

@@ -28,17 +28,15 @@ type TradesDB struct {
 	db database.DBer
 }
 
-const (
-	tradesDBCreateStatement = `create table raw (
+//OpenTradesDB 连接上一个filename对应的数据库文件
+func OpenTradesDB(filename string) (*TradesDB, error) {
+	tradesDBCreateStatement := `create table raw (
 		tid integer primary key,
 		date integer NOT NULL,
 		price real NOT NULL,
 		amount real NOT NULL,
 		type text NOT NULL);`
-)
 
-//OpenTradesDB 连接上一个filename对应的数据库文件
-func OpenTradesDB(filename string) (*TradesDB, error) {
 	db, err := database.Connect(filename, tradesDBCreateStatement)
 	if err != nil {
 		return nil, err
