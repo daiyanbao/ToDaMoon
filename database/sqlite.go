@@ -45,16 +45,18 @@ type Datar interface {
 
 //DBer 是定制数据库的接口
 type DBer interface {
+	Name() string
+	Insert() error
+	QueryBy() ([]interface{}, error)
 }
 
 //DB 定制的sql数据库
 type DB struct {
 	name string
 	*sql.DB
-	Datar
 }
 
-//Name 返回数据库的名称，其实也就是数据库的存放地址
+//Name 返回数据库的名称，也是数据库的存放地址
 func (db *DB) Name() string {
 	return db.name
 }
@@ -67,9 +69,8 @@ func New(filename string, d Datar) (DBer, error) {
 	}
 
 	return &DB{
-		name:  filename,
-		DB:    db,
-		Datar: d,
+		name: filename,
+		DB:   db,
 	}, nil
 }
 
