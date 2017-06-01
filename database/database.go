@@ -132,7 +132,7 @@ func (db *DB) Insert(data []Attributer, insertStatement string) error {
 }
 
 //QueryBy 描述了从数据库中查询的过程
-func (db *DB) QueryBy(queryStatement string, newAttributes func() Attributer) ([]interface{}, error) {
+func (db *DB) QueryBy(queryStatement string, newItem func() Attributer) ([]interface{}, error) {
 	rows, err := db.Query(queryStatement)
 	if err != nil {
 		msg := fmt.Sprintf("对%s使用以下语句查询\n%s\n出现错误:%s", db.name, queryStatement, err)
@@ -142,7 +142,7 @@ func (db *DB) QueryBy(queryStatement string, newAttributes func() Attributer) ([
 
 	result := []interface{}{}
 	for rows.Next() {
-		item := newAttributes()
+		item := newItem()
 		err := rows.Scan(item.Attributes()...)
 		if err != nil {
 			msg := fmt.Sprintf("对%s查询%s出来的rows进行Scan时，出错:%s", db.name, queryStatement, err)

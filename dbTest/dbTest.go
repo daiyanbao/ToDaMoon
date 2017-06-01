@@ -16,6 +16,8 @@ func main() {
 	os.Remove("./foo.db")
 
 	ncsdbfilename := "./noCreateStatement.db"
+	os.Remove(ncsdbfilename)
+
 	dbt, err := sql.Open("sqlite3", ncsdbfilename)
 	if err != nil {
 		msg := fmt.Sprintf("无法创建%s数据库，出错原因:%s", ncsdbfilename, err)
@@ -25,8 +27,8 @@ func main() {
 
 	sqlStmt := `
 	create table foo (id integer not null primary key, name text);
-	delete from foo;
 	`
+	//NOTICE: 	delete from foo;
 	_, err = dbt.Exec(sqlStmt)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
