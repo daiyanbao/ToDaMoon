@@ -16,7 +16,6 @@ type Depth struct {
 	Bids [][2]float64
 }
 
-
-
+//Balance 是用户的账户
 type Balance struct {
 }

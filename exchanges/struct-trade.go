@@ -15,5 +15,5 @@ func (t *Trade) Attributes() []interface{} {
 }
 
 //Trades 是*Trade的切片
-//因为会有很多关于[]Trade的操作，所以，设置了这个方法。
+//因为会有很多关于[]*Trade的操作，所以，设置了这个方法。
 type Trades []*Trade
