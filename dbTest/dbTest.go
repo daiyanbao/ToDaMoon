@@ -15,16 +15,30 @@ import (
 func main() {
 	os.Remove("./foo.db")
 
+	ncsdbfilename := "./noCreateStatement.db"
+	dbt, err := sql.Open("sqlite3", ncsdbfilename)
+	if err != nil {
+		msg := fmt.Sprintf("无法创建%s数据库，出错原因:%s", ncsdbfilename, err)
+		log.Println(msg)
+	}
+	defer dbt.Close()
+
+	sqlStmt := `
+	create table foo (id integer not null primary key, name text);
+	delete from foo;
+	`
+	_, err = dbt.Exec(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+
 	db, err := sql.Open("sqlite3", "./foo.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	sqlStmt := `
-	create table foo (id integer not null primary key, name text);
-	delete from foo;
-	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
@@ -42,7 +56,7 @@ func main() {
 
 	go insert(db, 0, 0, wg)
 	go insert(db2, time.Second*2, 100, wg)
-	go insert2(db2, time.Second*2, 100, wg)
+
 	go query(db2)
 
 	wg.Wait()
@@ -72,7 +86,8 @@ func insert(db *sql.DB, waitTime time.Duration, index int, wg *sync.WaitGroup) {
 	defer stmt.Close()
 
 	for i := index; i < index+10; i++ {
-		_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%05d", i))
+		p := newPeople(i, fmt.Sprintf("こんにちわ世界%05d", i))
+		_, err = stmt.Exec(p.attributes()...)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -126,35 +141,9 @@ func (p *people) attributes() []interface{} {
 	return []interface{}{&p.id, &p.name}
 }
 
-func insert2(db *sql.DB, waitTime time.Duration, index int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	fmt.Printf("insert之前，先休息%d秒\n", waitTime)
-	time.Sleep(waitTime)
-
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
+func newPeople(id int, name string) *people {
+	return &people{
+		id:   id,
+		name: name,
 	}
-
-	defer tx.Commit()
-	fmt.Println(index, "After begin")
-
-	stmt, err := tx.Prepare("insert into foo(id, age) values(?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	for i := index; i < index+10; i++ {
-		_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%05d", i))
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(index, i)
-		if i == 10000+5 {
-			return
-		}
-		time.Sleep(time.Millisecond * 500)
-	}
-	fmt.Println(index, "commit")
 }

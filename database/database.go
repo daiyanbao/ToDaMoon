@@ -46,8 +46,8 @@ type Datar interface {
 //DBer 是定制数据库的接口
 type DBer interface {
 	Name() string
-	Insert() error
-	QueryBy() ([]interface{}, error)
+	Insert([]Attributer, string) error
+	QueryBy(string, func() Attributer) ([]interface{}, error)
 }
 
 //DB 定制的sql数据库
@@ -61,9 +61,9 @@ func (db *DB) Name() string {
 	return db.name
 }
 
-//New 返回一个数据库对象
-func New(filename string, d Datar) (DBer, error) {
-	db, err := open(filename, d)
+//Connect 返回一个数据库对象
+func Connect(filename string, createStatement string) (DBer, error) {
+	db, err := open(filename, createStatement)
 	if err != nil {
 		return nil, err
 	}
@@ -77,14 +77,14 @@ func New(filename string, d Datar) (DBer, error) {
 var mutex sync.Mutex
 
 //Open 链接上了数据库
-func open(filename string, d Datar) (*sql.DB, error) {
+func open(filename string, createStatement string) (*sql.DB, error) {
 	{ //为了不重复创建数据库，加个锁
 		mutex.Lock()
 		defer mutex.Unlock()
 
 		//如果不存在数据库文件不存在，就创建一个新的
 		if !util.Exist(filename) {
-			if err := createDB(filename, d); err != nil {
+			if err := createDB(filename, createStatement); err != nil {
 				return nil, err
 			}
 		}
@@ -99,25 +99,8 @@ func open(filename string, d Datar) (*sql.DB, error) {
 	return db, nil
 }
 
-//Insert 向DB内插入数据
-func (db *DB) Insert(ds []Datar) error {
-	//插入长度为0的数据，直接返回
-	//检查长度是因为，后面会用到ds[0]，如果len(ds)==0，ds[0]会引起panic
-	if len(ds) == 0 {
-		return nil
-	}
-
-	//如果数据库本身数据的类型与待插入数据的类型不一致，无法插入
-	item := db.NewItem()
-	if !util.IsTypeEqual(item, ds[0]) {
-		msg := fmt.Sprintf("数据库%s的数据的原始类型为%T，待插入数据的原始数据类型为%T，两者不符，无法插入。", db.name, item, ds[0])
-		return errors.New(msg)
-	}
-
-	return insert(db, ds)
-}
-
-func insert(db *DB, ds []Datar) error {
+//Insert 描述了向DB内插入数据的过程
+func (db *DB) Insert(data []Attributer, insertStatement string) error {
 	//启动insert事务
 	transaction, err := db.Begin()
 	if err != nil {
@@ -127,20 +110,19 @@ func insert(db *DB, ds []Datar) error {
 	defer transaction.Commit()
 
 	//为insert事务进行准备工作
-	statement := db.InsertStatement()
-	stmt, err := transaction.Prepare(statement)
+	stmt, err := transaction.Prepare(insertStatement)
 	if err != nil {
-		msg := fmt.Sprintf("%s的insert事务的准备工作失败: %s", db.name, err)
+		msg := fmt.Sprintf("%s的insert事务的准备以下insert语句时失败\n%s\n失败原因: %s", db.name, insertStatement, err)
 		return errors.New(msg)
 	}
 	defer stmt.Close()
 
 	//按行插入
-	for _, d := range ds {
-		_, err := stmt.Exec(d.Attributes())
+	for _, d := range data {
+		_, err := stmt.Exec(d.Attributes()...)
 		if err != nil {
-			attrs := fmt.Sprint(d.Attributes())
-			msg := fmt.Sprintf("%s在插入[%s]时出错: %s", db.name, attrs, err)
+			attrs := fmt.Sprint(d)
+			msg := fmt.Sprintf("%s在插入\n%s\n出错: %s", db.name, attrs, err)
 			//TODO: 直接关闭程序是否太严格了，考虑一下换成报错
 			log.Fatalln(msg)
 		}
@@ -149,21 +131,21 @@ func insert(db *DB, ds []Datar) error {
 	return nil
 }
 
-//
-func (db *DB) QueryBy(statement string) ([]interface{}, error) {
-	rows, err := db.Query(statement)
+//QueryBy 描述了从数据库中查询的过程
+func (db *DB) QueryBy(queryStatement string, newAttributes func() Attributer) ([]interface{}, error) {
+	rows, err := db.Query(queryStatement)
 	if err != nil {
-		msg := fmt.Sprintf("对%s使用%s语句查询，出现错误:%s", db.name, statement, err)
+		msg := fmt.Sprintf("对%s使用以下语句查询\n%s\n出现错误:%s", db.name, queryStatement, err)
 		return nil, errors.New(msg)
 	}
 	defer rows.Close()
 
 	result := []interface{}{}
 	for rows.Next() {
-		item := db.NewItem()
-		err := rows.Scan(item.Attributes())
+		item := newAttributes()
+		err := rows.Scan(item.Attributes()...)
 		if err != nil {
-			msg := fmt.Sprintf("对%s查询%s出来的rows进行Scan时，出错:%s", db.name, statement, err)
+			msg := fmt.Sprintf("对%s查询%s出来的rows进行Scan时，出错:%s", db.name, queryStatement, err)
 			//TODO: 直接关闭程序是否太严格了，考虑一下换成报错
 			log.Fatalln(msg)
 		}
@@ -172,25 +154,26 @@ func (db *DB) QueryBy(statement string) ([]interface{}, error) {
 
 	err = rows.Err()
 	if err != nil {
-		msg := fmt.Sprintf("对%s查询%s出来的rows，Scan完毕后，出错:%s", db.name, statement, err)
+		msg := fmt.Sprintf("对%s查询%s出来的rows，Scan完毕后，出错:%s", db.name, queryStatement, err)
 		return nil, errors.New(msg)
 	}
 
 	return result, nil
 }
 
-func createDB(filename string, c Creater) error {
+func createDB(filename string, createStatement string) error {
 	db, err := sql.Open("sqlite3", filename)
 	if err != nil {
-		return util.Err("无法创建数据库"+filename, err)
+		msg := fmt.Sprintf("无法创建%s数据库，出错原因:%s", filename, err)
+		return errors.New(msg)
 	}
 	defer db.Close()
 
-	//在db中创建一个表，并清空表中所有的行。
-	stmt := c.CreateStatement()
-	_, err = db.Exec(stmt) //数据库执行创建语句
+	_, err = db.Exec(createStatement) //数据库执行创建语句
 	if err != nil {
-		return util.Err("执行创建以下创建语句失败:"+stmt, err)
+		msg := fmt.Sprintf("在%s数据库中执行以下create语句失败，\n%s\n失败原因:%s", filename, createStatement, err)
+		return errors.New(msg)
 	}
+
 	return nil
 }
