@@ -16,20 +16,7 @@ type Depth struct {
 	Bids [][2]float64
 }
 
-//Trade 记录一个成交记录的细节
-type Trade struct {
-	Tid    int64
-	Date   int64
-	Price  float64
-	Amount float64
-	Type   string
-}
 
-func (t Trade) Attributes() (int64, int64, float64, float64, string) {
-	return t.Tid, t.Date, t.Price, t.Amount, t.Type
-}
-
-type Trades []Trade
 
 type Balance struct {
 }
