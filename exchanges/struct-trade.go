@@ -55,19 +55,19 @@ func OpenTradesDB(filename string) (*TradesDB, error) {
 	}, nil
 }
 
-func (t *TradesDB) count() (int64, error) {
+func (t *TradesDB) Len() (int64, error) {
 	stmt := "select count(tid) from raw"
 	var result int64
 
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, util.Err("*TradesDB.count(): ", err)
+		return 0, util.Err("*TradesDB.Len(): ", err)
 	}
 	return result, nil
 }
 
 //MaxTid 返回数据库中最大的tid值
 func (t *TradesDB) MaxTid() (int64, error) {
-	c, err := t.count()
+	c, err := t.Len()
 	if err != nil {
 		return 0, util.Err("*TradesDB.MaxTid(): ", err)
 	} else if c == 0 {
@@ -85,7 +85,7 @@ func (t *TradesDB) MaxTid() (int64, error) {
 
 //MinTid 返回数据库中最大的tid值
 func (t *TradesDB) MinTid() (int64, error) {
-	c, err := t.count()
+	c, err := t.Len()
 	if err != nil {
 		return 0, util.Err("*TradesDB.MinTid(): ", err)
 	} else if c == 0 {
@@ -104,7 +104,7 @@ func (t *TradesDB) MinTid() (int64, error) {
 //MaxTidNotGreaterThan 返回数据库中比参数小的tid中的最大值
 //tid通常不是连续的，甚至还有可能被交易所删除了记录，而缺上一大段区间。
 func (t *TradesDB) MaxTidNotGreaterThan(number int64) (int64, error) {
-	c, err := t.count()
+	c, err := t.Len()
 	if err != nil {
 		return 0, util.Err("*TradesDB.MaxTidNotGreaterThan(): ", err)
 	} else if c == 0 {
