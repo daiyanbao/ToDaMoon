@@ -55,6 +55,7 @@ func OpenTradesDB(filename string) (*TradesDB, error) {
 	}, nil
 }
 
+//Len 返回了数据库的长度
 func (t *TradesDB) Len() (int64, error) {
 	stmt := "select count(tid) from raw"
 	var result int64
