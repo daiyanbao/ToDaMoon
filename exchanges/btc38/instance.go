@@ -15,7 +15,9 @@ var name = "btc38"
 //BTC38 包含了btc38.com的API所需的所有数据
 type BTC38 struct {
 	*config
-	exchanges.Net
+	*exchanges.Net //REVIEW: 我为什么使用*Net
+	exchanges.TradesDBS
+	TradesDB map[string]map[string]*exchanges.TradesDB
 }
 
 type config struct {
@@ -44,8 +46,6 @@ func instance() *BTC38 {
 	//连接btc38的本人交易数据库
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
-
-	//FIXME: 添加通知接口的内容
 
 	return btc38
 }
@@ -93,7 +93,7 @@ func (c *config) check() {
 }
 
 func generateBy(c *config) *BTC38 {
-	n := exchanges.Net{
+	n := &exchanges.Net{
 		Header: genHeader(),
 	}
 	n.Start(c.MinAccessPeriodMS)
