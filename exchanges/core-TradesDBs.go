@@ -20,7 +20,7 @@ func MakeTradesDBs(dir, exchange string, markets map[string][]string) TradesDBs 
 			filename := tradesDBFileName(dir, exchange, money, coin)
 			t[money][coin], err = OpenTradesDB(filename)
 			if err != nil {
-				text := fmt.Sprintf("无法连接%s数据库。", filename)
+				text := fmt.Sprintf("无法连接%s数据库: %s", filename, err)
 				log.Fatalln(text)
 			}
 		}

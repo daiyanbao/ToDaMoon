@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	//导入sqlite3的驱动
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //Attributer 返回了struct的属性的指针位置组成的切片
@@ -170,4 +173,13 @@ func createDB(filename string, createStatement string) error {
 	}
 
 	return nil
+}
+
+//AttributerMaker 把别的类型的切片转换成[]Attributer
+func AttributerMaker(is []interface{}) []Attributer {
+	as := make([]Attributer, len(is))
+	for i, v := range is {
+		as[i] = v.(Attributer)
+	}
+	return as
 }

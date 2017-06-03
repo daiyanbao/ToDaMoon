@@ -264,6 +264,23 @@ func convertToTrades(rows []interface{}) (Trades, error) {
 	return ts, nil
 }
 
+//Insert 往TradesDB数据库中插入数据。
+func (t *TradesDB) Insert(ts Trades) error {
+	stmt := "insert into raw(tid, date, price, amount, type) values(?,?,?,?,?)"
+
+	//go语言不会自动转换切片，要手动转换
+	as := make([]database.Attributer, len(ts))
+	for i, v := range ts {
+		as[i] = database.Attributer(v)
+	}
+
+	if err := t.db.Insert(as, stmt); err != nil {
+		return util.Err("*TradesDB.Insert(): ", err)
+	}
+
+	return nil
+}
+
 //Trades 是*Trade的切片
 //因为会有很多关于[]*Trade的操作，所以，设置了这个方法。
 type Trades []*Trade

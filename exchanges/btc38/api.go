@@ -24,8 +24,8 @@ const (
 )
 
 //Ticker 可以返回coin的ticker信息
-func (b *BTC38) Ticker(coin, money string) (*ec.Ticker, error) {
-	rawData, err := b.getTickerRawData(coin, money)
+func (b *BTC38) Ticker(money, coin string) (*ec.Ticker, error) {
+	rawData, err := b.getTickerRawData(money, coin)
 	if err != nil {
 		return nil, err
 	}
@@ -60,16 +60,16 @@ func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
 }
 
 // Ticker returns okcoin's latest ticker data
-func (b *BTC38) getTickerRawData(coin, money string) ([]byte, error) {
-	path := tickerURLMaker(coin, money)
+func (b *BTC38) getTickerRawData(money, coin string) ([]byte, error) {
+	path := tickerURLMaker(money, coin)
 	return b.Get(path)
 }
 
-func tickerURLMaker(coin, money string) string {
-	return urlMaker(tickerURL, coin, money)
+func tickerURLMaker(money, coin string) string {
+	return urlMaker(tickerURL, money, coin)
 }
 
-func urlMaker(URL string, coin, money string) string {
+func urlMaker(URL string, money, coin string) string {
 	v := url.Values{}
 	v.Set("c", coin)
 	v.Set("mk_type", money)
@@ -78,8 +78,8 @@ func urlMaker(URL string, coin, money string) string {
 }
 
 //Depth 是反馈市场深度信息
-func (b *BTC38) Depth(coin, money string) (*ec.Depth, error) {
-	rawData, err := b.getDepthRawData(coin, money)
+func (b *BTC38) Depth(money, coin string) (*ec.Depth, error) {
+	rawData, err := b.getDepthRawData(money, coin)
 	if err != nil {
 		return nil, err
 	}
@@ -94,19 +94,19 @@ func (b *BTC38) Depth(coin, money string) (*ec.Depth, error) {
 }
 
 // Ticker returns okcoin's latest ticker data
-func (b *BTC38) getDepthRawData(coin, money string) ([]byte, error) {
-	path := depthURLMaker(coin, money)
+func (b *BTC38) getDepthRawData(money, coin string) ([]byte, error) {
+	path := depthURLMaker(money, coin)
 	return b.Get(path)
 }
 
-func depthURLMaker(coin, money string) string {
-	return urlMaker(depthURL, coin, money)
+func depthURLMaker(money, coin string) string {
+	return urlMaker(depthURL, money, coin)
 }
 
 //Trades 返回市场的交易记录
 //当tid<=0时，返回最新的30条记录
-func (b *BTC38) Trades(coin, money string, tid int64) (ec.Trades, error) {
-	rawData, err := b.getTradesRawData(coin, money, tid)
+func (b *BTC38) Trades(money, coin string, tid int64) (ec.Trades, error) {
+	rawData, err := b.getTradesRawData(money, coin, tid)
 	if err != nil {
 		return nil, err
 	}
@@ -120,13 +120,13 @@ func (b *BTC38) Trades(coin, money string, tid int64) (ec.Trades, error) {
 	return resp, nil
 }
 
-func (b *BTC38) getTradesRawData(coin, money string, tid int64) ([]byte, error) {
-	path := tradesURLMaker(coin, money, tid)
+func (b *BTC38) getTradesRawData(money, coin string, tid int64) ([]byte, error) {
+	path := tradesURLMaker(money, coin, tid)
 	return b.Get(path)
 }
 
-func tradesURLMaker(coin, money string, tid int64) string {
-	path := urlMaker(tradesURL, coin, money)
+func tradesURLMaker(money, coin string, tid int64) string {
+	path := urlMaker(tradesURL, money, coin)
 	if tid <= 0 {
 		return path
 	}
@@ -189,8 +189,8 @@ const (
 
 //Trade 下单交易
 //TODO: 把money改成枚举类型，所有的
-func (b *BTC38) Trade(ot orderType, coin, money string, price, amount float64) (int, error) {
-	rawData, err := b.getTradeRawData(ot, coin, money, price, amount)
+func (b *BTC38) Trade(ot orderType, money, coin string, price, amount float64) (int, error) {
+	rawData, err := b.getTradeRawData(ot, money, coin, price, amount)
 	if err != nil {
 		return 0, err
 	}
@@ -198,12 +198,12 @@ func (b *BTC38) Trade(ot orderType, coin, money string, price, amount float64) (
 	return handleTradeRawData(rawData)
 }
 
-func (b *BTC38) getTradeRawData(ot orderType, coin, money string, price, amount float64) ([]byte, error) {
-	body := b.tradeBodyMaker(ot, coin, money, price, amount)
+func (b *BTC38) getTradeRawData(ot orderType, money, coin string, price, amount float64) ([]byte, error) {
+	body := b.tradeBodyMaker(ot, money, coin, price, amount)
 	return b.Post(submitOrderURL, body)
 }
 
-func (b *BTC38) tradeBodyMaker(ot orderType, coin, money string, price, amount float64) io.Reader {
+func (b *BTC38) tradeBodyMaker(ot orderType, money, coin string, price, amount float64) io.Reader {
 	v := url.Values{}
 	v.Set("key", b.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -238,8 +238,8 @@ func handleTradeRawData(rawData []byte) (int, error) {
 
 //CancelOrder 下单交易
 //TODO: 把money改成枚举类型，所有的
-func (b *BTC38) CancelOrder(coin, money string, orderID int) (bool, error) {
-	rawData, err := b.getCancelOrderRawData(coin, money, orderID)
+func (b *BTC38) CancelOrder(money, coin string, orderID int) (bool, error) {
+	rawData, err := b.getCancelOrderRawData(money, coin, orderID)
 	if err != nil {
 		return false, err
 	}
@@ -247,12 +247,12 @@ func (b *BTC38) CancelOrder(coin, money string, orderID int) (bool, error) {
 	return handleCancelOrderRawData(rawData)
 }
 
-func (b *BTC38) getCancelOrderRawData(coin, money string, orderID int) ([]byte, error) {
-	body := b.cancelOrderBodyMaker(coin, money, orderID)
+func (b *BTC38) getCancelOrderRawData(money, coin string, orderID int) ([]byte, error) {
+	body := b.cancelOrderBodyMaker(money, coin, orderID)
 	return b.Post(cancelOrderURL, body)
 }
 
-func (b *BTC38) cancelOrderBodyMaker(coin, money string, orderID int) io.Reader {
+func (b *BTC38) cancelOrderBodyMaker(money, coin string, orderID int) io.Reader {
 	v := url.Values{}
 	v.Set("key", b.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -290,8 +290,8 @@ type order struct {
 
 //getMyOrders 下单交易
 //TODO: 把money改成枚举类型，所有的
-func (b *BTC38) getMyOrders(coin, money string) ([]order, error) {
-	rawData, err := b.getMyOrdersRawData(coin, money)
+func (b *BTC38) getMyOrders(money, coin string) ([]order, error) {
+	rawData, err := b.getMyOrdersRawData(money, coin)
 	if err != nil {
 		return nil, err
 	}
@@ -299,12 +299,12 @@ func (b *BTC38) getMyOrders(coin, money string) ([]order, error) {
 	return handleMyOrdersRawData(rawData)
 }
 
-func (b *BTC38) getMyOrdersRawData(coin, money string) ([]byte, error) {
-	body := b.myOrdersBodyMaker(coin, money)
+func (b *BTC38) getMyOrdersRawData(money, coin string) ([]byte, error) {
+	body := b.myOrdersBodyMaker(money, coin)
 	return b.Post(getOrderListURL, body)
 }
 
-func (b *BTC38) myOrdersBodyMaker(coin, money string) io.Reader {
+func (b *BTC38) myOrdersBodyMaker(money, coin string) io.Reader {
 	v := url.Values{}
 	v.Set("key", b.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -345,8 +345,8 @@ type myTrade struct {
 
 //getMyTrades 下单交易
 //TODO: 把money改成枚举类型，所有的
-func (b *BTC38) getMyTrades(coin, money string, page int) ([]myTrade, error) {
-	rawData, err := b.getMyTradesRawData(coin, money, page)
+func (b *BTC38) getMyTrades(money, coin string, page int) ([]myTrade, error) {
+	rawData, err := b.getMyTradesRawData(money, coin, page)
 	if err != nil {
 		return nil, err
 	}
@@ -354,12 +354,12 @@ func (b *BTC38) getMyTrades(coin, money string, page int) ([]myTrade, error) {
 	return handleMyTradesRawData(rawData)
 }
 
-func (b *BTC38) getMyTradesRawData(coin, money string, page int) ([]byte, error) {
-	body := b.myTradesBodyMaker(coin, money, page)
+func (b *BTC38) getMyTradesRawData(money, coin string, page int) ([]byte, error) {
+	body := b.myTradesBodyMaker(money, coin, page)
 	return b.Post(getMyTradeListURL, body)
 }
 
-func (b *BTC38) myTradesBodyMaker(coin, money string, page int) io.Reader {
+func (b *BTC38) myTradesBodyMaker(money, coin string, page int) io.Reader {
 	v := url.Values{}
 	v.Set("key", b.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())

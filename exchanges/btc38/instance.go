@@ -94,7 +94,7 @@ func generateBy(c *config) *BTC38 {
 		Header: genHeader(),
 	}
 	n.Start(c.MinAccessPeriodMS)
-
+	//FIXME: 好像有点问题
 	tdb := exchanges.MakeTradesDBs(c.DBDir, c.Name, c.Markets)
 
 	btc38 = &BTC38{config: c,
