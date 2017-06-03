@@ -17,7 +17,6 @@ type BTC38 struct {
 	*config
 	*exchanges.Net //REVIEW: 我为什么使用*Net
 	exchanges.TradesDBs
-	TradesDB map[string]map[string]*exchanges.TradesDB
 }
 
 type config struct {
@@ -41,11 +40,9 @@ func instance() *BTC38 {
 
 	//生成btc38实例
 	btc38 = generateBy(c)
-	//连接btc38的全局交易数据库
+	//TODO: 连接btc38的本人交易数据库
 
-	//连接btc38的本人交易数据库
-
-	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
+	//TODO: 获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
 
 	return btc38
 }
@@ -98,8 +95,11 @@ func generateBy(c *config) *BTC38 {
 	}
 	n.Start(c.MinAccessPeriodMS)
 
+	tdb := exchanges.MakeTradesDBs(c.DBDir, c.Name, c.Markets)
+
 	btc38 = &BTC38{config: c,
-		Net: n,
+		Net:       n,
+		TradesDBs: tdb,
 	}
 	return btc38
 }
