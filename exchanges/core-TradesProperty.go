@@ -89,6 +89,7 @@ func updateDBAndProperty(e Exchanger, money, coin string, db *TradesDB) observer
 				p.Update(th)
 				//FIXME: 此处应该是通过channel发送到另外一个goroutin，让那个goroutin来管理数据什么时候存入数据库。
 				//那个goroutine不订阅这个property的原因是因为，我也不知道
+				//FIXME: 我觉得我这个地方的思路不对，要重写
 				thdb = append(thdb, th...)
 			}
 		}
