@@ -2,5 +2,6 @@
 package btc38
 
 func (b *BTC38) allCnyCoins() []string {
+
 	return nil
 }
