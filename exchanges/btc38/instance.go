@@ -45,6 +45,8 @@ func instance() *BTC38 {
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
 
+	//FIXME: 添加通知接口的内容
+
 	return btc38
 }
 
@@ -81,7 +83,7 @@ func (c *config) check() {
 
 	myIP, err := util.ExternalIP()
 	if err != nil {
-		log.Fatal("无法获取本机外部IP")
+		log.Fatal("无法获取本机的外网IP")
 	}
 	if myIP != c.IP {
 		text := fmt.Sprintf("本机外网IP地址%s没有在BTC38网注册", myIP)

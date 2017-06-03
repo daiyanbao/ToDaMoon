@@ -1,7 +1,7 @@
 package Interface
 
-//Notify 是通知类型的接口
-type Notify interface {
+//Notifier 是通知类型的接口
+type Notifier interface {
 	//反馈程序运行状态。
 	Debug(string)
 	Warning(string)

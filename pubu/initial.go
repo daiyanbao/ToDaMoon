@@ -14,7 +14,7 @@ var pbc *client
 var once sync.Once
 
 //New 返回一个单例的*client客户端
-func New() Interface.Notify {
+func New() Interface.Notifier {
 	once.Do(
 		func() {
 			cfg, err := ini.Load("./pubu.ini")
