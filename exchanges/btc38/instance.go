@@ -16,7 +16,7 @@ var name = "btc38"
 type BTC38 struct {
 	*config
 	*exchanges.Net //REVIEW: 我为什么使用*Net
-	exchanges.TradesDBS
+	exchanges.TradesDBs
 	TradesDB map[string]map[string]*exchanges.TradesDB
 }
 
