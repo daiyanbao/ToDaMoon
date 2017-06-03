@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-ini/ini"
+	"github.com/BurntSushi/toml"
 )
 
 var btc38 *BTC38
@@ -49,29 +49,20 @@ func instance() *BTC38 {
 }
 
 func getConfig() *config {
-	//TODO: 把配置文件改成toml格式的
+	filename := getConfigFileName()
 
-	//获取cfg文件
-	iniName := getIniFileName()
-	iniFile, err := ini.Load(iniName)
-	if err != nil {
-		msg := fmt.Sprintf("无法加载%s/%s: %s", util.PWD(), iniName, err)
-		log.Fatalf(msg)
-	}
-
-	//生成配置对象
 	cfg := new(config)
-	if err := iniFile.Section(name).MapTo(cfg); err != nil {
-		msg := fmt.Sprintf("无法Map设置的参数内容到%s的配置对象", name)
-		log.Fatalln(msg, err)
+	if _, err := toml.DecodeFile(filename, cfg); err != nil {
+		msg := fmt.Sprintf("无法加载%s/%s，并Decode到cfg变量: %s", util.PWD(), filename, err)
+		log.Fatalf(msg)
 	}
 
 	cfg.check()
 	return cfg
 }
 
-func getIniFileName() string {
-	return fmt.Sprintf("%s.ini", name)
+func getConfigFileName() string {
+	return fmt.Sprintf("%s.toml", name)
 }
 
 // Check Config for setting mistakes
