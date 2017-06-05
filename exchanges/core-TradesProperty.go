@@ -54,18 +54,15 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 			continue
 		}
 
-		if len(th) == 0 {
-			time.Sleep(sleepTime)
-			continue
+		if len(th) > 0 {
+			p.Update(th)
+
+			if err := db.Insert(th); err != nil {
+				msg := fmt.Sprintf("插入%s交易所的%s市场的%s的历史交易数据失败：%s", e.Name, money, coin, err)
+				log.Fatalln(msg)
+			}
 		}
-
-		p.Update(th)
-
-		if err := db.Insert(th); err != nil {
-			msg := fmt.Sprintf("插入%s交易所的%s市场的%s的历史交易数据失败：%s", e.Name, money, coin, err)
-			log.Fatalln(msg)
-		}
-
+		//REVIEW: 无法动态调整sleep的时间，是一个非常大的问题。特别是当exchange中的coin的种类特别多的时候。
 		time.Sleep(sleepTime)
 	}
 }
