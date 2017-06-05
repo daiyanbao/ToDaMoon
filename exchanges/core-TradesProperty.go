@@ -28,7 +28,7 @@ func makePropertys(e Exchanger, tdbs TradesDBs) TradesProperty {
 	}
 }
 
-func updateDB(e Exchanger, money, coin string, db *TradesDB) {
+func updateDBToLastest(e Exchanger, money, coin string, db *TradesDB) {
 	maxTid, err := db.MaxTid()
 	if err != nil {
 		msg := fmt.Sprintf("updataDB(): 无法获取%s数据库的MaxTid: %s", db.Name(), err)
