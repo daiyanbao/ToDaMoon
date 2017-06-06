@@ -18,11 +18,12 @@ type TradeSubject struct {
 	UpdateCycleCh chan<- time.Duration
 }
 
-//TradesProperty 是exchnge的trades监听属性
-type TradesProperty map[string]map[string]TradeSubject
+//TradesSubject 是exchnge的trades监听属性
+type TradesSubject map[string]map[string]TradeSubject
 
-func makeProperties(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) TradesProperty {
-	tp := make(TradesProperty)
+//MakeSubjectes 返回了所尊coin的最新订阅消息
+func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) TradesSubject {
+	tp := make(TradesSubject)
 	wg := &sync.WaitGroup{}
 	for money, coinDBs := range tdbs {
 		tp[money] = make(map[string]TradeSubject)

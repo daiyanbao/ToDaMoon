@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 
+	"time"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -17,6 +19,7 @@ type BTC38 struct {
 	*config
 	*exchanges.Net //REVIEW: 我为什么使用*Net
 	exchanges.TradesDBs
+	exchanges.TradesSubject
 }
 
 type config struct {
@@ -40,10 +43,14 @@ func instance() *BTC38 {
 
 	//生成btc38实例
 	btc38 = generateBy(c)
-	//TODO: 连接btc38的本人交易数据库
 
-	//TODO: 获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
+	//连接btc38的本人交易数据库
+	btc38.TradesDBs = exchanges.MakeTradesDBs(c.DBDir, c.Name, c.Markets)
 
+	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
+	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*50)
+
+	//TODO: 修改每个tradesSubject的获取时间。
 	return btc38
 }
 
@@ -109,4 +116,9 @@ func genHeader() map[string]string {
 	header["Content-Type"] = "application/x-www-form-urlencoded"
 	header["User-Agent"] = "Mozilla/4.0"
 	return header
+}
+
+//Name 返回BTC38的name
+func (b *BTC38) Name() string {
+	return b.config.Name
 }
