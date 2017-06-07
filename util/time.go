@@ -22,6 +22,9 @@ func WaitFunc(checkCycle time.Duration, name string) (chan<- time.Duration, func
 	updateCycle := checkCycle
 
 	return cycleCh, func() {
+		//TODO: 删除此处内容
+		log.Println("新的wait()", name)
+
 		for beginTime.Add(updateCycle).After(time.Now()) {
 			select {
 			case updateCycle = <-cycleCh:
