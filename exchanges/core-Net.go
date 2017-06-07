@@ -65,7 +65,6 @@ func (n *Net) post(path string, body io.Reader) ([]byte, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
 	return handleResp(resp)
 }
 
@@ -76,11 +75,11 @@ func (n *Net) get(url string) ([]byte, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
 	return handleResp(resp)
 }
 
 func handleResp(r *http.Response) ([]byte, error) {
+	defer r.Body.Close()
 	if r.StatusCode/100 != 2 {
 		text := fmt.Sprintf("响应码是%d\n", r.StatusCode)
 		return nil, errors.New(text)
@@ -101,7 +100,8 @@ func (n *Net) Start(waitMS int) {
 	waitTime := time.Millisecond * time.Duration(waitMS)
 
 	go func() {
-		beginTime := time.Now()
+		sleep := util.SleepFunc(waitTime)
+
 		for ask := range n.Ask {
 			switch ask.Type {
 			case GET:
@@ -113,10 +113,12 @@ func (n *Net) Start(waitMS int) {
 			default:
 				log.Println("错误的请求类型")
 			}
-			beginTime = util.HoldOn(waitTime, beginTime)
+
+			sleep()
 		}
 	}()
 }
+
 func (n *Net) ask(t askType, path string, body io.Reader) ([]byte, error) {
 	ansChan := make(chan Answer)
 	n.Ask <- Ask{Type: t,

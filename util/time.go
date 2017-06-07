@@ -42,7 +42,7 @@ func WaitFunc(checkCycle time.Duration) (chan<- time.Duration, func()) {
 func SleepFunc(duration time.Duration) func() {
 	beginTime := time.Now()
 	return func() {
-		//无需判断，如果Sleep的时间为负，是不会Sleep的。
+		//无需判断，如果Sleep的时间为负，则不会Sleep。
 		time.Sleep(duration - time.Since(beginTime))
 		beginTime = time.Now()
 	}

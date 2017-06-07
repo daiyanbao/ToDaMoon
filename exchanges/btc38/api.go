@@ -59,7 +59,6 @@ func (b *BTC38) allTicker(money string) (map[string]*ec.Ticker, error) {
 	return result, nil
 }
 
-// Ticker returns okcoin's latest ticker data
 func (b *BTC38) getTickerRawData(money, coin string) ([]byte, error) {
 	path := tickerURLMaker(money, coin)
 	return b.Get(path)
@@ -93,7 +92,6 @@ func (b *BTC38) Depth(money, coin string) (*ec.Depth, error) {
 	return &resp, nil
 }
 
-// Ticker returns okcoin's latest ticker data
 func (b *BTC38) getDepthRawData(money, coin string) ([]byte, error) {
 	path := depthURLMaker(money, coin)
 	return b.Get(path)
@@ -188,13 +186,12 @@ const (
 )
 
 //Trade 下单交易
-//TODO: 把money改成枚举类型，所有的
 func (b *BTC38) Trade(ot orderType, money, coin string, price, amount float64) (int, error) {
 	rawData, err := b.getTradeRawData(ot, money, coin, price, amount)
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println(string(rawData)) //TODO: 删除此处内容
+
 	return handleTradeRawData(rawData)
 }
 
@@ -218,7 +215,6 @@ func (b *BTC38) tradeBodyMaker(ot orderType, money, coin string, price, amount f
 	v.Set("amount", strconv.FormatFloat(amount, 'f', -1, 64))
 	encoded := v.Encode()
 
-	fmt.Println("order body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
 
@@ -237,7 +233,6 @@ func handleTradeRawData(rawData []byte) (int, error) {
 }
 
 //CancelOrder 下单交易
-//TODO: 把money改成枚举类型，所有的
 func (b *BTC38) CancelOrder(money, coin string, orderID int) (bool, error) {
 	rawData, err := b.getCancelOrderRawData(money, coin, orderID)
 	if err != nil {
@@ -265,7 +260,6 @@ func (b *BTC38) cancelOrderBodyMaker(money, coin string, orderID int) io.Reader 
 	v.Set("coinname", coin)
 	encoded := v.Encode()
 
-	fmt.Println("order body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
 
@@ -289,7 +283,6 @@ type order struct {
 }
 
 //getMyOrders 下单交易
-//TODO: 把money改成枚举类型，所有的
 func (b *BTC38) getMyOrders(money, coin string) ([]order, error) {
 	rawData, err := b.getMyOrdersRawData(money, coin)
 	if err != nil {
@@ -316,15 +309,11 @@ func (b *BTC38) myOrdersBodyMaker(money, coin string) io.Reader {
 	v.Set("coinname", coin)
 	encoded := v.Encode()
 
-	fmt.Println("orders body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
 
 func handleMyOrdersRawData(rawData []byte) ([]order, error) {
 	resp := []order{}
-
-	//TODO: 删除此处内容
-	fmt.Println(string(rawData))
 
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
@@ -344,7 +333,6 @@ type myTrade struct {
 }
 
 //getMyTrades 下单交易
-//TODO: 把money改成枚举类型，所有的
 func (b *BTC38) getMyTrades(money, coin string, page int) ([]myTrade, error) {
 	rawData, err := b.getMyTradesRawData(money, coin, page)
 	if err != nil {
@@ -372,15 +360,11 @@ func (b *BTC38) myTradesBodyMaker(money, coin string, page int) io.Reader {
 	v.Set("page", strconv.Itoa(page))
 	encoded := v.Encode()
 
-	fmt.Println("myTrades body:", encoded) //TODO: 删除此处内容
 	return strings.NewReader(encoded)
 }
 
 func handleMyTradesRawData(rawData []byte) ([]myTrade, error) {
 	resp := []myTrade{}
-
-	//TODO: 删除此处内容
-	fmt.Println(string(rawData))
 
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
