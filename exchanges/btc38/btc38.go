@@ -17,6 +17,22 @@ func Run() exchanges.Exchanger {
 	notify = pubu.New()
 	once.Do(build)
 
+	go testBTC38()
+
+	//以上是测试内容
+	return btc38
+}
+
+func build() {
+	//生成一个btc38的实例
+	btc38 = instance()
+
+	//执行btc38的各项任务
+	btc38.checkNewCoin()
+	btc38.watching()
+}
+
+func testBTC38() {
 	//以下是测试内容
 	fmt.Println("=============================================================")
 	b3Ticker, err := btc38.Ticker("cny", "btc")
@@ -127,16 +143,4 @@ func Run() exchanges.Exchanger {
 			fmt.Println(t)
 		}
 	}
-
-	//以上是测试内容
-	return btc38
-}
-
-func build() {
-	//生成一个btc38的实例
-	btc38 = instance()
-
-	//执行btc38的各项任务
-	btc38.checkNewCoin()
-	btc38.watching()
 }
