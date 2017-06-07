@@ -46,6 +46,8 @@ func makePropertyAndSaveToDB(e Exchanger, money, coin string, db *TradesDB, chec
 	th := Trades{}
 	p := observer.NewProperty(th)
 	ch := updatePropertyAndSaveToDB(e, money, coin, p, db, checkCycle, updateCycle)
+	log.Printf("已经创建了%s-%s-%s的监听属性", e.Name(), money, coin)
+
 	wg.Done()
 	return TradeSubject{
 		Property:      p,
@@ -87,7 +89,9 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 			wait()
 		}
 	}()
+
 	waitCh <- updateCycle
+
 	return waitCh
 }
 

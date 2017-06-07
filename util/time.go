@@ -11,31 +11,40 @@ func DateOf(t int64) string {
 }
 
 //WaitFunc 返回一个可以使用通道修改休眠时间的等待函数
-//updaetCycle的修改会立即生效，不用等到此updateCycle结束。
-//例如：当100秒的updateCycle时间已过51秒时，把updateCycle修改为50秒，程序会立刻结束。不用等到100秒才结束。
-//例如：100秒的updateCycle在结束前，把updateCycle修改为200秒，程序会立即生效。
+//updaetCycle的修改会立即生效，不用等到此waitDuration结束。
+//例如：当100秒的waitDuration时间已过51秒时，把waitDuration修改为50秒，程序会立刻结束。不用等到100秒才结束。
+//例如：100秒的waitDuration在结束前，把waitDuration修改为200秒，程序会立即生效。
 //checkCycle是检查是否到期的时间段，也是最小等待时间段。
-//没有修改updateCycle的时候，程序的等待时间是checkCycle×int(updateCycle/checkCycle+1)
+//没有修改waitDuration的时候，程序的等待时间是checkCycle×int(waitDuration/checkCycle+1)
 func WaitFunc(checkCycle time.Duration, name string) (chan<- time.Duration, func()) {
-	cycleCh := make(chan time.Duration, 3)
+	cycleCh := make(chan time.Duration, 7)
 	beginTime := time.Now()
-	updateCycle := checkCycle
+	waitDuration := checkCycle
 
 	return cycleCh, func() {
-		//TODO: 删除此处内容
-		log.Println("新的wait()", name)
 
-		for beginTime.Add(updateCycle).After(time.Now()) {
+		for {
 			select {
-			case updateCycle = <-cycleCh:
-				if updateCycle <= checkCycle {
-					log.Println("WARNING: updateCycle<=checkCycle，程序会按照checkCycle来等待。")
+			case waitDuration = <-cycleCh:
+				if waitDuration <= checkCycle {
+					log.Println("WARNING: waitDuration<=checkCycle，程序很有可能会按照checkCycle来等待。")
 				}
-				log.Printf("%s的wait的updateCycle已经修改为%s", name, updateCycle)
+				log.Printf("%s的waitDuration已经修改为%s", name, waitDuration)
 			default:
 			}
-			time.Sleep(checkCycle)
+
+			//把判断是否结束的语句，放在最后，很有必要。
+			//因为很有可能，wait()的调用周期总是大于waitDuration
+			//而导致总是无法进入for循环，来改变waitDuration的值
+			//特别是第一个waitDuration的值为checkCycle，总是比较小的。
+
+			if time.Now().Before(beginTime.Add(waitDuration)) {
+				time.Sleep(checkCycle)
+			} else {
+				break
+			}
 		}
+
 		beginTime = time.Now()
 	}
 }

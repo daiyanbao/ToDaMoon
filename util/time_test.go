@@ -9,10 +9,9 @@ func Test_WaitFunc(t *testing.T) {
 	t.Log("这个测试很花时间。。。")
 
 	beginTime := time.Now()
-	t.Log(beginTime)
 	checkCycle := time.Millisecond * 100
 
-	waitCh, wait := WaitFunc(checkCycle)
+	waitCh, wait := WaitFunc(checkCycle, "Test_WaitFunc")
 
 	wait()
 	t.Log(time.Now())
