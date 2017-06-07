@@ -23,7 +23,7 @@ type TradeSubject struct {
 type TradesSubject map[string]map[string]TradeSubject
 
 //MakeSubjectes 返回了所尊coin的最新订阅消息
-func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) TradesSubject {
+func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle, updateCycle time.Duration) TradesSubject {
 	log.Printf("开始创建%s的监听属性", e.Name())
 	tp := make(TradesSubject)
 	wg := &sync.WaitGroup{}
@@ -31,7 +31,7 @@ func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) Trades
 		tp[money] = make(map[string]TradeSubject)
 		for coin, db := range coinDBs {
 			wg.Add(1)
-			tp[money][coin] = makePropertyAndSaveToDB(e, money, coin, db, checkCycle, wg)
+			tp[money][coin] = makePropertyAndSaveToDB(e, money, coin, db, checkCycle, updateCycle, wg)
 		}
 	}
 
@@ -42,10 +42,10 @@ func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) Trades
 	return tp
 }
 
-func makePropertyAndSaveToDB(e Exchanger, money, coin string, db *TradesDB, checkCycle time.Duration, wg *sync.WaitGroup) TradeSubject {
+func makePropertyAndSaveToDB(e Exchanger, money, coin string, db *TradesDB, checkCycle, updateCycle time.Duration, wg *sync.WaitGroup) TradeSubject {
 	th := Trades{}
 	p := observer.NewProperty(th)
-	ch := updatePropertyAndSaveToDB(e, money, coin, p, db, checkCycle)
+	ch := updatePropertyAndSaveToDB(e, money, coin, p, db, checkCycle, updateCycle)
 	wg.Done()
 	return TradeSubject{
 		Property:      p,
@@ -53,7 +53,7 @@ func makePropertyAndSaveToDB(e Exchanger, money, coin string, db *TradesDB, chec
 	}
 }
 
-func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Property, db *TradesDB, checkCycle time.Duration) chan<- time.Duration {
+func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Property, db *TradesDB, checkCycle, updateCycle time.Duration) chan<- time.Duration {
 	maxTid, err := db.MaxTid()
 	if err != nil {
 		msg := fmt.Sprintf("updatePropertyAndSaveToDB(): 无法获取%s数据库的MaxTid: %s", db.Name(), err)
@@ -87,7 +87,7 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 			wait()
 		}
 	}()
-
+	waitCh <- updateCycle
 	return waitCh
 }
 

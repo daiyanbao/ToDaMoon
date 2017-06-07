@@ -19,15 +19,16 @@ var (
 )
 
 func main() {
+	ver := Version + "." + BuildNumber
 	if len(os.Args) > 1 && (os.Args[1] == "version" || os.Args[1] == "v") {
-		fmt.Println("Version: ", Version+"."+BuildNumber)
+		fmt.Println("Version: ", ver)
 		fmt.Println("Time:    ", BuildTime)
 		fmt.Println("GitHash: ", GitHash)
 		return
 	}
 
-	log.Println("LAUNCH, Version ", Version+"."+BuildNumber)
-	defer log.Println("LANDED, Version ", Version+"."+BuildNumber)
+	log.Println("======= LAUNCH, Version ", ver, "=======")
+	defer log.Println("======= LANDED, Version ", ver, "=======")
 
 	apollo.Launch()
 }

@@ -45,9 +45,7 @@ func instance() *BTC38 {
 	btc38 = generateBy(c)
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
-	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*100)
-	//修改了Property的获取周期。
-	btc38.TradesSubject.ChangeUpdateCycleTo(time.Minute)
+	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*100, time.Minute)
 
 	return btc38
 }
