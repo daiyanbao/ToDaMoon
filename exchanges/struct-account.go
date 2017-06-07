@@ -1,7 +1,7 @@
 package exchanges
 
-//Balance 是用户的账户
-type Balance struct {
+//Account 是用户的账户
+type Account struct {
 	Coins    map[string]CoinStatus
 	TotalCNY float64
 }
