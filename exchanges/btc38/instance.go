@@ -5,7 +5,6 @@ import (
 	"ToDaMoon/util"
 	"fmt"
 	"log"
-
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -18,8 +17,8 @@ var name = "btc38"
 type BTC38 struct {
 	*config
 	*exchanges.Net //REVIEW: 我为什么使用*Net
-	*exchanges.TradesDBs
-	*exchanges.TradesSubject
+	exchanges.TradesDBs
+	exchanges.TradesSubject
 	*exchanges.Account
 }
 
