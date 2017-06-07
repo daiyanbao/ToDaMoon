@@ -34,7 +34,7 @@ func build() {
 
 func testBTC38() {
 	//以下是测试内容
-	fmt.Println("==测试btc38.Ticker()=====================================")
+	fmt.Println("==测试btc38.Ticker()==")
 	b3Ticker, err := btc38.Ticker("cny", "btc")
 	if err != nil {
 		fmt.Println("BTC38.com BTC Ticker Error:", err)
@@ -42,7 +42,7 @@ func testBTC38() {
 		fmt.Println("BTC38.com BTC Ticker", b3Ticker)
 	}
 
-	fmt.Println("==测试btc38.allTicker()==================================")
+	fmt.Println("==测试btc38.allTicker()==")
 	b3All, err := btc38.allTicker("cny")
 	if err != nil {
 		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
