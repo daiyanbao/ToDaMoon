@@ -59,7 +59,7 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 		msg := fmt.Sprintf("updatePropertyAndSaveToDB(): 无法获取%s数据库的MaxTid: %s", db.Name(), err)
 		log.Fatalln(msg)
 	}
-	name := fmt.Sprintf("%s的Property", e.Name())
+	name := fmt.Sprintf("%s的%s的%s的Trade的Property", e.Name(), money, coin)
 	waitCh, wait := util.WaitFunc(checkCycle, name)
 
 	go func() {
