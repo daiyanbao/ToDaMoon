@@ -16,7 +16,7 @@ var name = "btc38"
 //BTC38 包含了btc38.com的API所需的所有数据
 type BTC38 struct {
 	*config
-	*exchanges.Net //REVIEW: 我为什么使用*Net
+	*exchanges.Net
 	exchanges.TradesDBs
 	exchanges.TradesSubject
 	*exchanges.Account
@@ -50,7 +50,7 @@ func instance() *BTC38 {
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
 	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*50)
 
-	//TODO: 修改每个tradesSubject的获取时间。
+	btc38.TradesSubject.ChangeUpdateCycleTo(time.Minute)
 
 	return btc38
 }
