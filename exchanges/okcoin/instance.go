@@ -1,25 +1,25 @@
-package btc38
+package okcoin
 
 import (
 	"ToDaMoon/exchanges"
 	"ToDaMoon/util"
 	"fmt"
 	"log"
+
 	"time"
 
 	"github.com/BurntSushi/toml"
 )
 
-var btc38 *BTC38
-var name = "btc38"
+var okcoin *OKCoin
+var name = "okcoin"
 
-//BTC38 包含了btc38.com的API所需的所有数据
-type BTC38 struct {
+//OKCoin 包含了okcoin.cn的API所需的所有数据
+type OKCoin struct {
 	*config
-	*exchanges.Net
+	*exchanges.Net //REVIEW: 我为什么使用*Net
 	exchanges.TradesDBs
 	exchanges.TradesSubject
-	*exchanges.Account
 }
 
 type config struct {
@@ -28,7 +28,6 @@ type config struct {
 	MinAccessPeriodMS int    //两次API访问的最小间隔时间，单位为毫秒
 	CoinPeriodS       int    //查询某一个币种最新交易记录的时间间隔，单位为秒
 	IP                string //本机的公网ip，btc38要求访问API的公网ip在网站上注册过。
-	ID                int
 	Name              string
 	PublicKey         string
 	SecretKey         string
@@ -37,19 +36,18 @@ type config struct {
 }
 
 //instance 返回一个btc38的单例
-func instance() *BTC38 {
+func instance() *OKCoin {
 	//读取配置文件
 	c := getConfig()
 
 	//生成btc38实例
-	btc38 = generateBy(c)
+	okcoin = generateBy(c)
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
-	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*500)
-	//修改了Property的获取周期。
-	btc38.TradesSubject.ChangeUpdateCycleTo(time.Minute)
+	okcoin.TradesSubject = exchanges.MakeSubjectes(okcoin, okcoin.TradesDBs, time.Millisecond*50)
 
-	return btc38
+	//TODO: 修改每个tradesSubject的获取时间。
+	return okcoin
 }
 
 func getConfig() *config {
@@ -94,7 +92,7 @@ func (c *config) check() {
 	}
 }
 
-func generateBy(c *config) *BTC38 {
+func generateBy(c *config) *OKCoin {
 	n := &exchanges.Net{
 		Header: genHeader(),
 	}
@@ -102,11 +100,11 @@ func generateBy(c *config) *BTC38 {
 	//FIXME: 好像有点问题
 	tdb := exchanges.MakeTradesDBs(c.DBDir, c.Name, c.Markets)
 
-	btc38 = &BTC38{config: c,
+	okcoin = &OKCoin{config: c,
 		Net:       n,
 		TradesDBs: tdb,
 	}
-	return btc38
+	return okcoin
 }
 
 func genHeader() map[string]string {
@@ -117,6 +115,6 @@ func genHeader() map[string]string {
 }
 
 //Name 返回BTC38的name
-func (b *BTC38) Name() string {
+func (b *OKCoin) Name() string {
 	return b.config.Name
 }
