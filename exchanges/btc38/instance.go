@@ -18,8 +18,9 @@ var name = "btc38"
 type BTC38 struct {
 	*config
 	*exchanges.Net //REVIEW: 我为什么使用*Net
-	exchanges.TradesDBs
-	exchanges.TradesSubject
+	*exchanges.TradesDBs
+	*exchanges.TradesSubject
+	*exchanges.Account
 }
 
 type config struct {
@@ -51,6 +52,7 @@ func instance() *BTC38 {
 	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*50)
 
 	//TODO: 修改每个tradesSubject的获取时间。
+
 	return btc38
 }
 

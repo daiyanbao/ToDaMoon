@@ -4,7 +4,7 @@ import (
 	"ToDaMoon/util"
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
+
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	json "github.com/json-iterator/go"
 )
 
 //AskChan 是发送网络请求的通道
