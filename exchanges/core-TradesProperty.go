@@ -65,6 +65,7 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 	go func() {
 		for {
 			th, err := e.Trades(money, coin, maxTid)
+
 			if err != nil {
 				msg := fmt.Sprintf("updatePropertyAndSaveToDB(): 获取%s交易所的%s市场的%s的历史交易数据失败：%s\n。。。。5秒后重试", e.Name, money, coin, err)
 				log.Println(msg)
@@ -73,12 +74,15 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 			}
 
 			if len(th) > 0 {
+
 				p.Update(th)
 
 				if err := db.Insert(th); err != nil {
 					msg := fmt.Sprintf("插入%s交易所的%s市场的%s的历史交易数据失败：%s", e.Name, money, coin, err)
 					log.Fatalln(msg)
 				}
+
+				maxTid = th[len(th)-1].Tid
 			}
 			wait()
 		}
