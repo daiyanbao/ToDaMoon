@@ -1,11 +1,10 @@
 package exchanges
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
-
-	json "github.com/json-iterator/go"
 )
 
 //Account 是用户的账户

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -30,10 +31,18 @@ func (b *BTC38) Ticker(money, coin string) (*ec.Ticker, error) {
 		return nil, err
 	}
 
+	if b.ShowDetail {
+		log.Printf(`btc38.Ticker("%s","%s")=%s`, money, coin, string(rawData))
+	}
+
 	resp := TickerResponse{}
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
+	}
+
+	if b.ShowDetail {
+		log.Printf(`After JSONDecode: btc38.Ticker("%s","%s")=%v`, money, coin, resp)
 	}
 
 	return resp.Ticker.normalize(), nil

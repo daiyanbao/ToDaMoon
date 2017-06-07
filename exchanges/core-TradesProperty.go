@@ -24,6 +24,7 @@ type TradesSubject map[string]map[string]TradeSubject
 
 //MakeSubjectes 返回了所尊coin的最新订阅消息
 func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) TradesSubject {
+	log.Printf("开始创建%s的监听属性", e.Name())
 	tp := make(TradesSubject)
 	wg := &sync.WaitGroup{}
 	for money, coinDBs := range tdbs {
@@ -35,7 +36,7 @@ func MakeSubjectes(e Exchanger, tdbs TradesDBs, checkCycle time.Duration) Trades
 	}
 
 	wg.Wait()
-	text := fmt.Sprintln("已经创建了所有相关的监听属性")
+	text := fmt.Sprintf("已经创建了%s所有相关的监听属性", e.Name())
 	log.Println(text)
 
 	return tp
@@ -58,7 +59,8 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 		msg := fmt.Sprintf("updatePropertyAndSaveToDB(): 无法获取%s数据库的MaxTid: %s", db.Name(), err)
 		log.Fatalln(msg)
 	}
-	waitCh, wait := util.WaitFunc(checkCycle)
+	name := fmt.Sprintf("%s的Property", e.Name())
+	waitCh, wait := util.WaitFunc(checkCycle, name)
 
 	go func() {
 		for {

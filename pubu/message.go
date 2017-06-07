@@ -3,6 +3,7 @@ package pubu
 import (
 	"bytes"
 	"encoding/json"
+
 	"fmt"
 	"io"
 	"time"

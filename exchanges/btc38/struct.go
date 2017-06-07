@@ -4,7 +4,7 @@ import ec "ToDaMoon/exchanges"
 
 // TickerResponse is TickerResponse
 type TickerResponse struct {
-	Ticker Ticker
+	Ticker Ticker `json:"ticker"`
 }
 
 // Ticker is Ticker

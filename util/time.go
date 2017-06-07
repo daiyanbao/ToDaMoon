@@ -16,7 +16,7 @@ func DateOf(t int64) string {
 //例如：100秒的updateCycle在结束前，把updateCycle修改为200秒，程序会立即生效。
 //checkCycle是检查是否到期的时间段，也是最小等待时间段。
 //没有修改updateCycle的时候，程序的等待时间是checkCycle×int(updateCycle/checkCycle+1)
-func WaitFunc(checkCycle time.Duration) (chan<- time.Duration, func()) {
+func WaitFunc(checkCycle time.Duration, name string) (chan<- time.Duration, func()) {
 	cycleCh := make(chan time.Duration, 3)
 	beginTime := time.Now()
 	updateCycle := checkCycle
@@ -28,6 +28,7 @@ func WaitFunc(checkCycle time.Duration) (chan<- time.Duration, func()) {
 				if updateCycle <= checkCycle {
 					log.Println("WARNING: updateCycle<=checkCycle，程序会按照checkCycle来等待。")
 				}
+				log.Printf("%s的wait的updateCycle已经修改为%s", name, updateCycle)
 			default:
 			}
 			time.Sleep(checkCycle)

@@ -12,6 +12,7 @@ type TradesDBs map[string]map[string]*TradesDB
 
 //MakeTradesDBs 是链接了exchanges所有的Trades数据库
 func MakeTradesDBs(dir, exchange string, markets map[string][]string) TradesDBs {
+	log.Printf("开始链接%s的数据库", exchange)
 	var err error
 	t := make(map[string]map[string]*TradesDB)
 	for money, coins := range markets {
@@ -23,6 +24,7 @@ func MakeTradesDBs(dir, exchange string, markets map[string][]string) TradesDBs 
 				text := fmt.Sprintf("无法连接%s数据库: %s", filename, err)
 				log.Fatalln(text)
 			}
+			log.Printf("已连接上：%s的%s的%s的数据库%s", exchange, money, coin, filename)
 		}
 	}
 	return t

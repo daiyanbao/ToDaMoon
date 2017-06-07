@@ -4,6 +4,7 @@ import (
 	"ToDaMoon/util"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 
 	"errors"
 	"fmt"
@@ -13,8 +14,6 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	json "github.com/json-iterator/go"
 )
 
 //AskChan 是发送网络请求的通道
@@ -158,7 +157,7 @@ func Path(URL string, values url.Values) string {
 
 //JSONDecode 解析Json格式
 func JSONDecode(data []byte, to interface{}) error {
-	err := json.Unmarshal(data, &to)
+	err := json.Unmarshal(data, to)
 	if err != nil {
 		return err
 	}
