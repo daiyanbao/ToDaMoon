@@ -3,6 +3,7 @@ package exchanges
 import (
 	"fmt"
 	"log"
+	"time"
 )
 
 //这个部分是抽象了exchagnes管理trades数据库方法的内容
@@ -12,7 +13,7 @@ type TradesDBs map[string]map[string]*TradesDB
 
 //MakeTradesDBs 是链接了exchanges所有的Trades数据库
 func MakeTradesDBs(dir, exchange string, markets map[string][]string) TradesDBs {
-	log.Printf("开始链接%s的数据库", exchange)
+	log.Printf("开始链接%s的数据库%s", exchange, time.Now())
 	var err error
 	t := make(map[string]map[string]*TradesDB)
 	for money, coins := range markets {
