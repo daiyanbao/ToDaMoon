@@ -2,9 +2,15 @@ package main
 
 import (
 	"ToDaMoon/apollo"
+	"ToDaMoon/util"
 	"fmt"
 	"log"
 	"os"
+)
+
+const (
+	// pidFile 用来存储程序pid代号的文件
+	pidFile = "tdm.pid"
 )
 
 var (
@@ -18,7 +24,15 @@ var (
 	BuildNumber string
 )
 
+func init() {
+	//获取并保存pid
+	util.Init(pidFile)
+}
+
 func main() {
+	//清理pid文件
+	defer os.Remove(pidFile)
+
 	ver := Version + "." + BuildNumber
 	if len(os.Args) > 1 && (os.Args[1] == "version" || os.Args[1] == "v") {
 		fmt.Println("Version: ", ver)
