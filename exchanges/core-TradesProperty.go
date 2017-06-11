@@ -79,7 +79,7 @@ func updatePropertyAndSaveToDB(e Exchanger, money, coin string, p observer.Prope
 				p.Update(th)
 
 				if err := db.Insert(th); err != nil {
-					msg := fmt.Sprintf("插入%s交易所的%s市场的%s的历史交易数据失败：%s", e.Name, money, coin, err)
+					msg := fmt.Sprintf("插入%s交易所的%s市场的%s的历史交易数据失败：%s", e.Name(), money, coin, err)
 					log.Fatalln(msg)
 				}
 
