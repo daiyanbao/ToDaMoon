@@ -101,7 +101,7 @@ func (n *Net) Start(waitMS int) {
 	waitTime := time.Millisecond * time.Duration(waitMS)
 
 	go func() {
-		sleepAMoment := util.SleepFunc(waitTime)
+		sleepAWaitTime := util.SleepFunc(waitTime)
 
 		for ask := range n.Ask {
 			switch ask.Type {
@@ -115,7 +115,7 @@ func (n *Net) Start(waitMS int) {
 				log.Println("错误的请求类型")
 			}
 
-			sleepAMoment()
+			sleepAWaitTime()
 		}
 	}()
 }
