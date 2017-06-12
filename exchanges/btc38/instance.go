@@ -18,7 +18,7 @@ type BTC38 struct {
 	*config
 	*exchanges.Net
 	exchanges.TradesDBs
-	exchanges.TradesSubject
+	exchanges.TradesCenter
 	*exchanges.Account
 }
 
@@ -45,7 +45,7 @@ func instance() *BTC38 {
 	btc38 = generateBy(cfg)
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
-	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*100, time.Minute)
+	btc38.TradesCenter = exchanges.MakeTradesCenter(btc38, btc38.TradesDBs, time.Millisecond*100, time.Minute)
 
 	return btc38
 }
