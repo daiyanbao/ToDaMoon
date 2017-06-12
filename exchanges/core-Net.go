@@ -1,7 +1,6 @@
 package exchanges
 
 import (
-	"ToDaMoon/util"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -101,9 +100,9 @@ func (n *Net) Start(waitMS int) {
 	waitTime := time.Millisecond * time.Duration(waitMS)
 
 	go func() {
-		sleepAWaitTime := util.SleepFunc(waitTime)
-
 		for ask := range n.Ask {
+			waitTimeEnd := time.After(waitTime)
+
 			switch ask.Type {
 			case GET:
 				data, err := n.get(ask.Path)
@@ -115,7 +114,7 @@ func (n *Net) Start(waitMS int) {
 				log.Println("错误的请求类型")
 			}
 
-			sleepAWaitTime()
+			<-waitTimeEnd
 		}
 	}()
 }
