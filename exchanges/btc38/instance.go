@@ -39,10 +39,10 @@ type config struct {
 //instance 返回一个btc38的单例
 func instance() *BTC38 {
 	//读取配置文件
-	c := getConfig()
+	cfg := getConfig()
 
 	//生成btc38实例
-	btc38 = generateBy(c)
+	btc38 = generateBy(cfg)
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
 	btc38.TradesSubject = exchanges.MakeSubjectes(btc38, btc38.TradesDBs, time.Millisecond*100, time.Minute)
@@ -97,7 +97,7 @@ func generateBy(c *config) *BTC38 {
 		Header: genHeader(),
 	}
 	n.Start(c.MinAccessPeriodMS)
-	//FIXME: 好像有点问题
+
 	tdb := exchanges.MakeTradesDBs(c.DBDir, c.Name, c.Markets)
 
 	btc38 = &BTC38{config: c,

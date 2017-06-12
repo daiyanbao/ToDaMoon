@@ -13,7 +13,6 @@ import (
 //TradeSubject 会发布最新的交易数据。
 //会通过observer.Property来更新最新的交易数据。
 //updateCycleCh 可以修改Property的更新周期
-//TODO: TradeSubject不是一个好名字，和TradesSubject太像了
 type TradeSubject struct {
 	observer.Property
 	UpdateCycleCh chan<- time.Duration
