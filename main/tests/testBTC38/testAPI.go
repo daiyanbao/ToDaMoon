@@ -1,9 +1,14 @@
-package btc38
+package main
 
 import (
 	"fmt"
-	"time"
 )
+
+func main() {
+	fmt.Println("hello wrold.")
+}
+
+/*
 
 //TestAPI 会逐个测试网站的API
 func TestAPI() {
@@ -119,3 +124,5 @@ func TestAPI() {
 		}
 	}
 }
+
+*/
