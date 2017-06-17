@@ -9,5 +9,6 @@ ToDaMoon是我的自己的虚拟币交易系统。
 
 
 ## Tips
+>注意：以下方式适用于Linux操作系统
 1. [后台运行ToDaMoon](./Tips/Run-TDM-in-Background.md)
-1. [服务器开机启动ToDaMoon](./Tips/Run-TDM-at-Startup.md)
+1. [开机启动ToDaMoon](./Tips/Run-TDM-at-Startup.md)
