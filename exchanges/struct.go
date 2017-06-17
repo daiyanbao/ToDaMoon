@@ -15,3 +15,7 @@ type Depth struct {
 	Asks [][2]float64
 	Bids [][2]float64
 }
+
+//Order 是交易所的订单信息
+type Order struct {
+}
