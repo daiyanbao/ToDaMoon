@@ -11,7 +11,7 @@ var once sync.Once
 var notify Interface.Notifier
 
 //Run 会启动btc38模块
-func Run() exchanges.Exchanger {
+func Run() exchanges.API {
 	notify = pubu.New()
 	once.Do(build)
 	return btc38

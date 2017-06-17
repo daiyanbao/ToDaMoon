@@ -1,18 +1,15 @@
 package main
 
-import (
-	"fmt"
-)
-
 func main() {
-	fmt.Println("hello wrold.")
+	//a := btc38.NewAPI()
+	//	testAPI(a)
 }
 
 /*
 
-//TestAPI 会逐个测试网站的API
-func TestAPI() {
-	//以下是测试内容
+//testAPI 会逐个测试网站的API
+func testAPI(btc38 *btc38.API) {
+
 	fmt.Println("==测试btc38.Ticker()==")
 	b3Ticker, err := btc38.Ticker("cny", "btc")
 	if err != nil {
@@ -22,7 +19,7 @@ func TestAPI() {
 	}
 
 	fmt.Println("==测试btc38.allTicker()==")
-	b3All, err := btc38.allTicker("cny")
+	b3All, err := btc38.AllTicker("cny")
 	if err != nil {
 		fmt.Println("无法获取btc38的cny市场的全部币的ticker")
 	} else {
@@ -62,7 +59,7 @@ func TestAPI() {
 	}
 
 	fmt.Println("=============================================================")
-	b3Balance, err := btc38.Balance()
+	b3Balance, err := btc38.Account()
 	if err != nil {
 		fmt.Println("无法获取btc38的账户信息")
 	} else {
@@ -83,7 +80,7 @@ func TestAPI() {
 	// }
 
 	fmt.Println("=============================================================")
-	orderID, err := btc38.Trade(BUY, "cny", "btc", 10000, 90.0/10000)
+	orderID, err := btc38.Trade(btc38.BUY, "cny", "btc", 10000, 90.0/10000)
 	if err != nil {
 		fmt.Println("无法在btc38.com下单买btc", err)
 	} else {
