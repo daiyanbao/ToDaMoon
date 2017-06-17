@@ -1,7 +1,9 @@
 # 开机启动ToDaMoon
 
 >假设
+>
 >存放ToDaMoon执行文件的文件夹的绝对路径是/path/to/ToDaMoon
+>
 >存放启动脚本的文件夹的绝对路径是/path/to/script
 
 ## 1.编写启动脚本launchToDaMoon.sh
