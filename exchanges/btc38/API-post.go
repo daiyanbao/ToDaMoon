@@ -61,17 +61,15 @@ func handleMyBalanceRawData(rawData []byte) (myBalance, error) {
 	return resp, nil
 }
 
-type orderType int
+var transTypeMap = map[ec.TransType]int{
+	ec.BUY:  1,
+	ec.SELL: 2,
+}
 
-const (
-	//BUY 是使用money换coin的过程
-	BUY orderType = 1 //不用iota是因为btc38的api指定了数字1为买入
-	//SELL 是使用coin换money的过程
-	SELL orderType = 2
-)
-
-//Trade 下单交易
-func (a *API) Trade(ot orderType, money, coin string, price, amount float64) (int, error) {
+//Trans 下单交易
+func (a *API) Trans(t ec.TransType, money, coin string, price, amount float64) (int, error) {
+	ot := transTypeMap[t]
+	//TODO: 修改trade为trans
 	rawData, err := a.getTradeRawData(ot, money, coin, price, amount)
 	if err != nil {
 		return 0, err
@@ -80,12 +78,12 @@ func (a *API) Trade(ot orderType, money, coin string, price, amount float64) (in
 	return handleTradeRawData(rawData)
 }
 
-func (a *API) getTradeRawData(ot orderType, money, coin string, price, amount float64) ([]byte, error) {
+func (a *API) getTradeRawData(ot int, money, coin string, price, amount float64) ([]byte, error) {
 	body := a.tradeBodyMaker(ot, money, coin, price, amount)
 	return a.Post(submitOrderURL, body)
 }
 
-func (a *API) tradeBodyMaker(ot orderType, money, coin string, price, amount float64) io.Reader {
+func (a *API) tradeBodyMaker(ot int, money, coin string, price, amount float64) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -158,17 +156,30 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 	return false, errors.New(r)
 }
 
-type order struct {
-	ID        int       `json:"id,string"`
-	Coin      string    `json:"coinname"`
+//TODO: 取消orderType
+type orderType int
+
+const (
+	//BUY 是使用money换coin的过程
+	BUY orderType = 1 //不用iota是因为btc38的api指定了数字1为买入
+	//SELL 是使用coin换money的过程
+	SELL orderType = 2
+)
+
+//Order 是订单
+//TODO: 转换成exchanges的标准形式
+type Order struct {
+	ID   int    `json:"id,string"`
+	Coin string `json:"coinname"`
+	//TODO: 取消orderType
 	OrderType orderType `json:"type,string"`
 	Amount    float64   `json:"amount,string"`
 	Price     float64   `json:"price,string"`
 	Time      string    `json:"time"`
 }
 
-//getMyOrders 下单交易
-func (a *API) getMyOrders(money, coin string) ([]order, error) {
+//MyOrders 获取我所有的挂单
+func (a *API) MyOrders(money, coin string) ([]Order, error) {
 	rawData, err := a.getMyOrdersRawData(money, coin)
 	if err != nil {
 		return nil, err
@@ -197,8 +208,8 @@ func (a *API) myOrdersBodyMaker(money, coin string) io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func handleMyOrdersRawData(rawData []byte) ([]order, error) {
-	resp := []order{}
+func handleMyOrdersRawData(rawData []byte) ([]Order, error) {
+	resp := []Order{}
 
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
@@ -207,7 +218,9 @@ func handleMyOrdersRawData(rawData []byte) ([]order, error) {
 	return resp, nil
 }
 
-type myTrade struct {
+//MyTrade 是我的交易记录
+//TODO: 转换成exchanges的标准结果
+type MyTrade struct {
 	ID       int     `json:"id,string"`
 	BuyerID  string  `json:"buyer_id"`
 	SellerID string  `json:"seller_id"`
@@ -217,8 +230,8 @@ type myTrade struct {
 	Time     string  `json:"time"`
 }
 
-//getMyTrades 下单交易
-func (a *API) getMyTrades(money, coin string, page int) ([]myTrade, error) {
+//MyTrades 获取我的交易记录
+func (a *API) MyTrades(money, coin string, page int) ([]MyTrade, error) {
 	rawData, err := a.getMyTradesRawData(money, coin, page)
 	if err != nil {
 		return nil, err
@@ -248,8 +261,8 @@ func (a *API) myTradesBodyMaker(money, coin string, page int) io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func handleMyTradesRawData(rawData []byte) ([]myTrade, error) {
-	resp := []myTrade{}
+func handleMyTradesRawData(rawData []byte) ([]MyTrade, error) {
+	resp := []MyTrade{}
 
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {

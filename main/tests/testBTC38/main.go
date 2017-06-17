@@ -6,7 +6,6 @@ func main() {
 }
 
 /*
-
 //testAPI 会逐个测试网站的API
 func testAPI(btc38 *btc38.API) {
 
@@ -121,5 +120,4 @@ func testAPI(btc38 *btc38.API) {
 		}
 	}
 }
-
 */

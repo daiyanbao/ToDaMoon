@@ -66,7 +66,7 @@ func updatePropertyAndSaveToDB(a API, money, coin string, p observer.Property, d
 
 	go func() {
 		for {
-			th, err := a.Trades(money, coin, maxTid)
+			th, err := a.TransRecords(money, coin, maxTid)
 			if err != nil {
 				msg := fmt.Sprintf("updatePropertyAndSaveToDB(): 获取%s交易所的%s市场的%s的历史交易数据失败：%s\n。。。。5秒后重试", a.Name(), money, coin, err)
 				log.Println(msg)
