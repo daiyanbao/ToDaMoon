@@ -11,14 +11,15 @@ import (
 func ExternalIP() (string, error) {
 	resp, err := http.Get("http://myexternalip.com/raw")
 	if err != nil {
-		return "", errors.New("无法访问myexternalip.com")
+		return "", errors.New("无法访问myexternalip.com: " + err.Error())
 	}
 	defer resp.Body.Close()
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errors.New("无法解析myexternalip.com返回的数据")
+		return "", errors.New("无法解析myexternalip.com返回的数据: " + err.Error())
 	}
+
 	exip := string(bytes.TrimSpace(b))
 	return exip, nil
 }

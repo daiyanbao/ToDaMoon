@@ -174,3 +174,8 @@ func MD5(input []byte) []byte {
 func HexEncodeToString(input []byte) string {
 	return hex.EncodeToString(input)
 }
+
+//GetConfigFilename 根据name返回exchange的配置文件名称
+func GetConfigFilename(name string) string {
+	return fmt.Sprintf("%s.toml", name)
+}

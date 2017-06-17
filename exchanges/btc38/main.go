@@ -14,16 +14,12 @@ var notify Interface.Notifier
 func Run() exchanges.Exchanger {
 	notify = pubu.New()
 	once.Do(build)
-
-	//FIXME:  go testBTC38()
-
-	//以上是测试内容
 	return btc38
 }
 
 func build() {
 	//生成一个btc38的实例
-	btc38 = instance()
+	Instance()
 
 	//执行btc38的各项任务
 	btc38.checkNewCoin()

@@ -29,8 +29,12 @@ func (t Ticker) normalize() *ec.Ticker {
 }
 
 //MyBalance 是btc38的账户信息
-//TODO: 把MyBalance变成myBalance
-type MyBalance map[string]string
+type myBalance map[string]string
+
+func (m myBalance) normalize() *ec.Account {
+	//TODO: 完成myBalance的转换程序
+	return nil
+}
 
 // Trade :okcoin's Trade struct
 type Trade struct {
