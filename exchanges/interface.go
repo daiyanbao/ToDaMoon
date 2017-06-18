@@ -14,6 +14,8 @@ type API interface {
 	MyTransRecords(money, coin string, tid int64) (Trades, error)
 }
 
+//TODO: 把以下内容，移入struct.go
+
 //OrderType 指定了交易的类型
 type OrderType string
 
