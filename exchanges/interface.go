@@ -77,6 +77,7 @@ func TestAPI(a API) string {
 		fmt.Printf("%s.MyAccount\n%s\n", a.Name(), ma)
 	}
 
+	//TODO: 把Order的测试部分，放入另外一个子函数。利用不同的下单金额，进行测试。因为Order特别重要，特别重要。
 	fmt.Printf("==测试%s.Order()===\n", a.Name())
 	buyBTCPrice := btcPrice * 0.9
 	//FIXME: 删除下面一行
