@@ -7,21 +7,21 @@ type API interface {
 	Ticker(money, coin string) (*Ticker, error)
 	Depth(money, coin string) (*Depth, error)
 	TransRecords(money, coin string, tid int64) (Trades, error)
-	Account() (Account, error)
-	Trans(t TransType, money, coin string, price, amount float64) (int, error)
-	CancelOrder(money, coin string, orderID int) (bool, error)
+	MyAccount() (*Account, error)
+	Order(t OrderType, money, coin string, price, amount float64) (int64, error)
+	CancelOrder(money, coin string, orderID int64) (bool, error)
 	MyOrders(money, coin string) ([]Order, error)
 	MyTransRecords(money, coin string, tid int64) (Trades, error)
 }
 
-//TransType 指定了交易的类型
-type TransType string
+//OrderType 指定了交易的类型
+type OrderType string
 
 const (
 	//BUY 是使用money换coin的过程
-	BUY TransType = "buy"
+	BUY OrderType = "buy"
 	//SELL 是使用coin换money的过程
-	SELL TransType = "sell"
+	SELL OrderType = "sell"
 )
 
 //TestAPI 用于测试通用API接口的功能

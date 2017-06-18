@@ -17,5 +17,6 @@ type Depth struct {
 }
 
 //Order 是交易所的订单信息
+//TODO: 写完Order
 type Order struct {
 }

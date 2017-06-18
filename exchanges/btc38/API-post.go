@@ -17,11 +17,11 @@ func (a *API) md5(time string) string {
 	return ec.HexEncodeToString(md5)
 }
 
-//Account 返回BTC38的账户信息
-func (a *API) Account() (*ec.Account, error) {
+//MyAccount 返回BTC38的账户信息
+func (a *API) MyAccount() (*ec.Account, error) {
 	rawData, err := a.getMyBalanceRawData()
 	if err != nil {
-		msg := fmt.Sprintf("无法获取%s的MyBalance的RawDate:%s", a.Name, err)
+		msg := fmt.Sprintf("无法获取%s的MyBalance的RawDate:%s", a.Name(), err)
 		return nil, errors.New(msg)
 	}
 
@@ -61,13 +61,14 @@ func handleMyBalanceRawData(rawData []byte) (myBalance, error) {
 	return resp, nil
 }
 
-var transTypeMap = map[ec.TransType]int{
+var transTypeMap = map[ec.OrderType]int{
 	ec.BUY:  1,
 	ec.SELL: 2,
 }
 
-//Trans 下单交易
-func (a *API) Trans(t ec.TransType, money, coin string, price, amount float64) (int, error) {
+//Order 下单交易
+//TODO: 修改order的子函数的名称
+func (a *API) Order(t ec.OrderType, money, coin string, price, amount float64) (int64, error) {
 	ot := transTypeMap[t]
 	//TODO: 修改trade为trans
 	rawData, err := a.getTradeRawData(ot, money, coin, price, amount)
@@ -101,7 +102,7 @@ func (a *API) tradeBodyMaker(ot int, money, coin string, price, amount float64) 
 	return strings.NewReader(encoded)
 }
 
-func handleTradeRawData(rawData []byte) (int, error) {
+func handleTradeRawData(rawData []byte) (int64, error) {
 	r := string(rawData)
 
 	if r[:5] == "succ|" {
@@ -109,14 +110,14 @@ func handleTradeRawData(rawData []byte) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		return orderID, nil
+		return int64(orderID), nil
 	}
 
 	return 0, errors.New(r)
 }
 
 //CancelOrder 下单交易
-func (a *API) CancelOrder(money, coin string, orderID int) (bool, error) {
+func (a *API) CancelOrder(money, coin string, orderID int64) (bool, error) {
 	rawData, err := a.getCancelOrderRawData(money, coin, orderID)
 	if err != nil {
 		return false, err
@@ -125,12 +126,12 @@ func (a *API) CancelOrder(money, coin string, orderID int) (bool, error) {
 	return handleCancelOrderRawData(rawData)
 }
 
-func (a *API) getCancelOrderRawData(money, coin string, orderID int) ([]byte, error) {
+func (a *API) getCancelOrderRawData(money, coin string, orderID int64) ([]byte, error) {
 	body := a.cancelOrderBodyMaker(money, coin, orderID)
 	return a.Post(cancelOrderURL, body)
 }
 
-func (a *API) cancelOrderBodyMaker(money, coin string, orderID int) io.Reader {
+func (a *API) cancelOrderBodyMaker(money, coin string, orderID int64) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -139,7 +140,7 @@ func (a *API) cancelOrderBodyMaker(money, coin string, orderID int) io.Reader {
 	v.Set("md5", md5)
 
 	v.Set("mk_type", money)
-	v.Set("order_id", strconv.Itoa(orderID))
+	v.Set("order_id", fmt.Sprint(orderID))
 	v.Set("coinname", coin)
 	encoded := v.Encode()
 
@@ -179,7 +180,7 @@ type Order struct {
 }
 
 //MyOrders 获取我所有的挂单
-func (a *API) MyOrders(money, coin string) ([]Order, error) {
+func (a *API) MyOrders(money, coin string) ([]ec.Order, error) {
 	rawData, err := a.getMyOrdersRawData(money, coin)
 	if err != nil {
 		return nil, err
@@ -208,8 +209,10 @@ func (a *API) myOrdersBodyMaker(money, coin string) io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func handleMyOrdersRawData(rawData []byte) ([]Order, error) {
-	resp := []Order{}
+func handleMyOrdersRawData(rawData []byte) ([]ec.Order, error) {
+	resp := []ec.Order{}
+
+	fmt.Println("ec.Order还是空的")
 
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
@@ -230,8 +233,10 @@ type MyTrade struct {
 	Time     string  `json:"time"`
 }
 
-//MyTrades 获取我的交易记录
-func (a *API) MyTrades(money, coin string, page int) ([]MyTrade, error) {
+//MyTransRecords 获取我的交易记录
+//TODO: 修改子函数的名称
+//FIXME: 这个函数的方法，还没有统一。
+func (a *API) MyTransRecords(money, coin string, page int64) (ec.Trades, error) {
 	rawData, err := a.getMyTradesRawData(money, coin, page)
 	if err != nil {
 		return nil, err
@@ -240,12 +245,12 @@ func (a *API) MyTrades(money, coin string, page int) ([]MyTrade, error) {
 	return handleMyTradesRawData(rawData)
 }
 
-func (a *API) getMyTradesRawData(money, coin string, page int) ([]byte, error) {
+func (a *API) getMyTradesRawData(money, coin string, page int64) ([]byte, error) {
 	body := a.myTradesBodyMaker(money, coin, page)
 	return a.Post(getMyTradeListURL, body)
 }
 
-func (a *API) myTradesBodyMaker(money, coin string, page int) io.Reader {
+func (a *API) myTradesBodyMaker(money, coin string, page int64) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -255,18 +260,20 @@ func (a *API) myTradesBodyMaker(money, coin string, page int) io.Reader {
 
 	v.Set("mk_type", money)
 	v.Set("coinname", coin)
-	v.Set("page", strconv.Itoa(page))
+	v.Set("page", fmt.Sprint(page))
 	encoded := v.Encode()
 
 	return strings.NewReader(encoded)
 }
 
-func handleMyTradesRawData(rawData []byte) ([]MyTrade, error) {
-	resp := []MyTrade{}
-
+func handleMyTradesRawData(rawData []byte) (ec.Trades, error) {
+	resp := ec.Trades{}
+	//TODO: 这个函数是没有完成的。
+	fmt.Println("这个函数是没有完成的")
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
 	}
+
 	return resp, nil
 }

@@ -119,3 +119,8 @@ func genHeader() map[string]string {
 	header["User-Agent"] = "Mozilla/4.0"
 	return header
 }
+
+//Name 返回API所在交易所的名字
+func (a *API) Name() string {
+	return a.config.Name
+}

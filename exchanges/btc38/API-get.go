@@ -93,9 +93,10 @@ func depthURLMaker(money, coin string) string {
 	return urlMaker(depthURL, money, coin)
 }
 
-//Trades 返回市场的交易记录
+//TransRecords 返回市场的交易记录
 //当tid<=0时，返回最新的30条记录
-func (a *API) Trades(money, coin string, tid int64) (ec.Trades, error) {
+//TODO: 修改相关子函数的名称
+func (a *API) TransRecords(money, coin string, tid int64) (ec.Trades, error) {
 	rawData, err := a.getTradesRawData(money, coin, tid)
 	if err != nil {
 		return nil, err
