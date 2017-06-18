@@ -66,9 +66,13 @@ func (a *API) tickerRawData(money, coin string) ([]byte, error) {
 
 //Depth 是反馈市场深度信息
 func (a *API) Depth(money, coin string) (*ec.Depth, error) {
-	rawData, err := a.getDepthRawData(money, coin)
+	rawData, err := a.depthRawData(money, coin)
 	if err != nil {
 		return nil, err
+	}
+
+	if a.ShowDetail {
+		log.Printf(`rawData btc38.Depth("%s","%s")=%s`, money, coin, string(rawData))
 	}
 
 	resp := ec.Depth{}
@@ -77,16 +81,16 @@ func (a *API) Depth(money, coin string) (*ec.Depth, error) {
 		return nil, err
 	}
 
+	if a.ShowDetail {
+		log.Printf(`After JSONDecode: btc38.Depth("%s","%s")=%v`, money, coin, resp)
+	}
+
 	return &resp, nil
 }
 
-func (a *API) getDepthRawData(money, coin string) ([]byte, error) {
-	path := depthURLMaker(money, coin)
+func (a *API) depthRawData(money, coin string) ([]byte, error) {
+	path := urlMaker(depthURL, money, coin)
 	return a.Get(path)
-}
-
-func depthURLMaker(money, coin string) string {
-	return urlMaker(depthURL, money, coin)
 }
 
 //TransRecords 返回市场的交易记录
