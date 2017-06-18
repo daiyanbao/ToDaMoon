@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 type tickerResp struct {
@@ -105,4 +106,39 @@ func (t Trade) normalize() *ec.Trade {
 		Tid:    t.TradeID,
 		Type:   t.Type,
 	}
+}
+
+type order struct {
+	ID        int64   `json:"id,string"`
+	Coin      string  `json:"coinname"`
+	OrderType int     `json:"type,string"`
+	Amount    float64 `json:"amount,string"`
+	Price     float64 `json:"price,string"`
+	Time      string  `json:"time"`
+}
+
+var oTypeMap = map[int]string{
+	1: "buy",
+	2: "sell",
+}
+
+func (o order) normalize(money string) (*ec.Order, error) {
+	t, err := time.Parse("2006-01-02 15:04:05", o.Time)
+	if err != nil {
+		msg := fmt.Sprintf(`无法把"%s"转换成time.time:%s`, o.Time, err) + "\n"
+		return nil, errors.New(msg)
+	}
+
+	date := t.Unix()
+	oType := oTypeMap[o.OrderType]
+
+	return &ec.Order{
+		ID:     o.ID,
+		Date:   date,
+		Money:  money,
+		Price:  o.Price,
+		Coin:   o.Coin,
+		Amount: o.Amount,
+		Type:   oType,
+	}, nil
 }

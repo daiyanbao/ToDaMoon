@@ -64,30 +64,42 @@ func handleMyAccountRawData(rawData []byte) (myBalance, error) {
 	return resp, nil
 }
 
-var transTypeMap = map[ec.OrderType]int{
+var orderTypeMap = map[ec.OrderType]int{
 	ec.BUY:  1,
 	ec.SELL: 2,
 }
 
 //Order 下单交易
-//TODO: 修改order的子函数的名称
 func (a *API) Order(t ec.OrderType, money, coin string, price, amount float64) (int64, error) {
-	ot := transTypeMap[t]
-	//TODO: 修改trade为trans
-	rawData, err := a.getTradeRawData(ot, money, coin, price, amount)
+	ot := orderTypeMap[t]
+	rawData, err := a.orderRawData(ot, money, coin, price, amount)
 	if err != nil {
 		return 0, err
 	}
 
-	return handleTradeRawData(rawData)
+	if a.ShowDetail {
+		log.Printf(`rawData btc38.Order(%s, %s, %s, %f, %f)=%s`, t, money, coin, price, amount, string(rawData))
+		log.Println()
+	}
+
+	return handleOrderRawData(rawData)
 }
 
-func (a *API) getTradeRawData(ot int, money, coin string, price, amount float64) ([]byte, error) {
-	body := a.tradeBodyMaker(ot, money, coin, price, amount)
+func (a *API) orderRawData(ot int, money, coin string, price, amount float64) ([]byte, error) {
+	//NOTICE: btc38的价格只支持6位有效数字。比如现在BTC的价格是18000多，如果买价是12345.6就可以下单，如果买价是12345.67，就会显示deciError1
+	//TODO: 编写一个函数用于转换priceStr，以避免以上错误。
+	priceStr := fmt.Sprintf("%.5f", price)
+	amountStr := fmt.Sprintf("%.6f", amount)
+	body := a.orderBody(ot, money, coin, priceStr, amountStr)
+
+	if a.ShowDetail {
+		log.Printf(`Body of btc38.Order(%d, %s, %s, %f, %f)=%v`, ot, money, coin, price, amount, body)
+	}
+
 	return a.Post(submitOrderURL, body)
 }
 
-func (a *API) tradeBodyMaker(ot int, money, coin string, price, amount float64) io.Reader {
+func (a *API) orderBody(ot int, money, coin, price, amount string) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -96,18 +108,36 @@ func (a *API) tradeBodyMaker(ot int, money, coin string, price, amount float64) 
 	v.Set("md5", md5)
 
 	v.Set("type", fmt.Sprint(ot))
-	v.Set("coinname", coin)
 	v.Set("mk_type", money)
-	v.Set("price", strconv.FormatFloat(price, 'f', -1, 64))
-	v.Set("amount", strconv.FormatFloat(amount, 'f', -1, 64))
+	v.Set("price", price)
+	v.Set("amount", amount)
+	v.Set("coinname", coin)
 	encoded := v.Encode()
+
+	if a.ShowDetail {
+		log.Printf("encoded url.Values of btc38.Order(%d, %s, %s, %s, %s)=%s\n", ot, money, coin, price, amount, encoded)
+	}
 
 	return strings.NewReader(encoded)
 }
 
-func handleTradeRawData(rawData []byte) (int64, error) {
+/*
+http://www.btc38.com/help/document/2581.html
+返回 / Return：
+succ，挂单成功 / successful (submitOrder.php)
+succ|123，挂单成功，123为您挂单的ID / successful, 123 is your order_id
+overBalance，账户余额不足 / insuffient balance
+其它返回表示不同的错误，情况太多，暂不罗列，这种错误发生的可能性不大
+*/
+func handleOrderRawData(rawData []byte) (int64, error) {
 	r := string(rawData)
 
+	//下单后，立马成交
+	if r == "succ" {
+		return 0, nil
+	}
+
+	//下单后，没有成交
 	if r[:5] == "succ|" {
 		orderID, err := strconv.Atoi(r[5:])
 		if err != nil {
@@ -121,20 +151,24 @@ func handleTradeRawData(rawData []byte) (int64, error) {
 
 //CancelOrder 下单交易
 func (a *API) CancelOrder(money, coin string, orderID int64) (bool, error) {
-	rawData, err := a.getCancelOrderRawData(money, coin, orderID)
+	rawData, err := a.cancelOrderRawData(money, coin, orderID)
 	if err != nil {
 		return false, err
+	}
+
+	if a.ShowDetail {
+		log.Printf(`rawData btc38.CancelOrder(%s, %s, %d)=%s`, money, coin, orderID, string(rawData))
 	}
 
 	return handleCancelOrderRawData(rawData)
 }
 
-func (a *API) getCancelOrderRawData(money, coin string, orderID int64) ([]byte, error) {
-	body := a.cancelOrderBodyMaker(money, coin, orderID)
+func (a *API) cancelOrderRawData(money, coin string, orderID int64) ([]byte, error) {
+	body := a.cancelOrderBody(money, coin, orderID)
 	return a.Post(cancelOrderURL, body)
 }
 
-func (a *API) cancelOrderBodyMaker(money, coin string, orderID int64) io.Reader {
+func (a *API) cancelOrderBody(money, coin string, orderID int64) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -150,54 +184,42 @@ func (a *API) cancelOrderBodyMaker(money, coin string, orderID int64) io.Reader 
 	return strings.NewReader(encoded)
 }
 
+/*
+http://www.btc38.com/help/document/2581.html
+返回：
+succ，撤单成功 / successful
+overtime，该单不存在，或者已成交了 / order expired or traded
+*/
 func handleCancelOrderRawData(rawData []byte) (bool, error) {
 	r := string(rawData)
 
 	if r == "succ" {
 		return true, nil
 	}
-	//TODO: 最好能够给出cancel时候，遇到的各种情况，比如，订单已经成交等等。
+
 	return false, errors.New(r)
 }
 
-//TODO: 取消orderType
-type orderType int
-
-const (
-	//BUY 是使用money换coin的过程
-	BUY orderType = 1 //不用iota是因为btc38的api指定了数字1为买入
-	//SELL 是使用coin换money的过程
-	SELL orderType = 2
-)
-
-//Order 是订单
-//TODO: 转换成exchanges的标准形式
-type Order struct {
-	ID   int    `json:"id,string"`
-	Coin string `json:"coinname"`
-	//TODO: 取消orderType
-	OrderType orderType `json:"type,string"`
-	Amount    float64   `json:"amount,string"`
-	Price     float64   `json:"price,string"`
-	Time      string    `json:"time"`
-}
-
-//MyOrders 获取我所有的挂单
+//MyOrders 我所有还没有成交的挂单
 func (a *API) MyOrders(money, coin string) ([]ec.Order, error) {
-	rawData, err := a.getMyOrdersRawData(money, coin)
+	rawData, err := a.myOrdersRawData(money, coin)
 	if err != nil {
 		return nil, err
 	}
 
-	return handleMyOrdersRawData(rawData)
+	if a.ShowDetail {
+		log.Printf(`rawData btc38.MyOrders(%s, %s)=%s`, money, coin, string(rawData))
+	}
+
+	return a.handleMyOrdersRawData(rawData, money)
 }
 
-func (a *API) getMyOrdersRawData(money, coin string) ([]byte, error) {
-	body := a.myOrdersBodyMaker(money, coin)
+func (a *API) myOrdersRawData(money, coin string) ([]byte, error) {
+	body := a.myOrdersBody(money, coin)
 	return a.Post(getOrderListURL, body)
 }
 
-func (a *API) myOrdersBodyMaker(money, coin string) io.Reader {
+func (a *API) myOrdersBody(money, coin string) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -212,16 +234,44 @@ func (a *API) myOrdersBodyMaker(money, coin string) io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func handleMyOrdersRawData(rawData []byte) ([]ec.Order, error) {
-	resp := []ec.Order{}
+/*
+http://www.btc38.com/help/document/2581.html
+返回：
+如果挂单为空，返回 "no_order"
+如果挂单不为空，则返回比如 / if there is any order：
+[{"order_id":"123", "order_type":"1", "order_coinname":"BTC", "order_amount":"23.232323", "order_price":"0.2929"}, {"order_id":"123", "order_type":"1", "order_coinname":"LTC","order_amount":"23.232323", "order_price":"0.2929"}]
+*/
+func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, error) {
+	if string(rawData) == "no_order" {
+		return []ec.Order{}, nil
+	}
 
-	fmt.Println("ec.Order还是空的")
-
+	resp := []order{}
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
-		return nil, err
+		msg := fmt.Sprintf("JSONDecode %s时，出错:%s", string(rawData), err)
+		return nil, errors.New(msg)
 	}
-	return resp, nil
+
+	if a.ShowDetail {
+		log.Printf("\nBefore JSONDecode %s\nAfter JSONDecode %v\n", rawData, resp)
+	}
+
+	result := make([]ec.Order, len(resp))
+	for i, v := range resp {
+		r, err := v.normalize(money)
+		if err != nil {
+			msg := fmt.Sprintf("处理MyOrders的rawData失败，无法normalize:%s", err)
+			return nil, errors.New(msg)
+		}
+		result[i] = *r
+	}
+
+	if a.ShowDetail {
+		log.Printf("\nAfter normalize %v\n", result)
+	}
+
+	return result, nil
 }
 
 //MyTrade 是我的交易记录

@@ -61,7 +61,10 @@ func TestAPI(a API) string {
 		result += msg
 		fmt.Print(msg)
 	} else {
-		fmt.Printf("%s.TransRecords of cny and btc Since Tid = 1\n%s\n", a.Name(), tr)
+		fmt.Printf("%s.TransRecords of cny and btc Since Tid = 1\n", a.Name())
+		fmt.Println(tr[:3])
+		fmt.Println("... ... ...")
+		fmt.Println(tr[len(tr)-2:])
 	}
 
 	fmt.Printf("==测试%s.MyAccount()==\n", a.Name())
@@ -76,15 +79,29 @@ func TestAPI(a API) string {
 
 	fmt.Printf("==测试%s.Order()===\n", a.Name())
 	buyBTCPrice := btcPrice * 0.9
+	//FIXME: 删除下面一行
+	buyBTCPrice = 12345.6
 	buyMoney := 20.0
 	buyAmount := buyMoney / buyBTCPrice
 	orderID, err := a.Order(BUY, "cny", "btc", buyBTCPrice, buyAmount)
 	if err != nil {
-		msg := fmt.Sprintf(`%s.Order(BUY, "cny", "btc", %f,%f) Error:%s\n`, a.Name(), buyBTCPrice, buyAmount, err)
+		msg := fmt.Sprintf(`%s.Order(BUY, "cny", "btc", %f,%f) Error:%s`, a.Name(), buyBTCPrice, buyAmount, err) + "\n"
 		result += msg
 		fmt.Print(msg)
 	} else {
-		fmt.Printf(`%s.Order(BUY, "cny", "btc", %f,%f) 下单成功，订单号%d\n`, a.Name(), buyBTCPrice, buyAmount, orderID)
+		fmt.Printf(`%s.Order(BUY, "cny", "btc", %f,%f) 下单成功，订单号%d`, a.Name(), buyBTCPrice, buyAmount, orderID)
+		fmt.Println()
+	}
+
+	fmt.Printf("==测试%s.MyOrders()===\n", a.Name())
+	orders, err := a.MyOrders("cny", "btc")
+	if err != nil {
+		msg := fmt.Sprintf(`%s.MyOrders("cny", "btc") Error:%s`, a.Name(), err) + "\n"
+		result += msg
+		fmt.Print(msg)
+	} else {
+		fmt.Printf(`%s.MyOrders("cny", "btc")的挂单如下`, a.Name())
+		fmt.Printf("\n%v\n", orders)
 	}
 
 	fmt.Println("=====等待撤单=====")
@@ -94,13 +111,21 @@ func TestAPI(a API) string {
 	}
 
 	fmt.Printf("==测试%s.CancelOrder()===\n", a.Name())
-	canceled, err := a.CancelOrder("cny", "btc", orderID)
-	if err != nil{
-		msg := fmt.Sprintf(`%s.Order(BUY, "cny", "btc", %f,%f) Error:%s\n`, a.Name(), buyBTCPrice, buyAmount, err)
-		result += msg
-		fmt.Print(msg)
+	if orderID == 0 {
+		fmt.Println("orderID==0，无订单可取消")
 	} else {
-		fmt.Printf(`%s.Order(BUY, "cny", "btc", %f,%f) 下单成功，订单号%d\n`, a.Name(), buyBTCPrice, buyAmount, orderID)
+		canceled, err := a.CancelOrder("cny", "btc", orderID)
+		if err != nil {
+			msg := fmt.Sprintf(`%s.Order(BUY, "cny", "btc", %f,%f) Error:%s\n`, a.Name(), buyBTCPrice, buyAmount, err)
+			result += msg
+			fmt.Print(msg)
+		} else if canceled {
+			fmt.Printf(`%s.Order(BUY, "cny", "btc", %f,%f) 撤单功，订单号%d`, a.Name(), buyBTCPrice, buyAmount, orderID)
+			fmt.Println()
+		} else {
+			fmt.Println("err is nil, but canceled is false.")
+			time.Sleep(3 * time.Second)
+		}
 	}
 
 	return result

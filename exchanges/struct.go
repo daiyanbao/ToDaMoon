@@ -43,4 +43,22 @@ func (d *Depth) String() string {
 //Order 是交易所的订单信息
 //TODO: 写完Order
 type Order struct {
+	ID     int64
+	Date   int64
+	Money  string
+	Price  float64
+	Coin   string
+	Amount float64
+	Type   string
+}
+
+func (o *Order) String() string {
+	str := fmt.Sprintf("ID    :%d\n", o.ID)
+	str += fmt.Sprintf("Date  :%d\n", o.Date)
+	str += fmt.Sprintf("Money :%s\n", o.Money)
+	str += fmt.Sprintf("Price :%f\n", o.Price)
+	str += fmt.Sprintf("Coin  :%s\n", o.Coin)
+	str += fmt.Sprintf("Amount:%f\n", o.Amount)
+	str += fmt.Sprintf("Type  :%s\n", o.Type)
+	return str
 }

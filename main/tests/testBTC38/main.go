@@ -11,7 +11,7 @@ func main() {
 	fmt.Printf("===开始===%s的API测试===\n", a.Name())
 	result := ec.TestAPI(a)
 
-	fmt.Printf("==测试%s.AllTicker()==\n", a.Name())
+	fmt.Printf("\n==测试%s.AllTicker()==\n", a.Name())
 	at, err := a.AllTicker("cny")
 	if err != nil {
 		msg := fmt.Sprintf("%s.AllTicker Error:%s\n", a.Name(), err)

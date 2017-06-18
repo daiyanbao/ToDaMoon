@@ -60,3 +60,9 @@ func SleepFunc(duration time.Duration) func() {
 		beginTime = time.Now()
 	}
 }
+
+// //ParseTime 把string格式的时间，转换成time.time
+// //FIXME: finish This
+// func ParseTime(strTime string) time.time {
+
+// }
