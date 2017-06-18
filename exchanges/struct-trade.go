@@ -16,6 +16,16 @@ type Trade struct {
 	Type   string
 }
 
+func (t Trade) String() string {
+	str := "*****************\n"
+	str += fmt.Sprintf("Tid   :%d\n", t.Tid)
+	str += fmt.Sprintf("Date  :%d\n", t.Date)
+	str += fmt.Sprintf("Price :%f\n", t.Price)
+	str += fmt.Sprintf("Amount:%f\n", t.Amount)
+	str += fmt.Sprintf("Type  :%s\n", t.Type)
+	return str
+}
+
 //Attributes 实现了database.Attributer接口
 func (t *Trade) Attributes() []interface{} {
 	return []interface{}{&t.Tid, &t.Date, &t.Price, &t.Amount, &t.Type}

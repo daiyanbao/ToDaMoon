@@ -5,41 +5,44 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func (a *API) md5(time string) string {
-	md := fmt.Sprintf("%s_%d_%s_%s", a.PublicKey, a.ID, a.SecretKey, time)
-	md5 := ec.MD5([]byte(md))
-	return ec.HexEncodeToString(md5)
-}
-
 //MyAccount 返回BTC38的账户信息
 func (a *API) MyAccount() (*ec.Account, error) {
-	rawData, err := a.getMyBalanceRawData()
+	rawData, err := a.myAccountRawData()
 	if err != nil {
 		msg := fmt.Sprintf("无法获取%s的MyBalance的RawDate:%s", a.Name(), err)
 		return nil, errors.New(msg)
 	}
 
-	m, err := handleMyBalanceRawData(rawData)
+	if a.ShowDetail {
+		log.Printf(`rawData btc38.MyAccount()=%s`, string(rawData))
+	}
+
+	m, err := handleMyAccountRawData(rawData)
 	if err != nil {
 		msg := fmt.Sprintf("无法转换MyBalance的rawData(%s):%s", string(rawData), err)
 		return nil, errors.New(msg)
 	}
 
-	return m.normalize(), nil
+	if a.ShowDetail {
+		log.Printf(`After JSONDecode: btc38.MyAccount()=%v`, m)
+	}
+
+	return m.normalize(a.Markets["cny"])
 }
 
-func (a *API) getMyBalanceRawData() ([]byte, error) {
-	body := a.myBalanceBodyMaker()
-	return a.Post(getMyBalanceURL, body)
+func (a *API) myAccountRawData() ([]byte, error) {
+	body := a.myAccountBody()
+	return a.Post(myAccountURL, body)
 }
 
-func (a *API) myBalanceBodyMaker() io.Reader {
+func (a *API) myAccountBody() io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -51,7 +54,7 @@ func (a *API) myBalanceBodyMaker() io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func handleMyBalanceRawData(rawData []byte) (myBalance, error) {
+func handleMyAccountRawData(rawData []byte) (myBalance, error) {
 	resp := myBalance{}
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
@@ -153,7 +156,7 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 	if r == "succ" {
 		return true, nil
 	}
-
+	//TODO: 最好能够给出cancel时候，遇到的各种情况，比如，订单已经成交等等。
 	return false, errors.New(r)
 }
 
@@ -276,4 +279,10 @@ func handleMyTradesRawData(rawData []byte) (ec.Trades, error) {
 	}
 
 	return resp, nil
+}
+
+func (a *API) md5(time string) string {
+	md := fmt.Sprintf("%s_%d_%s_%s", a.PublicKey, a.ID, a.SecretKey, time)
+	md5 := ec.MD5([]byte(md))
+	return ec.HexEncodeToString(md5)
 }

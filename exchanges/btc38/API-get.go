@@ -95,9 +95,8 @@ func (a *API) depthRawData(money, coin string) ([]byte, error) {
 
 //TransRecords 返回市场的交易记录
 //当tid<=0时，返回最新的30条记录
-//TODO: 修改相关子函数的名称
 func (a *API) TransRecords(money, coin string, tid int64) (ec.Trades, error) {
-	rawData, err := a.getTradesRawData(money, coin, tid)
+	rawData, err := a.transRecordsRawData(money, coin, tid)
 	if err != nil {
 		return nil, err
 	}
@@ -111,18 +110,15 @@ func (a *API) TransRecords(money, coin string, tid int64) (ec.Trades, error) {
 	return resp, nil
 }
 
-func (a *API) getTradesRawData(money, coin string, tid int64) ([]byte, error) {
-	path := tradesURLMaker(money, coin, tid)
-	return a.Get(path)
-}
+func (a *API) transRecordsRawData(money, coin string, tid int64) ([]byte, error) {
+	path := urlMaker(transRecordsURL, money, coin)
 
-func tradesURLMaker(money, coin string, tid int64) string {
-	path := urlMaker(tradesURL, money, coin)
-	if tid <= 0 {
-		return path
+	if tid > 0 {
+		postfix := fmt.Sprintf("&tid=%d", tid)
+		path += postfix
 	}
-	postfix := fmt.Sprintf("&tid=%d", tid)
-	return path + postfix
+
+	return a.Get(path)
 }
 
 func urlMaker(URL string, money, coin string) string {

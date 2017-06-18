@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"sort"
 )
 
 //Account 是用户的账户
@@ -13,11 +14,51 @@ type Account struct {
 	TotalCNY float64
 }
 
+//NewAccount 返回*Account
+func NewAccount() *Account {
+	return &Account{
+		Coins: make(map[string]CoinStatus),
+	}
+}
+
 //CoinStatus 是每个coin在交易所中的状态
 //coin也包括cny,usd等真实的货币。
 type CoinStatus struct {
 	Available float64
 	Freezed   float64
+	Total     float64
+}
+
+func (cs CoinStatus) String() string {
+	return fmt.Sprintf("\t%f\t%f\t%f\n", cs.Available, cs.Freezed, cs.Total)
+}
+
+func (a Account) String() string {
+	result := ""
+
+	result += fmt.Sprintf("总金额: ￥%.2f\n", a.TotalCNY)
+	result += fmt.Sprintln("Coin\t可用\t\t冻结\t\t总计")
+
+	sortedCS := sortedCoins(a.Coins)
+
+	for _, k := range sortedCS {
+		result += k + a.Coins[k].String()
+	}
+
+	return result
+}
+
+func sortedCoins(m map[string]CoinStatus) []string {
+	result := make([]string, len(m))
+	i := 0
+
+	for k := range m {
+		result[i] = k
+		i++
+	}
+
+	sort.Strings(result)
+	return result
 }
 
 func readAccountJSON(exchangeName string) (*Account, error) {

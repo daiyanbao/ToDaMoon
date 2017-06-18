@@ -1,6 +1,11 @@
 package btc38
 
-import ec "ToDaMoon/exchanges"
+import (
+	ec "ToDaMoon/exchanges"
+	"errors"
+	"fmt"
+	"strconv"
+)
 
 type tickerResp struct {
 	Ticker ticker `json:"ticker"`
@@ -29,9 +34,57 @@ func (t ticker) normalize() *ec.Ticker {
 //MyBalance 是btc38的账户信息
 type myBalance map[string]string
 
-func (m myBalance) normalize() *ec.Account {
-	//TODO: 完成myBalance的转换程序
-	return nil
+func (m myBalance) normalize(coins []string) (*ec.Account, error) {
+	mba, err := convertMyBalanceAmount(m)
+	if err != nil {
+		msg := fmt.Sprintf("转换时失败：%s", err)
+		return nil, errors.New(msg)
+	}
+
+	a := ec.NewAccount()
+	a.TotalCNY = mba["cny_balance"]
+
+	coins = append(coins, "cny")
+
+	for _, coin := range coins {
+		tKey, fKey := getMyBalanceKeys(coin)
+		total := mba[tKey]
+		freezed := mba[fKey]
+		available := total - freezed
+		a.Coins[coin] = ec.CoinStatus{
+			Total:     total,
+			Freezed:   freezed,
+			Available: available,
+		}
+	}
+
+	return a, nil
+}
+
+func convertMyBalanceAmount(m myBalance) (map[string]float64, error) {
+	result := make(map[string]float64)
+
+	for k, v := range m {
+		if v == "0.000000" { //因为0项很多，所以用这个来加速。
+			result[k] = 0
+			continue
+		}
+
+		amount, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			msg := fmt.Sprintf("无法把%s的%s转换成float64: %s", k, v, err)
+			return nil, errors.New(msg)
+		}
+		result[k] = amount
+	}
+
+	return result, nil
+}
+
+func getMyBalanceKeys(coin string) (totalKey, freezedKey string) {
+	totalKey = fmt.Sprintf("%s_balance", coin)
+	freezedKey = fmt.Sprintf("%s_balance_lock", coin)
+	return totalKey, freezedKey
 }
 
 // Trade :okcoin's Trade struct
