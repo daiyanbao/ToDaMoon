@@ -9,16 +9,16 @@ import (
 
 //Ticker 可以返回coin的ticker信息
 func (a *API) Ticker(money, coin string) (*ec.Ticker, error) {
-	rawData, err := a.getTickerRawData(money, coin)
+	rawData, err := a.tickerRawData(money, coin)
 	if err != nil {
 		return nil, err
 	}
 
 	if a.ShowDetail {
-		log.Printf(`btc38.Ticker("%s","%s")=%s`, money, coin, string(rawData))
+		log.Printf(`rawData btc38.Ticker("%s","%s")=%s`, money, coin, string(rawData))
 	}
 
-	resp := TickerResponse{}
+	resp := tickerResp{}
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
@@ -33,15 +33,23 @@ func (a *API) Ticker(money, coin string) (*ec.Ticker, error) {
 
 //AllTicker 返回money市场中全部coin的ticker
 func (a *API) AllTicker(money string) (map[string]*ec.Ticker, error) {
-	rawData, err := a.getTickerRawData("all", money)
+	rawData, err := a.tickerRawData(money, "all")
 	if err != nil {
 		return nil, err
 	}
 
-	resp := make(map[string]TickerResponse)
+	if a.ShowDetail {
+		log.Printf(`rawData btc38.AllTicker("%s")=%s`, money, string(rawData))
+	}
+
+	resp := make(map[string]tickerResp)
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
+	}
+
+	if a.ShowDetail {
+		log.Printf(`After JSONDecode: btc38.AllTicker("%s")=%v`, money, resp)
 	}
 
 	result := make(map[string]*ec.Ticker)
@@ -51,21 +59,9 @@ func (a *API) AllTicker(money string) (map[string]*ec.Ticker, error) {
 	return result, nil
 }
 
-func (a *API) getTickerRawData(money, coin string) ([]byte, error) {
-	path := tickerURLMaker(money, coin)
+func (a *API) tickerRawData(money, coin string) ([]byte, error) {
+	path := urlMaker(tickerURL, money, coin)
 	return a.Get(path)
-}
-
-func tickerURLMaker(money, coin string) string {
-	return urlMaker(tickerURL, money, coin)
-}
-
-func urlMaker(URL string, money, coin string) string {
-	v := url.Values{}
-	v.Set("c", coin)
-	v.Set("mk_type", money)
-
-	return ec.Path(URL, v)
 }
 
 //Depth 是反馈市场深度信息
@@ -123,4 +119,13 @@ func tradesURLMaker(money, coin string, tid int64) string {
 	}
 	postfix := fmt.Sprintf("&tid=%d", tid)
 	return path + postfix
+}
+
+func urlMaker(URL string, money, coin string) string {
+	v := url.Values{}
+
+	v.Set("c", coin)
+	v.Set("mk_type", money)
+
+	return ec.Path(URL, v)
 }

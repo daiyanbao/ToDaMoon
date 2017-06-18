@@ -2,13 +2,11 @@ package btc38
 
 import ec "ToDaMoon/exchanges"
 
-// TickerResponse is TickerResponse
-type TickerResponse struct {
-	Ticker Ticker `json:"ticker"`
+type tickerResp struct {
+	Ticker ticker `json:"ticker"`
 }
 
-// Ticker is Ticker
-type Ticker struct {
+type ticker struct {
 	High float64 `json:"high,float64"`
 	Low  float64 `json:"low,float64"`
 	Last float64 `json:"last,float64"`
@@ -17,7 +15,7 @@ type Ticker struct {
 	Sell float64 `json:"sell,float64"`
 }
 
-func (t Ticker) normalize() *ec.Ticker {
+func (t ticker) normalize() *ec.Ticker {
 	return &ec.Ticker{
 		High: t.High,
 		Low:  t.Low,

@@ -1,5 +1,7 @@
 package exchanges
 
+import "fmt"
+
 //API 交易所的标准接口
 //每一个子交易所，都要求返回符合这个接口的子例
 type API interface {
@@ -27,6 +29,27 @@ const (
 )
 
 //TestAPI 用于测试通用API接口的功能
-func TestAPI(a API) {
+func TestAPI(a API) string {
+	result := ""
+	fmt.Printf("==测试%s.Ticker()==\n", a.Name())
+	t, err := a.Ticker("cny", "btc")
+	if err != nil {
+		msg := fmt.Sprintf("%s.Ticker Error:%s\n", a.Name(), err)
+		result += msg
+		fmt.Print(msg)
+	} else {
+		fmt.Printf("%s.Ticker of cny and btc\n%s\n", a.Name(), t)
+	}
 
+	fmt.Printf("==测试%s.Depth()==\n", a.Name())
+	d, err := a.Depth("cny", "btc")
+	if err != nil {
+		msg := fmt.Sprintf("%s.Depth Error:%s\n", a.Name(), err)
+		result += msg
+		fmt.Print(msg)
+	} else {
+		fmt.Printf("%s.Depth of cny and btc\n%s\n", a.Name(), d)
+	}
+
+	return result
 }
