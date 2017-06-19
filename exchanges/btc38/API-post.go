@@ -86,9 +86,10 @@ func (a *API) Order(t ec.OrderType, money, coin string, price, amount float64) (
 }
 
 func (a *API) orderRawData(ot int, money, coin string, price, amount float64) ([]byte, error) {
-	//NOTICE: btc38的价格只支持6位有效数字。比如现在BTC的价格是18000多，如果买价是12345.6就可以下单，如果买价是12345.67，就会显示deciError1
-	priceStr := priceStr(price)
+	//NOTICE: btc38的价格**可能**只支持6位有效数字。比如现在BTC的价格是18000多，如果买价是12345.6就可以下单，如果买价是12345.67，就会显示deciError1
+	priceStr := price2Str(price)
 	amountStr := fmt.Sprintf("%.6f", amount)
+
 	body := a.orderBody(ot, money, coin, priceStr, amountStr)
 
 	if a.ShowDetail {

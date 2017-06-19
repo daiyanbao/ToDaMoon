@@ -2,7 +2,7 @@ package btc38
 
 import "testing"
 
-func Test_priceStr(t *testing.T) {
+func Test_price2Str(t *testing.T) {
 	data := map[float64]string{
 		123456789.12345: "123456789",
 		12345.6789:      "12345.6",
@@ -12,7 +12,7 @@ func Test_priceStr(t *testing.T) {
 	}
 
 	for k, v := range data {
-		psk := priceStr(k)
+		psk := price2Str(k)
 		if psk != v {
 			t.Errorf("%f应该被转换成%s，而不是%s", k, v, psk)
 		}

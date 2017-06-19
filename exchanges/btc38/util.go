@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func priceStr(price float64) string {
+func price2Str(price float64) string {
 	ps := fmt.Sprintf("%.5f", price)
 
 	i := strings.Index(ps, ".")
