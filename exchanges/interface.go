@@ -1,11 +1,15 @@
 package exchanges
 
-import "fmt"
-import "time"
+import (
+	"ToDaMoon/util"
+	"fmt"
+	"time"
+)
 
 //API 交易所的标准接口
 //每一个子交易所，都要求返回符合这个接口的子例
 type API interface {
+	//TODO: 为每个方法编写说明
 	Name() string
 	Ticker(money, coin string) (*Ticker, error)
 	Depth(money, coin string) (*Depth, error)
@@ -14,7 +18,9 @@ type API interface {
 	Order(t OrderType, money, coin string, price, amount float64) (int64, error)
 	CancelOrder(money, coin string, orderID int64) (bool, error)
 	MyOrders(money, coin string) ([]Order, error)
-	MyTransRecords(money, coin string, tid int64) (Trades, error)
+
+	//MyTransRecords 返回在Date之后的成交记录
+	MyTransRecords(money, coin string, date int64) (Trades, error)
 }
 
 //TODO: 把以下内容，移入struct.go
@@ -126,7 +132,19 @@ func TestAPI(a API) string {
 		}
 	}
 
-
+	fmt.Printf("==测试%s.MyTransRecords()===\n", a.Name())
+	money := "cny"
+	coin := "doge"
+	maxDate := int64(1)
+	myRecords, err := a.MyTransRecords(money, coin, maxDate)
+	if err != nil {
+		msg := fmt.Sprintf(`%s.MyTransRecords("%s","%s", %d) Error:%s`, a.Name(), money, coin, maxDate, err)
+		result += msg + "\n"
+		fmt.Print(msg)
+	} else {
+		fmt.Printf("%s之后，%s的%s的成交记录\n", util.DateOf(maxDate), money, coin)
+		fmt.Println(myRecords)
+	}
 
 	return result
 }
