@@ -274,17 +274,6 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 	return result, nil
 }
 
-//MyTrade 是我的交易记录
-//TODO: 转换成exchanges的标准结果
-type myTrade struct {
-	ID       int     `json:"id,string"`
-	BuyerID  string  `json:"buyer_id"`
-	SellerID string  `json:"seller_id"`
-	Volume   float64 `json:"volume,string"`
-	Price    float64 `json:"price,string"`
-	Coin     string  `json:"coinname"`
-	Time     string  `json:"time"`
-}
 
 //MyTransRecords 获取我的交易记录
 //FIXME: 这个函数的方法，还没有统一。
@@ -294,7 +283,7 @@ func (a *API) MyTransRecords(money, coin string, date int64) (ec.Trades, error) 
 
 //MyTradeList 按照btc38的API的格式，返回交易记录结果。
 //TODO: 这个方法保留，但是要换名字。重新编写一个符合API接口的方法。
-func (a *API) MyTradeList(money, coin string, page int64) (ec.Trades, error) {
+func (a *API) MyTradeList(money, coin string, page int64) ([]MyTrade, error) {
 	rawData, err := a.myTradeListRawData(money, coin, page)
 	if err != nil {
 		return nil, err
@@ -324,8 +313,8 @@ func (a *API) myTradeListBody(money, coin string, page int64) io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func (a *API) handleMyTradeListRawData(rawData []byte) (ec.Trades, error) {
-	resp := []myTrade{}
+func (a *API) handleMyTradeListRawData(rawData []byte) ([]MyTrade, error) {
+	resp := []MyTrade{}
 	//TODO: 这个函数是没有完成的。
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
@@ -335,10 +324,8 @@ func (a *API) handleMyTradeListRawData(rawData []byte) (ec.Trades, error) {
 	if a.ShowDetail {
 		log.Printf("\n交易记录明细 %v\n", resp)
 	}
-	//TODO: 删除此处内容
-	fmt.Println("这个函数是没有完成的")
-	//FIXME: 修改返回的结果
-	return ec.Trades{}, nil
+
+	return resp, nil
 }
 
 func (a *API) md5(time string) string {

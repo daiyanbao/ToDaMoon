@@ -2,6 +2,7 @@ package btc38
 
 import (
 	ec "ToDaMoon/exchanges"
+	"ToDaMoon/util"
 	"errors"
 	"fmt"
 	"strconv"
@@ -140,5 +141,54 @@ func (o order) normalize(money string) (*ec.Order, error) {
 		Coin:   o.Coin,
 		Amount: o.Amount,
 		Type:   oType,
+	}, nil
+}
+
+//MyTrade 是btc38的交易记录的格式
+type MyTrade struct {
+	ID       int64   `json:"id,string"`
+	BuyerID  int     `json:"buyer_id,string"`
+	SellerID int     `json:"seller_id,string"`
+	Volume   float64 `json:"volume,string"`
+	Price    float64 `json:"price,string"`
+	Coin     string  `json:"coinname"`
+	Time     string  `json:"time"`
+}
+
+func (mt MyTrade) String() string {
+	str := fmt.Sprintf("ID      :%d\n", mt.ID)
+	str += fmt.Sprintf("BuyerID :%d\n", mt.BuyerID)
+	str += fmt.Sprintf("SellerID:%d\n", mt.SellerID)
+	str += fmt.Sprintf("Volume  :%f\n", mt.Volume)
+	str += fmt.Sprintf("Price   :%f\n", mt.Price)
+	str += fmt.Sprintf("Coin    :%s\n", mt.Coin)
+	str += fmt.Sprintf("Time    :%s\n", mt.Time)
+	return str
+}
+
+func (mt MyTrade) normalize(myUserID int) (*ec.Trade, error) {
+	d, err := util.ParseLocalTime(mt.Time)
+	if err != nil {
+		msg := fmt.Sprintf("无法把%s转换timestamp: %s", mt.Time, err)
+		return nil, errors.New(msg)
+	}
+
+	t := ""
+	switch myUserID {
+	case mt.BuyerID:
+		t = "buy"
+	case mt.SellerID:
+		t = "sell"
+	default:
+		msg := fmt.Sprintf("交易记录不包含本人ID=%d", myUserID)
+		return nil, errors.New(msg)
+	}
+
+	return &ec.Trade{
+		Tid:    mt.ID,
+		Date:   d.Unix(),
+		Price:  mt.Price,
+		Amount: mt.Volume,
+		Type:   t,
 	}, nil
 }

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"time"
 )
@@ -61,8 +63,16 @@ func SleepFunc(duration time.Duration) func() {
 	}
 }
 
-// //ParseTime 把string格式的时间，转换成time.time
-// //FIXME: finish This
-// func ParseTime(strTime string) time.time {
+// ParseLocalTime 把string格式的时间，转换成time.time
+// NOTICE: 我写这个函数的原因是
+// 1. 添加更详解的错误说明。
+// 2. 编写单元测试，查看是否真的转换成功了。
+func ParseLocalTime(strTime string) (*time.Time, error) {
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", strTime, time.Local)
+	if err != nil {
+		msg := fmt.Sprintf("无法把%s转换成time.time格式: %s", strTime, err)
+		return nil, errors.New(msg)
+	}
 
-// }
+	return &t, nil
+}

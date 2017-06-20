@@ -41,3 +41,13 @@ func Test_WaitFunc(t *testing.T) {
 		t.Error("wait()没能在updateCycle结束前，修改为更小的updateCycle")
 	}
 }
+
+func Test_ParseLocalTime(t *testing.T) {
+	now := time.Now()
+	nowStr := now.Format("2006-01-02 15:04:05")
+	nowPIT, _ := ParseLocalTime(nowStr)
+
+	if now.Unix()-nowPIT.Unix() != 0 {
+		t.Errorf("无法把%s转换成%s，而是转换成了%s", nowStr, now, nowPIT)
+	}
+}
