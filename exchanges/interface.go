@@ -10,9 +10,16 @@ import (
 //每一个子交易所，都要求返回符合这个接口的子例
 type API interface {
 	//TODO: 为每个方法编写说明
+	//交易所的名称
 	Name() string
 	Ticker(money, coin string) (*Ticker, error)
+
+	//TODO: 对返回结果进行排序
+	//反馈市场中币种双方要价，已经排序过了
+	//Ask[0]是最低的卖价
+	//Bids[0]是最高的买价
 	Depth(money, coin string) (*Depth, error)
+
 	TransRecords(money, coin string, tid int64) (Trades, error)
 	MyAccount() (*Account, error)
 	Order(t OrderType, money, coin string, price, amount float64) (int64, error)
