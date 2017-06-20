@@ -23,10 +23,24 @@ func (t *Ticker) String() string {
 }
 
 //Depth 记录深度信息
+//TODO: 修改元素的属性
 type Depth struct {
 	Asks [][2]float64
 	Bids [][2]float64
 }
+
+//Quotation 是报价单的意思。
+type Quotation struct {
+	Price, Amount float64
+}
+
+//AskQuotation 是卖出价的报价单表
+//TODO: 添加排序方法
+type AskQuotation []Quotation
+
+//BidQuotation 是买入价的报价单表
+//TODO: 添加排序方法
+type BidQuotation []Quotation
 
 func (d *Depth) String() string {
 	str := fmt.Sprintln("Asks:")
@@ -62,3 +76,13 @@ func (o *Order) String() string {
 	str += fmt.Sprintf("Type  :%s\n", o.Type)
 	return str
 }
+
+//OrderType 指定了交易的类型
+type OrderType string
+
+const (
+	//BUY 是使用money换coin的过程
+	BUY OrderType = "buy"
+	//SELL 是使用coin换money的过程
+	SELL OrderType = "sell"
+)

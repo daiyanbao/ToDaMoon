@@ -287,24 +287,28 @@ type myTrade struct {
 }
 
 //MyTransRecords 获取我的交易记录
-//TODO: 修改子函数的名称
 //FIXME: 这个函数的方法，还没有统一。
+func (a *API) MyTransRecords(money, coin string, date int64) (ec.Trades, error) {
+	return nil, nil
+}
+
+//MyTradeList 按照btc38的API的格式，返回交易记录结果。
 //TODO: 这个方法保留，但是要换名字。重新编写一个符合API接口的方法。
-func (a *API) MyTransRecords(money, coin string, page int64) (ec.Trades, error) {
-	rawData, err := a.myTransRecordsRawData(money, coin, page)
+func (a *API) MyTradeList(money, coin string, page int64) (ec.Trades, error) {
+	rawData, err := a.myTradeListRawData(money, coin, page)
 	if err != nil {
 		return nil, err
 	}
 
-	return a.handleMyTransRecordsRawData(rawData)
+	return a.handleMyTradeListRawData(rawData)
 }
 
-func (a *API) myTransRecordsRawData(money, coin string, page int64) ([]byte, error) {
-	body := a.myTradesBodyMaker(money, coin, page)
+func (a *API) myTradeListRawData(money, coin string, page int64) ([]byte, error) {
+	body := a.myTradeListBody(money, coin, page)
 	return a.Post(getMyTradeListURL, body)
 }
 
-func (a *API) myTradesBodyMaker(money, coin string, page int64) io.Reader {
+func (a *API) myTradeListBody(money, coin string, page int64) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
@@ -320,7 +324,7 @@ func (a *API) myTradesBodyMaker(money, coin string, page int64) io.Reader {
 	return strings.NewReader(encoded)
 }
 
-func (a *API) handleMyTransRecordsRawData(rawData []byte) (ec.Trades, error) {
+func (a *API) handleMyTradeListRawData(rawData []byte) (ec.Trades, error) {
 	resp := []myTrade{}
 	//TODO: 这个函数是没有完成的。
 	err := ec.JSONDecode(rawData, &resp)

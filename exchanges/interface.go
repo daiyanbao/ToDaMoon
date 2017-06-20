@@ -1,7 +1,6 @@
 package exchanges
 
 import (
-	"ToDaMoon/util"
 	"fmt"
 	"time"
 )
@@ -9,38 +8,37 @@ import (
 //API 交易所的标准接口
 //每一个子交易所，都要求返回符合这个接口的子例
 type API interface {
-	//TODO: 为每个方法编写说明
 	//交易所的名称
 	Name() string
+
+	//反馈coin的交易指
 	Ticker(money, coin string) (*Ticker, error)
 
 	//TODO: 对返回结果进行排序
 	//反馈市场中币种双方要价，已经排序过了
-	//Ask[0]是最低的卖价
+	//Asks[0]是最低的卖价
 	//Bids[0]是最高的买价
 	Depth(money, coin string) (*Depth, error)
 
+	//返回在Tid之后的一组全局交易记录，
+	//不同的交易所，返回的长度不一样。
 	TransRecords(money, coin string, tid int64) (Trades, error)
+
+	//返回你在exchange的各个币的额度。
 	MyAccount() (*Account, error)
+
+	//如果下单成功，会返回订单编号。
 	Order(t OrderType, money, coin string, price, amount float64) (int64, error)
+
+	//REVIEW: 想想返回bool是否可以改进。
 	CancelOrder(money, coin string, orderID int64) (bool, error)
+
+	//还没有成交的挂单
 	MyOrders(money, coin string) ([]Order, error)
 
 	//MyTransRecords 返回在Date之后的成交记录
 	MyTransRecords(money, coin string, date int64) (Trades, error)
 }
-
-//TODO: 把以下内容，移入struct.go
-
-//OrderType 指定了交易的类型
-type OrderType string
-
-const (
-	//BUY 是使用money换coin的过程
-	BUY OrderType = "buy"
-	//SELL 是使用coin换money的过程
-	SELL OrderType = "sell"
-)
 
 //TestAPI 用于测试通用API接口的功能
 func TestAPI(a API) string {
@@ -139,19 +137,19 @@ func TestAPI(a API) string {
 		}
 	}
 
-	fmt.Printf("==测试%s.MyTransRecords()===\n", a.Name())
-	money := "cny"
-	coin := "doge"
-	maxDate := int64(1)
-	myRecords, err := a.MyTransRecords(money, coin, maxDate)
-	if err != nil {
-		msg := fmt.Sprintf(`%s.MyTransRecords("%s","%s", %d) Error:%s`, a.Name(), money, coin, maxDate, err)
-		result += msg + "\n"
-		fmt.Print(msg)
-	} else {
-		fmt.Printf("%s之后，%s的%s的成交记录\n", util.DateOf(maxDate), money, coin)
-		fmt.Println(myRecords)
-	}
+	// fmt.Printf("==测试%s.MyTransRecords()===\n", a.Name())
+	// money := "cny"
+	// coin := "doge"
+	// maxDate := int64(1)
+	// myRecords, err := a.MyTransRecords(money, coin, maxDate)
+	// if err != nil {
+	// msg := fmt.Sprintf(`%s.MyTransRecords("%s","%s", %d) Error:%s`, a.Name(), money, coin, maxDate, err)
+	// result += msg + "\n"
+	// fmt.Print(msg)
+	// } else {
+	// fmt.Printf("%s之后，%s的%s的成交记录\n", util.DateOf(maxDate), money, coin)
+	// fmt.Println(myRecords)
+	// }
 
 	return result
 }
