@@ -19,7 +19,7 @@ type Trade struct {
 func (t Trade) String() string {
 	str := "*****************\n"
 	str += fmt.Sprintf("Tid   :%d\n", t.Tid)
-	str += fmt.Sprintf("Date  :%d\n", t.Date)
+	str += fmt.Sprintf("Date  :%d %s\n", t.Date, util.DateOf(t.Date))
 	str += fmt.Sprintf("Price :%f\n", t.Price)
 	str += fmt.Sprintf("Amount:%f\n", t.Amount)
 	str += fmt.Sprintf("Type  :%s\n", t.Type)

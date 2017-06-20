@@ -274,10 +274,31 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 	return result, nil
 }
 
-
 //MyTransRecords 获取我的交易记录
 //FIXME: 这个函数的方法，还没有统一。
 func (a *API) MyTransRecords(money, coin string, date int64) (ec.Trades, error) {
+	//TODO: 完成这个方法
+
+	mtl, err := a.MyTradeList(money, coin, 1)
+	if err != nil {
+		msg := fmt.Sprintf("MyTradeList(%s, %s)获取失败:%s", money, coin, err)
+		return nil, errors.New(msg)
+	}
+
+	res := ec.Trades{}
+	for _, mt := range mtl {
+		t, err := mt.normalize(a.ID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, t)
+	}
+
+	return res, nil
+}
+
+//FIXME: 把MyTransRecord抽象完成。
+func (a *API) nomalizeMytradeList() (ec.Trades, error) {
 	return nil, nil
 }
 
@@ -315,14 +336,13 @@ func (a *API) myTradeListBody(money, coin string, page int64) io.Reader {
 
 func (a *API) handleMyTradeListRawData(rawData []byte) ([]MyTrade, error) {
 	resp := []MyTrade{}
-	//TODO: 这个函数是没有完成的。
 	err := ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
 	}
 
 	if a.ShowDetail {
-		log.Printf("\n交易记录明细 %v\n", resp)
+		log.Printf("\n前3条交易记录明细 %s\n", resp[:3])
 	}
 
 	return resp, nil
