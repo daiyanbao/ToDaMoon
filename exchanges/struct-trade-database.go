@@ -1,5 +1,11 @@
 package exchanges
 
+import (
+	"ToDaMoon/database"
+	"ToDaMoon/util"
+	"errors"
+	"fmt"
+)
 
 //TradesDB 用来存放exchange的历史交易数据的数据库
 type TradesDB struct {
