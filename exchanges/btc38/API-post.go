@@ -324,10 +324,10 @@ func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
 			msg := fmt.Sprintf("nextPageList 无法获取%s.MyTradeList(%s, %s, %d)的数据: %s", a.Name(), money, coin, page, err)
 			return nil, errors.New(msg)
 		}
+		//TODO: 删除此处内容
 		fmt.Println(mts)
 
 		page++
-
 		return nil, nil
 	}
 }
