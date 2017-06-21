@@ -33,8 +33,137 @@ func (t *Trade) Attributes() []interface{} {
 //newTrade 返回了一个*Trade变量。
 func newTrade() database.Attributer {
 	return &Trade{}
-}
+
 
 //Trades 是*Trade的切片
 //因为会有很多关于[]*Trade的操作，所以，设置了这个方法。
 type Trades []*Trade
+
+//Len returns length of ts
+func (ts Trades) Len() int {
+	return len(ts)
+}
+/*
+func (ts Trades) Less(i, j int) bool {
+	return ts[i].Tid < ts[j].Tid
+}
+
+func (ts Trades) Swap(i, j int) {
+	ts[i], ts[j] = ts[j], ts[i]
+}
+
+func (ts Trades) Sort() {
+	sort.Sort(ts)
+}
+
+func (ts Trades) IsUnique() (bool, []int64) {
+	var repeatID []int64
+	if ts.Len() < 2 {
+		return true, nil
+	}
+	tids := make(TidSlice, ts.Len())
+	for i := range ts {
+		tids[i] = ts[i].Tid
+	}
+	tids.Sort()
+
+	tempTid := tids[0]
+
+	for i := 1; i < tids.Len(); i++ {
+		if tempTid == tids[i] {
+			repeatID = append(repeatID, tempTid)
+		} else {
+			tempTid = tids[i]
+		}
+	}
+
+	if repeatID == nil {
+		return true, nil
+	}
+	return false, repeatID
+}
+
+func (ts Trades) PrintIDDiff() {
+	for i := 0; i < ts.Len()-1; i++ {
+		fmt.Print(ts[i+1].Tid-ts[i].Tid, ",")
+	}
+}
+
+func (ts Trades) IndexOf(date int64) int {
+	length := len(ts)
+	switch {
+	case date <= ts[0].Date:
+		return 0
+	case ts[length-1].Date < date:
+		return length
+	default:
+		for i, t := range ts {
+			if date <= t.Date {
+				return i
+			}
+		}
+	}
+	panic("NEVER REACH THIS.")
+}
+
+//Result included startDate, But WITHOUT endDate.
+func (ts Trades) CopyBetween(startDate, endDate int64) Trades {
+	ts.Sort()
+	s := ts.IndexOf(startDate)
+	e := ts.IndexOf(endDate)
+	if s == e {
+		return nil
+	}
+	result := make(Trades, e-s, e-s)
+	copy(result, ts[s:e:e])
+	return result
+}
+
+// DropBefore return Droped Data, Keep the others.
+func (ts *Trades) DropBefore(startDate int64) Trades {
+	s := ts.IndexOf(startDate)
+	if s == 0 {
+		return nil
+	}
+	result := make(Trades, s, s)
+	copy(result, (*ts)[:s:s]) // copy丢弃的数据到新的Trades可以避免，修改丢弃数据时候，产生对ts的修改。
+	*ts = (*ts)[s:ts.Len():ts.Len()]
+	return result
+}
+
+// CutFirstDate 会cut掉ts中,所有包含ts[0].Date值的数据，并作为返回值。
+// 这个默认 ts已经是排序好了的。
+func (ts *Trades) CutFirstDate() Trades {
+	result := Trades{}
+	firstDate := (*ts)[0].Date
+
+	// 首先处理ts中只有一个Date值的情况。
+	if firstDate == (*ts)[ts.Len()-1].Date {
+		result = append(result, (*ts)...)
+		*ts = (*ts)[ts.Len():ts.Len()]
+		return result
+	}
+
+	for i, t := range *ts {
+		if t.Date != firstDate {
+			result = append(result, (*ts)[:i]...)
+			*ts = (*ts)[i:ts.Len()]
+
+			// fmt.Println(i)
+			//fmt.Println("result", result[result.Len()-1].Tid)
+
+			return result
+		}
+	}
+	panic("NEVER BE HERE")
+}
+
+func (ts Trades) Trans() *pb.Coin {
+	result := new(pb.Coin)
+	result.Trades = []*pb.Trade{}
+	for i := range ts {
+		result.Trades = append(result.Trades, ts[i].trans())
+	}
+	return result
+}
+*/
