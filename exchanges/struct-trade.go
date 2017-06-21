@@ -59,6 +59,23 @@ func (ts Trades) Sort() {
 	sort.Sort(ts)
 }
 
+//After 返回ts中大于tid的部分
+func (ts Trades) After(tid int64) Trades {
+	i := ts.IndexOf(tid)
+	return ts[i+1:]
+}
+
+//IndexOf 返回tid所在的Index
+func (ts Trades) IndexOf(tid int64) int {
+	for i, t := range ts {
+		if t.Tid == tid {
+			return i
+		}
+	}
+
+	return ts.Len() - 1
+}
+
 /*
 
 func (ts Trades) IsUnique() (bool, []int64) {

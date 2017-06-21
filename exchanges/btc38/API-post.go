@@ -275,48 +275,28 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 }
 
 //MyTransRecords 获取我的交易记录
-func (a *API) MyTransRecords(money, coin string, Tid int64) (ec.Trades, error) {
-	//TODO: 完成这个方法
-
+func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
+	next := nextECTrades(a, money, coin)
+	res := ec.Trades{}
 	done := false
 	//res := ec.Trades{}
 
 	for !done {
-		//获取myTrade数据，len(mt)==0 return
-		//转换成标准的ec.Trades 格式 tempECTrades
-
-		//找出所有符合条件的tempECTrades2
-		//len(tempECTrades2)==0 , return
-
-		//res = append(res, tempECTrades2)
-		done = true
-
-		//len(tempECTrades2) < len(tempECTrades), return
-
-	}
-	//return
-
-	mtl, err := a.MyTradeList(money, coin, 1)
-	if err != nil {
-		msg := fmt.Sprintf("MyTradeList(%s, %s)获取失败:%s", money, coin, err)
-		return nil, errors.New(msg)
-	}
-
-	res := ec.Trades{}
-	for _, mt := range mtl {
-		t, err := mt.normalize(a.ID)
+		temp, err := next()
 		if err != nil {
-			return nil, err
+			msg := fmt.Sprintf("获取next()失败:%s", err)
+			return nil, errors.New(msg)
 		}
-		res = append(res, t)
+		//获取myTrade数据，len(mt)==0 return
+		res, done = appendECTrades(res, temp, tid)
 	}
-
 	return res, nil
 }
 
 //nextPageList
 func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
-	page := 1 //REVIEW: how about page = 0
+	//REVIEW: how about page = 0
+	page := 1
 
 	return func() (ec.Trades, error) {
 		mts, err := a.MyTradeList(money, coin, page)
@@ -324,19 +304,22 @@ func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
 			msg := fmt.Sprintf("nextPageList 无法获取%s.MyTradeList(%s, %s, %d)的数据: %s", a.Name(), money, coin, page, err)
 			return nil, errors.New(msg)
 		}
-		//TODO: 删除此处内容
-		fmt.Println(mts)
+
+		res, err := myTrades2ECTrades(mts, a.ID)
+		if err != nil {
+			msg := fmt.Sprintf("无法把nextECTrades获取的%s转换成ec.Trades: %s", mts, err)
+			return nil, errors.New(msg)
+		}
 
 		page++
-		return nil, nil
+		return res, nil
 	}
 }
 
-//FIXME: 把MyTransRecord抽象完成。
-func (a *API) myTrades2ECTrades(mts []MyTrade) (ec.Trades, error) {
+func myTrades2ECTrades(mts []MyTrade, ID int) (ec.Trades, error) {
 	res := make(ec.Trades, len(mts))
 	for i, mt := range mts {
-		et, err := mt.normalize(a.ID)
+		et, err := mt.normalize(ID)
 		if err != nil {
 			msg := fmt.Sprintf("无法把%s转换成ec.Trade: %s", mt, err)
 			return nil, errors.New(msg)
@@ -344,10 +327,23 @@ func (a *API) myTrades2ECTrades(mts []MyTrade) (ec.Trades, error) {
 		res[i] = et
 	}
 
-	//mts是降序，ec.Trades是升序，所以res要reverse一下
+	//mts是降序，ec.Trades是升序，所以res要进行排序。
 	res.Sort()
-
 	return res, nil
+}
+
+func appendECTrades(res, temp ec.Trades, tid int64) (ec.Trades, bool) {
+	temp.Sort()
+	switch {
+	case tid < temp[0].Tid:
+		res = append(res, temp...)
+		return res, false //没有找完
+	case tid < temp[temp.Len()-1].Tid:
+		res = append(res, temp.After(tid)...)
+		return res, true //已经找完了。
+	default:
+		return res, true //已经找完了。
+	}
 }
 
 //MyTradeList 按照btc38的API的格式，返回交易记录结果。
