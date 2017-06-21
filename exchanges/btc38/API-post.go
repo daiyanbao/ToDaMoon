@@ -275,9 +275,26 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 }
 
 //MyTransRecords 获取我的交易记录
-//FIXME: 这个函数的方法，还没有统一。
 func (a *API) MyTransRecords(money, coin string, Tid int64) (ec.Trades, error) {
 	//TODO: 完成这个方法
+
+	done := false
+	//res := ec.Trades{}
+
+	for !done {
+		//获取myTrade数据，len(mt)==0 return
+		//转换成标准的ec.Trades 格式 tempECTrades
+
+		//找出所有符合条件的tempECTrades2
+		//len(tempECTrades2)==0 , return
+
+		//res = append(res, tempECTrades2)
+		done = true
+
+		//len(tempECTrades2) < len(tempECTrades), return
+
+	}
+	//return
 
 	mtl, err := a.MyTradeList(money, coin, 1)
 	if err != nil {
@@ -297,14 +314,44 @@ func (a *API) MyTransRecords(money, coin string, Tid int64) (ec.Trades, error) {
 	return res, nil
 }
 
+//nextPageList
+func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
+	page := 1 //REVIEW: how about page = 0
+
+	return func() (ec.Trades, error) {
+		mts, err := a.MyTradeList(money, coin, page)
+		if err != nil {
+			msg := fmt.Sprintf("nextPageList 无法获取%s.MyTradeList(%s, %s, %d)的数据: %s", a.Name(), money, coin, page, err)
+			return nil, errors.New(msg)
+		}
+		fmt.Println(mts)
+
+		page++
+
+		return nil, nil
+	}
+}
+
 //FIXME: 把MyTransRecord抽象完成。
-func (a *API) nomalizeMytradeList() (ec.Trades, error) {
-	return nil, nil
+func (a *API) myTrades2ECTrades(mts []MyTrade) (ec.Trades, error) {
+	res := make(ec.Trades, len(mts))
+	for i, mt := range mts {
+		et, err := mt.normalize(a.ID)
+		if err != nil {
+			msg := fmt.Sprintf("无法把%s转换成ec.Trade: %s", mt, err)
+			return nil, errors.New(msg)
+		}
+		res[i] = et
+	}
+
+	//mts是降序，ec.Trades是增序，所以res要reverse一下
+
+	return res, nil
 }
 
 //MyTradeList 按照btc38的API的格式，返回交易记录结果。
-//TODO: 这个方法保留，但是要换名字。重新编写一个符合API接口的方法。
-func (a *API) MyTradeList(money, coin string, page int64) ([]MyTrade, error) {
+//TODO: 当page很大的时候，会返回一个空切片，还是报错。
+func (a *API) MyTradeList(money, coin string, page int) ([]MyTrade, error) {
 	rawData, err := a.myTradeListRawData(money, coin, page)
 	if err != nil {
 		return nil, err
@@ -313,12 +360,12 @@ func (a *API) MyTradeList(money, coin string, page int64) ([]MyTrade, error) {
 	return a.handleMyTradeListRawData(rawData)
 }
 
-func (a *API) myTradeListRawData(money, coin string, page int64) ([]byte, error) {
+func (a *API) myTradeListRawData(money, coin string, page int) ([]byte, error) {
 	body := a.myTradeListBody(money, coin, page)
 	return a.Post(getMyTradeListURL, body)
 }
 
-func (a *API) myTradeListBody(money, coin string, page int64) io.Reader {
+func (a *API) myTradeListBody(money, coin string, page int) io.Reader {
 	v := url.Values{}
 	v.Set("key", a.PublicKey)
 	nowTime := fmt.Sprint(time.Now().Unix())
