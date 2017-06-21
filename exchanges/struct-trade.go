@@ -4,6 +4,7 @@ import (
 	"ToDaMoon/database"
 	"ToDaMoon/util"
 	"fmt"
+	"sort"
 )
 
 //Trade 记录一个成交记录的细节
@@ -33,28 +34,32 @@ func (t *Trade) Attributes() []interface{} {
 //newTrade 返回了一个*Trade变量。
 func newTrade() database.Attributer {
 	return &Trade{}
-
+}
 
 //Trades 是*Trade的切片
-//因为会有很多关于[]*Trade的操作，所以，设置了这个方法。
 type Trades []*Trade
 
 //Len returns length of ts
 func (ts Trades) Len() int {
 	return len(ts)
 }
-/*
+
+//Less 决定了是升序还是降序
 func (ts Trades) Less(i, j int) bool {
 	return ts[i].Tid < ts[j].Tid
 }
 
+//Swap 是交换方式
 func (ts Trades) Swap(i, j int) {
 	ts[i], ts[j] = ts[j], ts[i]
 }
 
+//Sort 对Trades进行原地排序
 func (ts Trades) Sort() {
 	sort.Sort(ts)
 }
+
+/*
 
 func (ts Trades) IsUnique() (bool, []int64) {
 	var repeatID []int64

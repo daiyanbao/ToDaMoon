@@ -344,7 +344,8 @@ func (a *API) myTrades2ECTrades(mts []MyTrade) (ec.Trades, error) {
 		res[i] = et
 	}
 
-	//mts是降序，ec.Trades是增序，所以res要reverse一下
+	//mts是降序，ec.Trades是升序，所以res要reverse一下
+	res.Sort()
 
 	return res, nil
 }
