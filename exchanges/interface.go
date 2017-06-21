@@ -37,8 +37,9 @@ type API interface {
 	//还没有成交的挂单
 	MyOrders(money, coin string) ([]Order, error)
 
-	//MyTransRecords 返回在Date之后的成交记录
-	MyTransRecords(money, coin string, date int64) (Trades, error)
+	//MyTransRecords 返回在Tid之后的成交记录
+	//MyTransRecords 和 TransRecords 的逻辑是一致的。
+	MyTransRecords(money, coin string, Tid int64) (Trades, error)
 }
 
 //TestAPI 用于测试通用API接口的功能

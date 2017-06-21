@@ -276,7 +276,7 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 
 //MyTransRecords 获取我的交易记录
 //FIXME: 这个函数的方法，还没有统一。
-func (a *API) MyTransRecords(money, coin string, date int64) (ec.Trades, error) {
+func (a *API) MyTransRecords(money, coin string, Tid int64) (ec.Trades, error) {
 	//TODO: 完成这个方法
 
 	mtl, err := a.MyTradeList(money, coin, 1)
