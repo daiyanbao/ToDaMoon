@@ -275,6 +275,8 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 }
 
 //MyTransRecords 获取我的交易记录
+//tid参数应为数据库中，真实存在的tid
+//如果，不知道真实的tid，可以让tid=0来获取全部的交易数据。
 func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
 	next := nextECTrades(a, money, coin)
 	res := ec.Trades{}
@@ -287,16 +289,24 @@ func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
 			msg := fmt.Sprintf("获取next()失败:%s", err)
 			return nil, errors.New(msg)
 		}
+
+		//当tid不是真实存在的tid时，
+		//例如，tid=0时，会反复读取数据，直到返回的temp为空切片。
+		if temp.Len() == 0 {
+			break
+		}
 		//获取myTrade数据，len(mt)==0 return
 		res, done = appendECTrades(res, temp, tid)
 	}
+
+	res.Sort()
 	return res, nil
 }
 
 //nextPageList
 func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
 	//REVIEW: how about page = 0
-	page := 1
+	page := 0
 
 	return func() (ec.Trades, error) {
 		mts, err := a.MyTradeList(money, coin, page)
@@ -386,7 +396,7 @@ func (a *API) handleMyTradeListRawData(rawData []byte) ([]MyTrade, error) {
 	}
 
 	if a.ShowDetail {
-		log.Printf("\n前3条交易记录明细 %s\n", resp[:3])
+		log.Printf("\n交易记录明细 %s\n", resp)
 	}
 
 	return resp, nil

@@ -142,17 +142,16 @@ func TestAPI(a API) string {
 	fmt.Printf("==测试%s.MyTransRecords()===\n", a.Name())
 	money := "cny"
 	coin := "doge"
-	maxDate := int64(1)
-	myRecords, err := a.MyTransRecords(money, coin, maxDate)
+	maxTid := int64(1)
+	myRecords, err := a.MyTransRecords(money, coin, maxTid)
 	if err != nil {
-		msg := fmt.Sprintf(`%s.MyTransRecords("%s","%s", %d) Error:%s`, a.Name(), money, coin, maxDate, err)
+		msg := fmt.Sprintf(`%s.MyTransRecords("%s","%s", %d) Error:%s`, a.Name(), money, coin, maxTid, err)
 		result += msg + "\n"
 		fmt.Print(msg)
 	} else {
-		fmt.Printf("%s之后，%s的%s的成交记录\n", util.DateOf(maxDate), money, coin)
+		fmt.Printf("%s之后，%s的%s的成交记录\n", util.DateOf(maxTid), money, coin)
 		//TODO: 要求输出全部的
-		fmt.Println(util.DateOf(myRecords[0].Date))
-		fmt.Println(myRecords[0])
+		fmt.Println(myRecords)
 	}
 
 	return result
