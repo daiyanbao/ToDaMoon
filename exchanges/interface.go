@@ -1,7 +1,6 @@
 package exchanges
 
 import (
-	"ToDaMoon/util"
 	"fmt"
 	"time"
 )
@@ -31,7 +30,13 @@ type API interface {
 	//如果下单成功，会返回订单编号。
 	Order(t OrderType, money, coin string, price, amount float64) (int64, error)
 
-	//REVIEW: 想想返回bool是否可以改进。
+	//TODO:  不要返回bool，返回定义好的结果值。
+	//type CancelResult string
+	//const (
+	//	OK = "ok"
+	//	CONCLUDED = "concluded" //订单已经成交
+	//	//或者部分成交什么的。
+	//)
 	CancelOrder(money, coin string, orderID int64) (bool, error)
 
 	//还没有成交的挂单
@@ -42,117 +47,158 @@ type API interface {
 	MyTransRecords(money, coin string, Tid int64) (Trades, error)
 }
 
-//TestAPI 用于测试通用API接口的功能
-func TestAPI(a API) string {
-	result := ""
+//TestTicker 测试API.Ticker()
+func TestTicker(a API, money, coin string) (price float64, result string) {
+	method := fmt.Sprintf(`%s.Ticker("%s","%s")`, a.Name(), money, coin)
 
-	fmt.Printf("==测试%s.Ticker()==\n", a.Name())
-	t, err := a.Ticker("cny", "btc")
-	if err != nil {
-		msg := fmt.Sprintf("%s.Ticker Error:%s\n", a.Name(), err)
-		result += msg
-		fmt.Print(msg)
-	} else {
-		fmt.Printf("%s.Ticker of cny and btc\n%s\n", a.Name(), t)
-	}
-	btcPrice := t.Last
+	fmt.Printf("==测试%s==\n", method)
 
-	fmt.Printf("==测试%s.Depth()==\n", a.Name())
-	d, err := a.Depth("cny", "btc")
+	t, err := a.Ticker(money, coin)
 	if err != nil {
-		msg := fmt.Sprintf("%s.Depth Error:%s\n", a.Name(), err)
-		result += msg
-		fmt.Print(msg)
-	} else {
-		fmt.Printf("%s.Depth of cny and btc\n%s\n", a.Name(), d)
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
 	}
 
-	fmt.Printf("==测试%s.TransRecords()==\n", a.Name())
-	tr, err := a.TransRecords("cny", "btc", 1)
+	fmt.Printf("%s\n%s\n", method, t)
+	price = t.Last
+
+	return
+}
+
+// TestDepth 测试API.Depth()
+func TestDepth(a API, money, coin string) (result string) {
+	method := fmt.Sprintf(`%s.Depth("%s","%s")`, a.Name(), money, coin)
+
+	fmt.Printf("==测试%s==\n", method)
+
+	d, err := a.Depth(money, coin)
 	if err != nil {
-		msg := fmt.Sprintf("%s.TransRecords Error:%s\n", a.Name(), err)
-		result += msg
-		fmt.Print(msg)
-	} else {
-		fmt.Printf("%s.TransRecords of cny and btc Since Tid = 1\n", a.Name())
-		fmt.Println(tr[:3])
-		fmt.Println("... ... ...")
-		fmt.Println(tr[len(tr)-2:])
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
 	}
 
-	fmt.Printf("==测试%s.MyAccount()==\n", a.Name())
+	fmt.Printf("%s\n%s\n", method, d)
+	return
+}
+
+//TestTransRecords 测试API.TransRecords
+func TestTransRecords(a API, money, coin string, tid int64) (result string) {
+	method := fmt.Sprintf(`%s.TransRecords("%s","%s", %d)`,
+		a.Name(), money, coin, tid)
+
+	fmt.Printf("==测试%s==\n", method)
+
+	tr, err := a.TransRecords(money, coin, tid)
+	if err != nil {
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
+	}
+
+	fmt.Printf("%s\n", method)
+	fmt.Println(tr[:2])
+	fmt.Println("... ... ...")
+	fmt.Println(tr[len(tr)-2:])
+
+	return
+}
+
+//TestMyAccount 测试API.MyAccount()
+func TestMyAccount(a API) (result string) {
+	method := fmt.Sprintf(`%s.MyAccount()`, a.Name())
+
+	fmt.Printf("==测试%s==\n", method)
+
 	ma, err := a.MyAccount()
 	if err != nil {
-		msg := fmt.Sprintf("%s.MyAccount Error:%s\n", a.Name(), err)
-		result += msg
-		fmt.Print(msg)
-	} else {
-		fmt.Printf("%s.MyAccount\n%s\n", a.Name(), ma)
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
 	}
 
-	fmt.Printf("==测试%s.Order()===\n", a.Name())
-	buyBTCPrice := btcPrice * 0.9
-	buyMoney := 20.0
-	buyAmount := buyMoney / buyBTCPrice
-	orderID, err := a.Order(BUY, "cny", "btc", buyBTCPrice, buyAmount)
+	fmt.Printf("%s\n%s\n", method, ma)
+	return
+}
+
+//TestOrder 测试API.Order()
+func TestOrder(a API, ot OrderType, money, coin string, price, amount float64) (id int64, result string) {
+	method := fmt.Sprintf(`%s.Order("%s", "%s", %f, %f)`,
+		a.Name(), money, coin, price, amount)
+
+	fmt.Printf("==测试%s===\n", method)
+
+	id, err := a.Order(ot, money, coin, price, amount)
 	if err != nil {
-		msg := fmt.Sprintf(`%s.Order(BUY, "cny", "btc", %f,%f) Error:%s`, a.Name(), buyBTCPrice, buyAmount, err) + "\n"
-		result += msg
-		fmt.Print(msg)
-	} else {
-		fmt.Printf(`%s.Order(BUY, "cny", "btc", %f,%f) 下单成功，订单号%d`, a.Name(), buyBTCPrice, buyAmount, orderID)
-		fmt.Println()
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
 	}
 
-	fmt.Printf("==测试%s.MyOrders()===\n", a.Name())
-	orders, err := a.MyOrders("cny", "btc")
+	fmt.Printf("%s下单成功，订单号%d", method, id)
+	return
+}
+
+//TestMyOrders 测试API.MyOrders()
+func TestMyOrders(a API, money, coin string) (result string) {
+	method := fmt.Sprintf(`%s.MyOrders("%s", "%s")`, a.Name(), money, coin)
+
+	fmt.Printf("==测试%s===\n", method)
+
+	orders, err := a.MyOrders(money, coin)
 	if err != nil {
-		msg := fmt.Sprintf(`%s.MyOrders("cny", "btc") Error:%s`, a.Name(), err) + "\n"
-		result += msg
-		fmt.Print(msg)
-	} else {
-		fmt.Printf(`%s.MyOrders("cny", "btc")的挂单如下`, a.Name())
-		fmt.Printf("\n%v\n", orders)
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
 	}
 
-	fmt.Println("=====等待撤单=====")
-	for i := 10; i > 0; i-- {
+	fmt.Printf("%s的挂单如下\n%v\n", method, orders)
+
+	return
+}
+
+//TestCancelOrder 测试API.CancelOrder()
+func TestCancelOrder(a API, money, coin string, id int64) (canceled bool, result string) {
+	method := fmt.Sprintf(`%s.CancelOrder("%s", "%s", %d)`, a.Name(), money, coin, id)
+
+	fmt.Printf("==测试%s==\n", method)
+
+	if id == 0 {
+		result = fmt.Sprintln("orderID==0，无订单可取消")
+		return
+	}
+
+	fmt.Println("\t=====等待撤单=====")
+	for i := 5; i > 0; i-- {
 		fmt.Println(i)
 		time.Sleep(time.Second)
 	}
 
-	fmt.Printf("==测试%s.CancelOrder()===\n", a.Name())
-	if orderID == 0 {
-		fmt.Println("orderID==0，无订单可取消")
-	} else {
-		canceled, err := a.CancelOrder("cny", "btc", orderID)
-		if err != nil {
-			msg := fmt.Sprintf(`%s.Order(BUY, "cny", "btc", %f,%f) Error:%s\n`, a.Name(), buyBTCPrice, buyAmount, err)
-			result += msg
-			fmt.Print(msg)
-		} else if canceled {
-			fmt.Printf(`%s.Order(BUY, "cny", "btc", %f,%f) 撤单功，订单号%d`, a.Name(), buyBTCPrice, buyAmount, orderID)
-			fmt.Println()
-		} else {
-			fmt.Println("err is nil, but canceled is false.")
-			time.Sleep(3 * time.Second)
-		}
+	canceled, err := a.CancelOrder(money, coin, id)
+	if err != nil {
+		result = fmt.Sprintf(`%s Error:%s\n`, method, err)
+		return
 	}
 
-	fmt.Printf("==测试%s.MyTransRecords()===\n", a.Name())
-	money := "cny"
-	coin := "doge"
-	maxTid := int64(1)
-	myRecords, err := a.MyTransRecords(money, coin, maxTid)
-	if err != nil {
-		msg := fmt.Sprintf(`%s.MyTransRecords("%s","%s", %d) Error:%s`, a.Name(), money, coin, maxTid, err)
-		result += msg + "\n"
-		fmt.Print(msg)
-	} else {
-		fmt.Printf("%s之后，%s的%s的成交记录\n", util.DateOf(maxTid), money, coin)
-		//TODO: 要求输出全部的
-		fmt.Println(myRecords)
+	if canceled {
+		fmt.Printf("%s 撤单成功", method)
+		return
 	}
+
+	result = fmt.Sprintln("err is nil, but canceled is false.")
+	time.Sleep(3 * time.Second)
+
+	return
+}
+
+//TestMyTransRecords 测试API.MyTransRecords()
+func TestMyTransRecords(a API, money, coin string, sinceID int64) (result string) {
+	method := fmt.Sprintf(`%s.MyTransRecords("%s", "%s", %d)`, a.Name(), money, coin, sinceID)
+
+	fmt.Printf("==测试%s===\n", method)
+
+	myRecords, err := a.MyTransRecords(money, coin, sinceID)
+	if err != nil {
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
+	}
+
+	fmt.Printf("%s=\n", method)
+	fmt.Println(myRecords)
 
 	return result
 }
