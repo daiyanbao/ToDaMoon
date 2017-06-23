@@ -64,6 +64,24 @@ func (a *API) tickerRawData(money, coin string) ([]byte, error) {
 	return a.Get(path)
 }
 
+//TestAllTicker 测试btc38.AllTicker()
+func TestAllTicker(a *API, money string) (result string) {
+	method := fmt.Sprintf(`%s.AllTicker("%s")`, a.Name(), money)
+
+	fmt.Printf("\n==测试%s==\n", method)
+
+	at, err := a.AllTicker(money)
+
+	if err != nil {
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
+	}
+
+	fmt.Printf("%s=\n%s\n", method, at)
+
+	return
+}
+
 //Depth 是反馈市场深度信息
 func (a *API) Depth(money, coin string) (*ec.Depth, error) {
 	rawData, err := a.depthRawData(money, coin)

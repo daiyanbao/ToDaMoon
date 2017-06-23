@@ -402,6 +402,30 @@ func (a *API) handleMyTradeListRawData(rawData []byte) ([]MyTrade, error) {
 	return resp, nil
 }
 
+//TestMyTradeList 测试btc38.MyTradeList()
+func TestMyTradeList(a *API, money, coin string, page int) (result string) {
+	method := fmt.Sprintf(`%s.MyTradeList("%s", "%s", %d)`, a.Name(), money, coin, page)
+
+	fmt.Printf("==测试%s==\n", method)
+
+	mtl, err := a.MyTradeList(money, coin, page)
+	if err != nil {
+		result = fmt.Sprintf("%s Error:%s\n", method, err)
+		return
+	}
+
+	fmt.Printf("%s=", method)
+	if len(mtl) < 5 {
+		fmt.Println(mtl)
+	} else {
+		fmt.Println(mtl[:2])
+		fmt.Println("... ... ... ...")
+		fmt.Println(mtl[len(mtl)-2:])
+	}
+
+	return
+}
+
 func (a *API) md5(time string) string {
 	md := fmt.Sprintf("%s_%d_%s_%s", a.PublicKey, a.ID, a.SecretKey, time)
 	md5 := ec.MD5([]byte(md))
