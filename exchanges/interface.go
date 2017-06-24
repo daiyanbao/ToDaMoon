@@ -14,10 +14,9 @@ type API interface {
 	//反馈coin的交易指
 	Ticker(money, coin string) (*Ticker, error)
 
-	//TODO: 对返回结果进行排序
 	//反馈市场中币种双方要价，已经排序过了
-	//Asks[0]是最低的卖价
-	//Bids[0]是最高的买价
+	//Asks[0].Price是最低的卖价
+	//Bids[0].Price是最高的买价
 	Depth(money, coin string) (*Depth, error)
 
 	//返回在Tid之后的一组全局交易记录，

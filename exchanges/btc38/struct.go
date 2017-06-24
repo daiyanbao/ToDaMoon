@@ -33,6 +33,23 @@ func (t ticker) normalize() *ec.Ticker {
 	}
 }
 
+type depth struct {
+	Asks [][2]float64
+	Bids [][2]float64
+}
+
+func quotations(depthData [][2]float64) ec.Quotations {
+	res := make(ec.Quotations, len(depthData))
+	for i, d := range depthData {
+		res[i] = ec.Quotation{
+			Price:  d[0],
+			Amount: d[1],
+		}
+	}
+
+	return res
+}
+
 //MyBalance 是btc38的账户信息
 type myBalance map[string]string
 

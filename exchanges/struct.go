@@ -1,6 +1,9 @@
 package exchanges
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 //Ticker 是ticker的数据结构。
 type Ticker struct {
@@ -25,8 +28,8 @@ func (t *Ticker) String() string {
 //Depth 记录深度信息
 //TODO: 修改元素的属性
 type Depth struct {
-	Asks [][2]float64
-	Bids [][2]float64
+	Asks Quotations
+	Bids Quotations
 }
 
 //Quotation 是报价单的意思。
@@ -34,13 +37,54 @@ type Quotation struct {
 	Price, Amount float64
 }
 
-//AskQuotation 是卖出价的报价单表
+//Quotations 是卖出价的报价单表
 //TODO: 添加排序方法
-type AskQuotation []Quotation
+type Quotations []Quotation
 
-//BidQuotation 是买入价的报价单表
-//TODO: 添加排序方法
-type BidQuotation []Quotation
+//IsAskSorted 判断一个Quotations是否是按照升序排列的。
+func (qs Quotations) IsAskSorted() bool {
+	for i := 1; i < qs.Len(); i++ {
+		if qs[i-1].Price > qs[i].Price {
+			return false
+		}
+	}
+	return true
+}
+
+//IsBidSorted 判断一个Quotations是否是按照降序排列的。
+func (qs Quotations) IsBidSorted() bool {
+	for i := 1; i < qs.Len(); i++ {
+		if qs[i-1].Price < qs[i].Price {
+			return false
+		}
+	}
+	return true
+}
+
+//Len returns length of ts
+func (qs Quotations) Len() int {
+	return len(qs)
+}
+
+//Less 决定了是升序还是降序
+func (qs Quotations) Less(i, j int) bool {
+	return qs[i].Price < qs[j].Price
+}
+
+//Swap 是交换方式
+func (qs Quotations) Swap(i, j int) {
+	qs[i], qs[j] = qs[j], qs[i]
+}
+
+//SortAsks 以Asks的升序进行原地排列
+func (qs Quotations) SortAsks() {
+	sort.Sort(qs)
+}
+
+//SortBids 以Bids的降序进行原地排序
+func (qs Quotations) SortBids() {
+	sort.Sort(sort.Reverse(qs))
+}
 
 func (d *Depth) String() string {
 	str := fmt.Sprintln("Asks:")

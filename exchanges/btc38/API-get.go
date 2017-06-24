@@ -91,9 +91,10 @@ func (a *API) Depth(money, coin string) (*ec.Depth, error) {
 
 	if a.ShowDetail {
 		log.Printf(`rawData btc38.Depth("%s","%s")=%s`, money, coin, string(rawData))
+		log.Println()
 	}
 
-	resp := ec.Depth{}
+	resp := depth{}
 	err = ec.JSONDecode(rawData, &resp)
 	if err != nil {
 		return nil, err
@@ -101,14 +102,34 @@ func (a *API) Depth(money, coin string) (*ec.Depth, error) {
 
 	if a.ShowDetail {
 		log.Printf(`After JSONDecode: btc38.Depth("%s","%s")=%v`, money, coin, resp)
+		log.Println()
 	}
 
-	return &resp, nil
+	res := depthNormalize(resp)
+
+	return res, nil
 }
 
 func (a *API) depthRawData(money, coin string) ([]byte, error) {
 	path := urlMaker(depthURL, money, coin)
 	return a.Get(path)
+}
+
+func depthNormalize(d depth) *ec.Depth {
+	a := quotations(d.Asks)
+	if !a.IsAskSorted() {
+		a.SortAsks()
+	}
+
+	b := quotations(d.Bids)
+	if !b.IsBidSorted() {
+		b.SortBids()
+	}
+
+	return &ec.Depth{
+		Asks: a,
+		Bids: b,
+	}
 }
 
 //TransRecords 返回市场的交易记录
