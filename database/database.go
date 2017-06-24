@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"sync"
 
 	//导入sqlite3的驱动
@@ -99,9 +98,9 @@ func (db *DB) Insert(data []Attributer, insertStatement string) error {
 		_, err := stmt.Exec(d.Attributes()...)
 		if err != nil {
 			attrs := fmt.Sprint(d)
-			msg := fmt.Sprintf("%s在插入\n%s\n出错: %s", db.Name(), attrs, err)
-			//TODO: 直接关闭程序是否太严格了，考虑一下换成报错
-			log.Fatalln(msg)
+			msg := fmt.Sprintf("%s在插入%s出错: %s", db.Name(), attrs, err)
+			//NOTICE: 经过再三的思考，我决定在插入出错后，不要直接关闭程序。由程序的调用方来决定，如何处理错误。
+			return errors.New(msg)
 		}
 	}
 
@@ -123,8 +122,8 @@ func (db *DB) GetRows(queryStatement string, newItem func() Attributer) ([]inter
 		err := rows.Scan(item.Attributes()...)
 		if err != nil {
 			msg := fmt.Sprintf("对%s查询%s出来的rows进行Scan时，出错:%s", db.Name(), queryStatement, err)
-			//TODO: 直接关闭程序是否太严格了，考虑一下换成报错
-			log.Fatalln(msg)
+			//NOTICE: 经过再三的思考，我决定在查询出错后，不要直接关闭程序。由程序的调用方来决定，如何处理错误。
+			return nil, errors.New(msg)
 		}
 		result = append(result, item)
 	}

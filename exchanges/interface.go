@@ -29,13 +29,6 @@ type API interface {
 	//如果下单成功，会返回订单编号。
 	Order(t OrderType, money, coin string, price, amount float64) (int64, error)
 
-	//TODO:  不要返回bool，返回定义好的结果值。
-	//type CancelResult string
-	//const (
-	//	OK = "ok"
-	//	CONCLUDED = "concluded" //订单已经成交
-	//	//或者部分成交什么的。
-	//)
 	CancelOrder(money, coin string, orderID int64) (bool, error)
 
 	//还没有成交的挂单

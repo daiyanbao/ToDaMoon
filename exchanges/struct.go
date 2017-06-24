@@ -26,10 +26,17 @@ func (t *Ticker) String() string {
 }
 
 //Depth 记录深度信息
-//TODO: 修改元素的属性
 type Depth struct {
 	Asks Quotations
 	Bids Quotations
+}
+
+func (d *Depth) String() string {
+	str := "Asks"
+	str += d.Asks.String()
+	str += "Bids"
+	str += d.Bids.String()
+	return str
 }
 
 //Quotation 是报价单的意思。
@@ -38,8 +45,15 @@ type Quotation struct {
 }
 
 //Quotations 是卖出价的报价单表
-//TODO: 添加排序方法
 type Quotations []Quotation
+
+func (qs Quotations) String() string {
+	str := fmt.Sprint("\tPrice\tAmount\n")
+	for _, q := range qs {
+		str += fmt.Sprintf("\t%f\t%f\n", q.Price, q.Amount)
+	}
+	return str
+}
 
 //IsAskSorted 判断一个Quotations是否是按照升序排列的。
 func (qs Quotations) IsAskSorted() bool {
@@ -99,7 +113,6 @@ func (d *Depth) String() string {
 }
 
 //Order 是交易所的订单信息
-//TODO: 写完Order
 type Order struct {
 	ID     int64
 	Date   int64

@@ -9,7 +9,6 @@ import (
 var btc38 *BTC38
 
 //BTC38 包含了btc38.com的API所需的所有数据
-//TODO: 把BTC38改成私有结构
 type BTC38 struct {
 	*API
 	exchanges.TradesDBs
