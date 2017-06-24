@@ -303,9 +303,8 @@ func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
 	return res, nil
 }
 
-//nextPageList
+//nextECTrades
 func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
-	//REVIEW: how about page = 0
 	page := 0
 
 	return func() (ec.Trades, error) {
@@ -357,7 +356,6 @@ func appendECTrades(res, temp ec.Trades, tid int64) (ec.Trades, bool) {
 }
 
 //MyTradeList 按照btc38的API的格式，返回交易记录结果。
-//TODO: 当page很大的时候，会返回一个空切片，还是报错。
 func (a *API) MyTradeList(money, coin string, page int) ([]MyTrade, error) {
 	rawData, err := a.myTradeListRawData(money, coin, page)
 	if err != nil {

@@ -152,7 +152,7 @@ func TestMyOrders(a API, money, coin string) (result string) {
 }
 
 //TestCancelOrder 测试API.CancelOrder()
-func TestCancelOrder(a API, money, coin string, id int64) (canceled bool, result string) {
+func TestCancelOrder(a API, money, coin string, id int64) (result string) {
 	method := fmt.Sprintf(`%s.CancelOrder("%s", "%s", %d)`, a.Name(), money, coin, id)
 
 	fmt.Printf("==测试%s==\n", method)
