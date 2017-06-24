@@ -14,7 +14,7 @@ func Launch() {
 	done := util.WaitingKill()
 
 	//在这里启动各个交易所模块
-	//TODO: 更换为control
+	//TODO: 更换为controller()
 	btc38.Run()
 
 	//等待被kill
