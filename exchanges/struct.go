@@ -48,7 +48,7 @@ type Quotation struct {
 type Quotations []Quotation
 
 func (qs Quotations) String() string {
-	str := fmt.Sprint("\tPrice\tAmount\n")
+	str := fmt.Sprint("\tPrice\t\tAmount\n")
 	for _, q := range qs {
 		str += fmt.Sprintf("\t%f\t%f\n", q.Price, q.Amount)
 	}
@@ -98,18 +98,6 @@ func (qs Quotations) SortAsks() {
 //SortBids 以Bids的降序进行原地排序
 func (qs Quotations) SortBids() {
 	sort.Sort(sort.Reverse(qs))
-}
-
-func (d *Depth) String() string {
-	str := fmt.Sprintln("Asks:")
-	for _, v := range d.Asks {
-		str += "\t" + fmt.Sprintln(v)
-	}
-	str += fmt.Sprintln("Bids:")
-	for _, v := range d.Bids {
-		str += "\t" + fmt.Sprintln(v)
-	}
-	return str
 }
 
 //Order 是交易所的订单信息
