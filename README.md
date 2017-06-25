@@ -9,7 +9,7 @@ ToDaMoon是我的自己的虚拟币交易系统。
 
 Telegram群组: [ToDaMoon](https://t.me/joinchat/AAAAAA2Tgxx5POA_Chzq-w)
 
-Telegram通道: [t.me/ToDaMoon](https://t.me/ToDaMoon)
+Telegram频道: [t.me/ToDaMoon](https://t.me/ToDaMoon)
 
 ## Tips
 >注意：以下方式适用于Linux操作系统
