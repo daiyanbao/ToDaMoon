@@ -9,10 +9,10 @@ import (
 //这个部分是抽象了exchagnes管理trades数据库方法的内容
 
 //TradesDBs 是exchange中存储coin历史交易记录的数据库
-type TradesDBs map[string]map[string]*TradesDB
+type TransRecordsDB map[string]map[string]*TradesDB
 
 //MakeTradesDBs 是链接了exchanges所有的Trades数据库
-func MakeTradesDBs(dir, exchange string, markets map[string][]string) TradesDBs {
+func MakeTradesDBs(dir, exchange string, markets map[string][]string) TransRecordsDB {
 	log.Printf("开始链接%s的数据库%s", exchange, time.Now())
 	var err error
 	t := make(map[string]map[string]*TradesDB)

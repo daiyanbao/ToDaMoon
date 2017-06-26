@@ -22,7 +22,7 @@ type TradePublish struct {
 type TradesCenter map[string]map[string]TradePublish
 
 //MakeTradesCenter 返回了所有coin的最新订阅属性
-func MakeTradesCenter(a API, tdbs TradesDBs, checkCycle, updateCycle time.Duration) TradesCenter {
+func MakeTradesCenter(a API, tdbs TransRecordsDB, checkCycle, updateCycle time.Duration) TradesCenter {
 	log.Printf("开始创建%s的监听属性", a.Name())
 	tp := make(TradesCenter)
 	wg := &sync.WaitGroup{}

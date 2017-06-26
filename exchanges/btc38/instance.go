@@ -11,7 +11,7 @@ var btc38 *BTC38
 //BTC38 包含了btc38.com的API所需的所有数据
 type BTC38 struct {
 	*API
-	exchanges.TradesDBs
+	exchanges.TransRecordsDB
 	exchanges.TradesCenter
 	*exchanges.Account
 }
@@ -25,7 +25,7 @@ func Instance() *BTC38 {
 	btc38 = genBTC38By(cfg)
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
-	btc38.TradesCenter = exchanges.MakeTradesCenter(btc38.API, btc38.TradesDBs, time.Millisecond*100, time.Minute)
+	btc38.TradesCenter = exchanges.MakeTradesCenter(btc38.API, btc38.TransRecordsDB, time.Millisecond*100, time.Minute)
 
 	return btc38
 }
@@ -35,7 +35,7 @@ func genBTC38By(c *config) *BTC38 {
 	tdb := exchanges.MakeTradesDBs(c.DBDir, c.Name, c.Markets)
 
 	btc38 = &BTC38{API: a,
-		TradesDBs: tdb,
+		TransRecordsDB: tdb,
 	}
 
 	return btc38
