@@ -33,9 +33,11 @@ func WaitingKill() chan struct{} {
 	closeSignal := make(chan os.Signal, 1)
 	done := make(chan struct{})
 	signal.Notify(closeSignal, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		log.Println("接收到关闭信号。", <-closeSignal)
 		close(done)
 	}()
+
 	return done
 }
