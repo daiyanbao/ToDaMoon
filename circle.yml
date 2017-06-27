@@ -1,6 +1,5 @@
 test:
     override:
-        - go get -t -v ./...
         - go test -v ./...
 
 machine:
