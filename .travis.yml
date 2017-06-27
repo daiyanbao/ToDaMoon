@@ -1,4 +1,14 @@
 language: go
+
+go:
+  - 1.8.3
+  - tip
+
+go_import_path: github.com/aQuaYi/ToDaMoon
+
 script: go test ./...
 notifications:
-  email: false
+  email:
+    recipients:
+      - aQua@aQuaYi.com
+    on_success: always
