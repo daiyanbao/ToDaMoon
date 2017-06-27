@@ -2,8 +2,10 @@ language: go
 
 go:
   - 1.8.3
+before_install:
+    - go get gopkg.in/check.v1
 
-go_import_path: github.com/aQuaYi/ToDaMoon
+# go_import_path: github.com/aQuaYi/ToDaMoon
 
 script: go test ./...
 
