@@ -1,5 +1,6 @@
 go_import_path: github.com/aQuaYi/ToDaMoon 
-
+sudo: false
+dist: Xenial
 language: go
 go:
   - 1.8
