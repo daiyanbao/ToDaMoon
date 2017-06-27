@@ -1,6 +1,6 @@
 test:
     override:
-        - go test -v ./...
+        - go test ./...
 
 machine:
     environment:
