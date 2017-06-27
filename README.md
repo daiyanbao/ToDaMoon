@@ -1,4 +1,5 @@
-# ToDaMoon [![Build Status](https://travis-ci.org/aQuaYi/ToDaMoon.svg?branch=master)](https://travis-ci.org/aQuaYi/ToDaMoon)
+# ToDaMoon 
+[![Build Status](https://travis-ci.org/aQuaYi/ToDaMoon.svg?branch=master)](https://travis-ci.org/aQuaYi/ToDaMoon)
 
 ToDaMoon是我的自己的虚拟币交易系统。
 
