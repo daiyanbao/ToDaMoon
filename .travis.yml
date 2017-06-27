@@ -1,16 +1,11 @@
-language: go
-
-go:
-  - 1.8.x
-  - tip
-
-sudo: false
-install:
-  - go get -v -t ./...
-
 go_import_path: github.com/aQuaYi/ToDaMoon 
 
+language: go
+go:
+  - 1.8
+
 script: go test ./...
+
 notifications:
   email:
     recipients:
