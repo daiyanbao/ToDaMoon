@@ -4,9 +4,10 @@ go:
   - 1.8.x
   - tip
 
+sudo: false
 install:
-    - go get -v -t ./..."
-    
+  - go get -v -t ./...
+
 go_import_path: github.com/aQuaYi/ToDaMoon 
 
 script: go test ./...
