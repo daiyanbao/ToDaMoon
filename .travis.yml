@@ -4,7 +4,10 @@ go:
   - 1.8.x
   - tip
 
-go_import_path: github.com/aquayi/ToDaMoon
+install:
+    - go get -v -t ./..."
+    
+go_import_path: github.com/aQuaYi/ToDaMoon 
 
 script: go test ./...
 notifications:
