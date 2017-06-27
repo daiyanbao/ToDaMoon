@@ -1,7 +1,7 @@
 package btc38
 
 import (
-	ec "ToDaMoon/exchanges"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 	"errors"
 	"fmt"
 	"io"

@@ -1,11 +1,11 @@
 package apollo
 
 import (
-	"ToDaMoon/util"
 	"fmt"
 	"log"
 
 	"github.com/BurntSushi/toml"
+	"github.com/aQuaYi/ToDaMoon/util"
 )
 
 var tomlFileanme = "apollo.toml"

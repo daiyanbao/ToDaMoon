@@ -1,10 +1,11 @@
 package btc38
 
 import (
-	ec "ToDaMoon/exchanges"
 	"fmt"
 	"log"
 	"net/url"
+
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 )
 
 //Ticker 可以返回coin的ticker信息

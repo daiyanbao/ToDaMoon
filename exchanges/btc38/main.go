@@ -1,9 +1,9 @@
 package btc38
 
 import (
-	"ToDaMoon/Interface"
-	"ToDaMoon/exchanges"
-	"ToDaMoon/pubu"
+	"github.com/aQuaYi/ToDaMoon/Interface"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/pubu"
 	"sync"
 )
 

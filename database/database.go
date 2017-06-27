@@ -2,11 +2,12 @@
 package database
 
 import (
-	"ToDaMoon/util"
 	"database/sql"
 	"errors"
 	"fmt"
 	"sync"
+
+	"github.com/aQuaYi/ToDaMoon/util"
 
 	//导入sqlite3的驱动
 	_ "github.com/mattn/go-sqlite3"

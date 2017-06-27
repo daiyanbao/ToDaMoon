@@ -1,7 +1,7 @@
 package btc38
 
 import (
-	"ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 
 	"time"
 )

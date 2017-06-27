@@ -1,10 +1,11 @@
 package btc38
 
 import (
-	ec "ToDaMoon/exchanges"
-	"ToDaMoon/util"
 	"fmt"
 	"log"
+
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/util"
 
 	"sync"
 

@@ -1,8 +1,8 @@
 package btc38
 
 import (
-	ec "ToDaMoon/exchanges"
-	"ToDaMoon/util"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/util"
 	"errors"
 	"fmt"
 	"strconv"

@@ -1,8 +1,8 @@
 package apollo
 
 import (
-	"ToDaMoon/exchanges/btc38"
-	"ToDaMoon/util"
+	"github.com/aQuaYi/ToDaMoon/exchanges/btc38"
+	"github.com/aQuaYi/ToDaMoon/util"
 )
 
 const ()

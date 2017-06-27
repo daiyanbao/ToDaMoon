@@ -1,8 +1,8 @@
 package main
 
 import (
-	ec "ToDaMoon/exchanges"
-	"ToDaMoon/exchanges/btc38"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges/btc38"
 	"fmt"
 )
 

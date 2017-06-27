@@ -1,8 +1,8 @@
 package exchanges
 
 import (
-	"ToDaMoon/database"
-	"ToDaMoon/util"
+	"github.com/aQuaYi/ToDaMoon/database"
+	"github.com/aQuaYi/ToDaMoon/util"
 	"fmt"
 	"sort"
 )

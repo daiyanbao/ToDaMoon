@@ -1,7 +1,7 @@
 package exchanges
 
 import (
-	"ToDaMoon/util"
+	"github.com/aQuaYi/ToDaMoon/util"
 	"fmt"
 	"log"
 	"sync"

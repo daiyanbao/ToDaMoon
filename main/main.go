@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ToDaMoon/apollo"
-	"ToDaMoon/util"
+	"github.com/aQuaYi/ToDaMoon/apollo"
+	"github.com/aQuaYi/ToDaMoon/util"
 	"fmt"
 	"log"
 	"os"

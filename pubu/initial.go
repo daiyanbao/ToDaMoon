@@ -1,11 +1,12 @@
 package pubu
 
 import (
-	"ToDaMoon/Interface"
-	"ToDaMoon/util"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/aQuaYi/ToDaMoon/Interface"
+	"github.com/aQuaYi/ToDaMoon/util"
 
 	"github.com/go-ini/ini"
 )
