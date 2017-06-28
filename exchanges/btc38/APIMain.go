@@ -48,6 +48,14 @@ func NewAPI() *API {
 	return api
 }
 
+//TODO: 把config分解成
+// type config struct {
+// 	APICfg
+// 	DebugCfg
+// 	DBCfg
+// 	Markets
+// }
+
 type config struct {
 	ShowDetail        bool
 	RecordHistory     bool   //使用数据库记录历史交易记录
