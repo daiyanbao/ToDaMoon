@@ -1,10 +1,11 @@
 package btc38
 
 import (
+	"sync"
+
 	"github.com/aQuaYi/ToDaMoon/Interface"
 	"github.com/aQuaYi/ToDaMoon/exchanges"
 	"github.com/aQuaYi/ToDaMoon/pubu"
-	"sync"
 )
 
 var once sync.Once
@@ -13,6 +14,7 @@ var notify Interface.Notifier
 //Run 会启动btc38模块
 func Run() exchanges.API {
 	once.Do(build)
+
 	return btc38
 }
 

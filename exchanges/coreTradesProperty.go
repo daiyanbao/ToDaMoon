@@ -1,12 +1,12 @@
 package exchanges
 
 import (
-	"github.com/aQuaYi/ToDaMoon/util"
 	"fmt"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/aQuaYi/ToDaMoon/util"
 	"github.com/imkira/go-observer"
 )
 
@@ -15,6 +15,8 @@ import (
 //updateCycleCh 可以修改Property的更新周期
 type TradePublish struct {
 	observer.Property
+
+	//TODO: 把UpdateCycleCh变成私有的属性
 	UpdateCycleCh chan<- time.Duration
 }
 

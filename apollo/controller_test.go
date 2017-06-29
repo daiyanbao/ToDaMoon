@@ -25,8 +25,3 @@ func Test_getExchanges(t *testing.T) {
 		}
 	}
 }
-
-// //TODO: 删除此处内容
-// func Test_Error(t *testing.T) {
-// 	t.Error("看看不通过是什么反应")
-// }
