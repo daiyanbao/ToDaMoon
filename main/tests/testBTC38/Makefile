@@ -8,9 +8,3 @@ FILE_PATH=`echo ${HOME}/ToDaMoon/`
 build:	
 	@go build -o ${BINARY}
 	@mv ${BINARY} ${FILE_PATH}
-
-# Cleans our project: deletes binaries
-clean:
-	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
-
-.PHONY: clean install

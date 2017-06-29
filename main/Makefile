@@ -20,17 +20,7 @@ build:
 	@./versionMaker
 	@go build ${LDFLAGS} -o ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE))
 	@cp ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE)) ${BINARY}
-	@./${BINARY} version	
+	./${BINARY} version	
 	@mv ${BINARY} ${FILE_PATH}
 	@mv ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE)) ${FILE_PATH}/History
 	@rm ${BUILD_NUMBER_FILE}
-
-# Installs our project: copies binaries
-install:
-	go install ${LDFLAGS}
-
-# Cleans our project: deletes binaries
-clean:
-	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
-
-.PHONY: clean install
