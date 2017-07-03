@@ -4,26 +4,27 @@ import (
 	"sync"
 
 	"github.com/aQuaYi/ToDaMoon/Interface"
-	"github.com/aQuaYi/ToDaMoon/exchanges"
 	"github.com/aQuaYi/ToDaMoon/pubu"
 )
 
-var once sync.Once
+var onceMain sync.Once
 var notify Interface.Notifier
 
-//Run 会启动btc38模块
-func Run() exchanges.API {
-	once.Do(build)
-
-	return btc38
+// Start 会启动btc38模块
+// 会执行tasks中的所有任务
+func Start() {
+	onceMain.Do(tasks)
 }
 
-func build() {
-	notify = pubu.New()
-	//生成一个btc38的实例
-	Instance()
+func tasks() {
+	// // 核心任务
+	// 生成一个btc38的实例
 
-	//执行btc38的各项任务
+	New()
+
+	// 使用pubu.im作为通知工具
+	notify = pubu.New()
+	// 执行btc38的各项任务
 	btc38.checkNewCoin()
 	btc38.watching()
 }
