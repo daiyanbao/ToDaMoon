@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-//这个部分是抽象了exchagnes管理trades数据库方法的内容
+// 这个部分是抽象了exchagnes管理trades数据库方法的内容
 
-//TradesDBs 是exchange中存储coin历史交易记录的数据库
+// TransRecordsDB 是exchange中存储coin历史交易记录的数据库
 type TransRecordsDB map[string]map[string]*TradesDB
 
 //MakeTradesDBs 是链接了exchanges所有的Trades数据库

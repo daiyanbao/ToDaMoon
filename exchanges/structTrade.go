@@ -1,10 +1,11 @@
 package exchanges
 
 import (
-	"github.com/aQuaYi/ToDaMoon/database"
-	"github.com/aQuaYi/ToDaMoon/util"
 	"fmt"
 	"sort"
+
+	"github.com/aQuaYi/ToDaMoon/database"
+	"github.com/aQuaYi/ToDaMoon/util"
 )
 
 //Trade 记录一个成交记录的细节
@@ -74,6 +75,19 @@ func (ts Trades) IndexOf(tid int64) int {
 	}
 
 	return ts.Len() - 1
+}
+
+// LastTID 返回Trades的最后一个Trade的Tid
+//NOTICE: 使用前，请检查ts的长度
+func (ts Trades) LastTID() int64 {
+	return ts[ts.Len()-1].Tid
+}
+
+// LastDate 返回Trades的最后一个Trade的Date
+//NOTICE: 使用前，请检查ts的长度
+func (ts Trades) LastDate() int64 {
+	return ts[ts.Len()-1].Date
+
 }
 
 /*
