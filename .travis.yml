@@ -4,11 +4,7 @@ go:
   - 1.8.3
   - master
 
-install:
-  go get golang.org/x/tools/cmd/cover &&　go get github.com/mattn/goveralls  
-
-script:
-  go test -v -covermode=count -coverprofile=coverage.out $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+script: go test -v ./...
 
 notifications:
   webhooks: https://hooks.pubu.im/services/3wp9q4yqlzm8fxr

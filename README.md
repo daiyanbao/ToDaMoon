@@ -1,7 +1,6 @@
 # ToDaMoon 
 [![Build Status](https://travis-ci.org/aQuaYi/ToDaMoon.svg?branch=master)](https://travis-ci.org/aQuaYi/ToDaMoon)
 [![CircleCI](https://circleci.com/gh/aQuaYi/ToDaMoon/tree/master.svg?style=svg)](https://circleci.com/gh/aQuaYi/ToDaMoon/tree/master)
-[![Coverage Status](https://coveralls.io/repos/github/aQuaYi/ToDaMoon/badge.svg?branch=master)](https://coveralls.io/github/aQuaYi/ToDaMoon?branch=master)
 
 ToDaMoon是我的自己的虚拟币交易系统。
 
