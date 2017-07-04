@@ -18,6 +18,7 @@ func (b *BTC38) watching() {
 	if !b.ShowDetail {
 		return
 	}
+	notify.Info("BTC38 的 watching 开始工作了～～～")
 
 	var done chan struct{}
 
