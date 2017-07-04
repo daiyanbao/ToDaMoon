@@ -5,6 +5,7 @@ import (
 	"log"
 
 	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/pubu"
 	"github.com/aQuaYi/ToDaMoon/util"
 
 	"sync"
@@ -36,8 +37,12 @@ type API struct {
 
 //NewAPI 返回一个*API的单例
 func NewAPI() *API {
+
 	onceAPI.Do(
 		func() {
+			// 使用pubu.im作为通知工具
+			notify = pubu.New()
+
 			//读取配置文件
 			cfg := getConfig()
 
@@ -104,7 +109,6 @@ func (c *config) check() {
 
 	if myIP != c.IP {
 		text := fmt.Sprintf("本机外网IP地址%s没有在BTC38网注册", myIP)
-		notify.Bad(text)
 		log.Fatalf(text)
 	}
 }

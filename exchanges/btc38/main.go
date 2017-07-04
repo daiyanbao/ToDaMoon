@@ -17,13 +17,14 @@ func Start() {
 }
 
 func tasks() {
+	// 使用pubu.im作为通知工具
+	notify = pubu.New()
+
 	// // 核心任务
 	// 生成一个btc38的实例
 
 	New()
 
-	// 使用pubu.im作为通知工具
-	notify = pubu.New()
 	// 执行btc38的各项任务
 	btc38.checkNewCoin()
 	btc38.watching()
