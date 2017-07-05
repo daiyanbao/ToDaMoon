@@ -20,7 +20,8 @@ func (b *BTC38) watching() {
 	}
 	notify.Info("BTC38 的 watching 开始工作了～～～")
 
-	var done chan struct{}
+	// REVIEW: 观察能否修改时间周期。
+	done := make(chan struct{}, 3)
 
 	sum := 1
 	for money, coins := range b.TradesCenter {
