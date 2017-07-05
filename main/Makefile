@@ -17,7 +17,7 @@ LDFLAGS=-ldflags "-w -s -X main.GitHash=${GITHASH} -X main.Version=$$(cat $(BUIL
 
 # 编译程序
 build:	
-	@cd .. && go test -race ./...
+	@cd .. && go test -v -race -cover -covermode atomic ./...
 	@./versionMaker
 	@go build ${LDFLAGS} -o ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE))
 	@cp ${BINARY}_V$$(cat $(BUILD_VERSION_FILE)).$$(cat $(BUILD_NUMBER_FILE)) ${BINARY}
