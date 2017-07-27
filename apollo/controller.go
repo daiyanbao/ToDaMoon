@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/BurntSushi/toml"
-	"github.com/aQuaYi/ToDaMoon/util"
+	"github.com/aQuaYi/GoKit"
 )
 
 var tomlFileanme = "apollo.toml"
@@ -23,7 +23,7 @@ type exchanges struct {
 func getExchanges() exchanges {
 	es := exchanges{}
 	if _, err := toml.DecodeFile(tomlFileanme, &es); err != nil {
-		msg := fmt.Sprintf("无法加载%s/%s，并Decode到cfg变量: %s", util.PWD(), tomlFileanme, err)
+		msg := fmt.Sprintf("无法加载%s/%s，并Decode到cfg变量: %s", GoKit.PWD(), tomlFileanme, err)
 		log.Fatalf(msg)
 	}
 

@@ -1,8 +1,8 @@
 package apollo
 
 import (
-	"github.com/aQuaYi/ToDaMoon/exchanges/btc38"
-	"github.com/aQuaYi/ToDaMoon/util"
+	"github.com/aQuaYi/GoKit"
+	"github.com/aQuaYi/exchanges/btc38"
 )
 
 const ()
@@ -11,7 +11,7 @@ const ()
 func Launch() {
 
 	//done等待程序结束的信号
-	done := util.WaitingKill()
+	done := GoKit.WaitingKill()
 
 	//在这里启动各个交易所模块
 	//TODO: 更换为controller()
