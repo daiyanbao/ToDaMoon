@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/aQuaYi/ToDaMoon/apollo"
-	"github.com/aQuaYi/ToDaMoon/util"
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/aQuaYi/GoKit"
+	"github.com/aQuaYi/ToDaMoon/apollo"
 )
 
 const (
@@ -26,7 +27,7 @@ var (
 
 func init() {
 	//获取并保存pid
-	util.Init(pidFile)
+	GoKit.Init(pidFile)
 }
 
 func main() {
