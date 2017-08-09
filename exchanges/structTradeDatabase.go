@@ -220,7 +220,7 @@ func (t *TradesDB) Trades(beginTID, endTID int64) (Trades, error) {
 	}
 
 	stmt := fmt.Sprintf("select * from raw where %d <= tid and tid < %d", beginTID, endTID)
-	rows, err := t.db.GetRows(stmt, newTrade)
+	rows, err := t.db.GetRows(stmt, &Trade{})
 	if err != nil {
 		return nil, GoKit.Err(err, "*TradesDB.Trades(): ")
 	}
@@ -250,14 +250,8 @@ func convertToTrades(rows []interface{}) (Trades, error) {
 func (t *TradesDB) Insert(ts Trades) error {
 	stmt := "insert into raw(tid, date, price, amount, type) values(?,?,?,?,?)"
 
-	//go语言不会自动转换切片，要手动转换
-	as := make([]database.Attributer, len(ts))
-	for i, v := range ts {
-		as[i] = database.Attributer(v)
-	}
-
-	if err := t.db.Insert(as, stmt); err != nil {
-		return GoKit.Err("*TradesDB.Insert(): ", err)
+	if err := t.db.Insert(stmt, ts); err != nil {
+		return GoKit.Err(err, "*TradesDB.Insert()")
 	}
 
 	return nil

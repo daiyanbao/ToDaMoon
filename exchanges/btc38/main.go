@@ -3,12 +3,11 @@ package btc38
 import (
 	"sync"
 
-	"github.com/aQuaYi/ToDaMoon/Interface"
-	"github.com/aQuaYi/ToDaMoon/pubu"
+	"github.com/aQuaYi/ToDaMoon/apollo"
 )
 
 var onceMain sync.Once
-var notify Interface.Notifier
+var notify apollo.Notifier
 
 // Start 会启动btc38模块
 // 会执行tasks中的所有任务

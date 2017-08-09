@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	ec "github.com/aQuaYi/ToDaMoon/exchanges"
-	"github.com/aQuaYi/ToDaMoon/util"
 	observer "github.com/imkira/go-observer"
 )
 

@@ -6,8 +6,9 @@ import (
 	"reflect"
 )
 
-//GetRows 描述了从数据库中查询的过程
-func (db *DB) GetRows(queryStatement string, StructPtr interface{}) ([]interface{}, error) {
+// GetRows 可以从数据库中查询多行信息
+// structPtr 是目标结构体的空值的指针
+func (db *DB) GetRows(queryStatement string, structPtr interface{}) ([]interface{}, error) {
 	rows, err := db.Query(queryStatement)
 	if err != nil {
 		msg := fmt.Sprintf("对%s使用以下语句查询\n%s\n出现错误:%s", db.Name(), queryStatement, err)
@@ -17,7 +18,7 @@ func (db *DB) GetRows(queryStatement string, StructPtr interface{}) ([]interface
 
 	result := []interface{}{}
 	for rows.Next() {
-		row, s := makeRow(StructPtr)
+		row, s := makeRow(structPtr)
 		err := rows.Scan(row...)
 		if err != nil {
 			msg := fmt.Sprintf("对%s查询%s出来的rows进行Scan时，出错:%s", db.Name(), queryStatement, err)

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/aQuaYi/GoKit"
-	ec "github.com/aQuaYi/exchanges"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 )
 
 type tickerResp struct {

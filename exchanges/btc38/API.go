@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/aQuaYi/GoKit"
-	ec "github.com/aQuaYi/exchanges"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 
 	"github.com/BurntSushi/toml"
 )

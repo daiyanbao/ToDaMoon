@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	ec "github.com/aQuaYi/exchanges"
-	"github.com/aQuaYi/exchanges/btc38"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges/btc38"
 )
 
 func main() {

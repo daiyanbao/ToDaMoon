@@ -8,7 +8,7 @@ import (
 
 	"github.com/aQuaYi/GoKit"
 
-	ec "github.com/aQuaYi/exchanges"
+	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 )
 
 // Ticker 可以返回coin的ticker信息
