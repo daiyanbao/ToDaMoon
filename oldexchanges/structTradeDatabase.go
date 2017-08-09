@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/aQuaYi/GoKit"
-	"github.com/aQuaYi/ToDaMoon/database"
+	"github.com/aQuaYi/ToDaMoon/easyDB"
 )
 
 //TradesDB 用来存放exchange的历史交易数据的数据库
 type TradesDB struct {
-	db database.DBer
+	db easyDB.DBer
 }
 
 //Name 返回数据库的名称
@@ -27,7 +27,7 @@ func OpenTradesDB(filename string) (*TradesDB, error) {
 		amount real NOT NULL,
 		type text NOT NULL);`
 
-	db, err := database.Connect(filename, createStatement)
+	db, err := easyDB.Connect(filename, createStatement)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (t *TradesDB) Len() (int64, error) {
 	var result int64
 
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.Len(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.Len(): ")
 	}
 	return result, nil
 }
@@ -52,7 +52,7 @@ func (t *TradesDB) Len() (int64, error) {
 func (t *TradesDB) MaxTid() (int64, error) {
 	c, err := t.Len()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTid(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTid(): ")
 	} else if c == 0 {
 		//返回1的原因是，有的交易所会忽略掉tid=0的参数。
 		return 1, nil
@@ -61,7 +61,7 @@ func (t *TradesDB) MaxTid() (int64, error) {
 	stmt := "select max(tid) from raw"
 	var result int64
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTid(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTid(): ")
 	}
 	return result, nil
 }
@@ -70,7 +70,7 @@ func (t *TradesDB) MaxTid() (int64, error) {
 func (t *TradesDB) MinTid() (int64, error) {
 	c, err := t.Len()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MinTid(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MinTid(): ")
 	} else if c == 0 {
 		//返回1的原因是，为了和MaxTid()一致
 		return 1, nil
@@ -79,7 +79,7 @@ func (t *TradesDB) MinTid() (int64, error) {
 	stmt := "select min(tid) from raw"
 	var result int64
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.MinTid(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MinTid(): ")
 	}
 	return result, nil
 }
@@ -89,7 +89,7 @@ func (t *TradesDB) MinTid() (int64, error) {
 func (t *TradesDB) MaxTidNotGreaterThan(number int64) (int64, error) {
 	c, err := t.Len()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTidNotGreaterThan(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTidNotGreaterThan(): ")
 	} else if c == 0 {
 		return 1, nil
 	}
@@ -97,7 +97,7 @@ func (t *TradesDB) MaxTidNotGreaterThan(number int64) (int64, error) {
 	stmt := fmt.Sprintf("select max(tid) from raw where tid <= %d", number)
 	var result int64
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTidNotGreaterThan(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTidNotGreaterThan(): ")
 	}
 
 	return result, nil
@@ -107,7 +107,7 @@ func (t *TradesDB) MaxTidNotGreaterThan(number int64) (int64, error) {
 func (t *TradesDB) MaxDate() (int64, error) {
 	maxTid, err := t.MaxTid()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxDate(): ")
 	} else if maxTid == 1 {
 		msg := fmt.Sprintf("%s数据库中，还没有数据。无法读取MaxDate()", t.Name())
 		return 0, errors.New(msg)
@@ -116,7 +116,7 @@ func (t *TradesDB) MaxDate() (int64, error) {
 	stmt := fmt.Sprintf("select date from raw where tid = %d", maxTid)
 	var result int64
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxDate(): ")
 	}
 
 	return result, nil
@@ -126,7 +126,7 @@ func (t *TradesDB) MaxDate() (int64, error) {
 func (t *TradesDB) MinDate() (int64, error) {
 	minTid, err := t.MinTid()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxDate(): ")
 	} else if minTid == 1 {
 		msg := fmt.Sprintf("%s数据库中，还没有数据。无法读取MinDate()", t.Name())
 		return 0, errors.New(msg)
@@ -135,7 +135,7 @@ func (t *TradesDB) MinDate() (int64, error) {
 	stmt := fmt.Sprintf("select date from raw where tid = %d", minTid)
 	var result int64
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxDate(): ")
 	}
 
 	return result, nil
@@ -145,14 +145,14 @@ func (t *TradesDB) MinDate() (int64, error) {
 func (t *TradesDB) DateOf(number int64) (int64, error) {
 	tid, err := t.MaxTidNotGreaterThan(number)
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.DateOf(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.DateOf(): ")
 	}
 
 	stmt := fmt.Sprintf("select date from raw where tid = %d", tid)
 
 	var result int64
 	if err := t.db.GetValues(stmt, &result); err != nil {
-		return 0, GoKit.Err("*TradesDB.DateOf(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.DateOf(): ")
 	}
 
 	return result, nil
@@ -164,7 +164,7 @@ func (t *TradesDB) MaxTidBeforeDate(date int64) (int64, error) {
 	//首先处理数据库中的记录太短的情况
 	firstDate, err := t.MinDate()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTidBeforeDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTidBeforeDate(): ")
 	}
 	if date < firstDate {
 		msg := fmt.Sprintf("*TradesDB.MaxTidBeforeDate(): %s中最老的数据，在%s之后才产生。", t.Name(), GoKit.DateOf(date))
@@ -174,7 +174,7 @@ func (t *TradesDB) MaxTidBeforeDate(date int64) (int64, error) {
 	//然后处理，数据库中的数据，还没有更新到最新记录的情况
 	lastDate, err := t.MaxDate()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTidBeforeDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTidBeforeDate(): ")
 	}
 	if lastDate < date {
 		msg := fmt.Sprintf("*TradesDB.MaxTidBeforeDate(): %s中最新的数据，在%s之前。", t.Name(), GoKit.DateOf(date))
@@ -184,12 +184,12 @@ func (t *TradesDB) MaxTidBeforeDate(date int64) (int64, error) {
 	//最后处理Date落在数据库中的情况
 	firstTID, err := t.MinTid()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTidBeforeDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTidBeforeDate(): ")
 	}
 
 	lastTID, err := t.MaxTid()
 	if err != nil {
-		return 0, GoKit.Err("*TradesDB.MaxTidBeforeDate(): ", err)
+		return 0, GoKit.Err(err, "*TradesDB.MaxTidBeforeDate(): ")
 	}
 
 	for firstTID+4096 < lastTID {
@@ -222,12 +222,12 @@ func (t *TradesDB) Trades(beginTID, endTID int64) (Trades, error) {
 	stmt := fmt.Sprintf("select * from raw where %d <= tid and tid < %d", beginTID, endTID)
 	rows, err := t.db.GetRows(stmt, newTrade)
 	if err != nil {
-		return nil, GoKit.Err("*TradesDB.Trades(): ", err)
+		return nil, GoKit.Err(err, "*TradesDB.Trades(): ")
 	}
 
 	ts, err := convertToTrades(rows)
 	if err != nil {
-		return nil, GoKit.Err("*Trades.Trades(): ", err)
+		return nil, GoKit.Err(err, "*Trades.Trades(): ")
 	}
 
 	return ts, nil
