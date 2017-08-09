@@ -7,13 +7,12 @@ import (
 	"net/url"
 
 	"github.com/aQuaYi/GoKit"
-	"github.com/aQuaYi/aQuaGo/exchanges"
 
-	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 )
 
 // Ticker 可以返回coin的ticker信息
-func (a *API) Ticker(money, coin string) (*ec.Ticker, error) {
+func (a *API) Ticker(money, coin string) (*exchanges.Ticker, error) {
 	rawData, err := a.tickerRawData(money, coin)
 	if err != nil {
 		return nil, err
@@ -38,7 +37,7 @@ func (a *API) Ticker(money, coin string) (*ec.Ticker, error) {
 
 // AllTicker 返回money市场中全部coin的ticker
 // btc38.com 独有的API
-func (a *API) AllTicker(money string) (map[string]*ec.Ticker, error) {
+func (a *API) AllTicker(money string) (map[string]*exchanges.Ticker, error) {
 	rawData, err := a.tickerRawData(money, "all")
 	if err != nil {
 		return nil, GoKit.Err(err, "无法获取%s.AllTicker(%s)的rawData", a.Name(), money)
@@ -60,7 +59,7 @@ func (a *API) AllTicker(money string) (map[string]*ec.Ticker, error) {
 		}
 	}
 
-	result := make(map[string]*ec.Ticker)
+	result := make(map[string]*exchanges.Ticker)
 	for k, v := range resp {
 		result[k] = v.Ticker.normalize()
 	}
@@ -115,7 +114,7 @@ func CheckAllTicker(a *API, money string) (result string) {
 }
 
 //Depth 是反馈市场深度信息
-func (a *API) Depth(money, coin string) (*ec.Depth, error) {
+func (a *API) Depth(money, coin string) (*exchanges.Depth, error) {
 	rawData, err := a.depthRawData(money, coin)
 	if err != nil {
 		return nil, err
@@ -147,7 +146,7 @@ func (a *API) depthRawData(money, coin string) ([]byte, error) {
 	return a.Get(path)
 }
 
-func depthNormalize(d depth) *ec.Depth {
+func depthNormalize(d depth) *exchanges.Depth {
 	a := quotations(d.Asks)
 	if !a.IsAskSorted() {
 		a.SortAsks()
@@ -158,7 +157,7 @@ func depthNormalize(d depth) *ec.Depth {
 		b.SortBids()
 	}
 
-	return &ec.Depth{
+	return &exchanges.Depth{
 		Asks: a,
 		Bids: b,
 	}
@@ -166,7 +165,7 @@ func depthNormalize(d depth) *ec.Depth {
 
 // TransRecords 返回市场的交易记录
 // 当tid<=0时，返回最新的30条记录
-func (a *API) TransRecords(money, coin string, tid int64) (ec.Trades, error) {
+func (a *API) TransRecords(money, coin string, tid int64) (exchanges.Trades, error) {
 	rawData, err := a.transRecordsRawData(money, coin, tid)
 	if err != nil {
 		return nil, err

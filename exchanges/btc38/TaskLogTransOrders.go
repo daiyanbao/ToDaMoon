@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/aQuaYi/GoKit"
-	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 	observer "github.com/imkira/go-observer"
 )
 
@@ -46,7 +46,7 @@ func logTransOrders(name, money, coin string, stream observer.Stream, updateCycl
 
 	go func() {
 		for {
-			ts, ok := stream.WaitNext().(ec.Trades)
+			ts, ok := stream.WaitNext().(exchanges.Trades)
 			if ok && ts.Len() > 0 {
 				log.Printf(format, ts.LastTID(), GoKit.DateOf(ts.LastDate()))
 

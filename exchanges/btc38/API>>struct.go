@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/aQuaYi/GoKit"
-	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 )
 
 type tickerResp struct {
@@ -23,8 +23,8 @@ type ticker struct {
 	Sell float64 `json:"sell,float64"`
 }
 
-func (t ticker) normalize() *ec.Ticker {
-	return &ec.Ticker{
+func (t ticker) normalize() *exchanges.Ticker {
+	return &exchanges.Ticker{
 		High: t.High,
 		Low:  t.Low,
 		Last: t.Last,
@@ -40,7 +40,7 @@ type depth struct {
 }
 
 func quotations(depthData [][2]float64) exchanges.Quotations {
-	res := make(ec.Quotations, len(depthData))
+	res := make(exchanges.Quotations, len(depthData))
 	for i, d := range depthData {
 		res[i] = exchanges.Quotation{
 			Price:  d[0],
@@ -54,7 +54,7 @@ func quotations(depthData [][2]float64) exchanges.Quotations {
 //MyBalance 是btc38的账户信息
 type myBalance map[string]string
 
-func (m myBalance) normalize(coins []string) (*ec.Account, error) {
+func (m myBalance) normalize(coins []string) (*exchanges.Account, error) {
 	mba, err := convertMyBalanceAmount(m)
 	if err != nil {
 		msg := fmt.Sprintf("转换时失败：%s", err)
@@ -117,8 +117,8 @@ type Trade struct {
 }
 
 // Normalize change Trade date to standard formate
-func (t Trade) normalize() *ec.Trade {
-	return &ec.Trade{
+func (t Trade) normalize() *exchanges.Trade {
+	return &exchanges.Trade{
 		Amount: t.Amount,
 		Date:   t.Date,
 		Price:  t.Price,
@@ -141,7 +141,7 @@ var oTypeMap = map[int]string{
 	2: "sell",
 }
 
-func (o order) normalize(money string) (*ec.Order, error) {
+func (o order) normalize(money string) (*exchanges.Order, error) {
 	t, err := time.Parse("2006-01-02 15:04:05", o.Time)
 	if err != nil {
 		msg := fmt.Sprintf(`无法把"%s"转换成time.time:%s`, o.Time, err) + "\n"
@@ -151,7 +151,7 @@ func (o order) normalize(money string) (*ec.Order, error) {
 	date := t.Unix()
 	oType := oTypeMap[o.OrderType]
 
-	return &ec.Order{
+	return &exchanges.Order{
 		ID:     o.ID,
 		Date:   date,
 		Money:  money,
@@ -184,7 +184,7 @@ func (mt MyTrade) String() string {
 	return str
 }
 
-func (mt MyTrade) normalize(myUserID int) (*ec.Trade, error) {
+func (mt MyTrade) normalize(myUserID int) (*exchanges.Trade, error) {
 	d, err := GoKit.ParseLocalTime(mt.Time)
 	if err != nil {
 		msg := fmt.Sprintf("无法把%s转换timestamp: %s", mt.Time, err)
@@ -202,7 +202,7 @@ func (mt MyTrade) normalize(myUserID int) (*ec.Trade, error) {
 		return nil, errors.New(msg)
 	}
 
-	return &ec.Trade{
+	return &exchanges.Trade{
 		Tid:    mt.ID,
 		Date:   d.Unix(),
 		Price:  mt.Price,

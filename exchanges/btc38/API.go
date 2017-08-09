@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/aQuaYi/GoKit"
-	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 
 	"github.com/BurntSushi/toml"
 )
@@ -31,7 +31,7 @@ var once sync.Once
 //API 包含了btc38.com的所有API的wrapper
 type API struct {
 	*config
-	ec.Net
+	exchanges.Net
 }
 
 //NewAPI 返回一个*API的单例

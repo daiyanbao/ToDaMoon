@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 )
 
 // MyAccount 返回BTC38的账户信息
-func (a *API) MyAccount() (*ec.Account, error) {
+func (a *API) MyAccount() (*exchanges.Account, error) {
 	rawData, err := a.myAccountRawData()
 	if err != nil {
 		msg := fmt.Sprintf("无法获取 %s的MyBalance的RawDate:%s", a.Name(), err)
@@ -68,9 +68,9 @@ func handleMyAccountRawData(rawData []byte) (myBalance, error) {
 	return resp, nil
 }
 
-var orderTypeMap = map[ec.OrderType]int{
-	ec.BUY:  1,
-	ec.SELL: 2,
+var orderTypeMap = map[exchanges.OrderType]int{
+	exchanges.BUY:  1,
+	exchanges.SELL: 2,
 }
 
 // Order 下单交易
@@ -205,7 +205,7 @@ func handleCancelOrderRawData(rawData []byte) (bool, error) {
 }
 
 // MyOrders 我所有还没有成交的挂单
-func (a *API) MyOrders(money, coin string) ([]ec.Order, error) {
+func (a *API) MyOrders(money, coin string) ([]exchanges.Order, error) {
 	rawData, err := a.myOrdersRawData(money, coin)
 	if err != nil {
 		return nil, err
@@ -245,9 +245,9 @@ http://www.btc38.com/help/document/2581.html
 如果挂单不为空，则返回比如 / if there is any order：
 [{"order_id":"123", "order_type":"1", "order_coinname":"BTC", "order_amount":"23.232323", "order_price":"0.2929"}, {"order_id":"123", "order_type":"1", "order_coinname":"LTC","order_amount":"23.232323", "order_price":"0.2929"}]
 */
-func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, error) {
+func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]exchanges.Order, error) {
 	if string(rawData) == "no_order" {
-		return []ec.Order{}, nil
+		return []exchanges.Order{}, nil
 	}
 
 	resp := []order{}
@@ -261,7 +261,7 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 		log.Printf("\nBefore json.Unmarshal %s\nAfter json.Unmarshal %v\n", rawData, resp)
 	}
 
-	result := make([]ec.Order, len(resp))
+	result := make([]exchanges.Order, len(resp))
 	for i, v := range resp {
 		r, err := v.normalize(money)
 		if err != nil {
@@ -281,7 +281,7 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 // MyTransRecords 获取我的交易记录
 // tid参数应为数据库中，真实存在的tid
 // 如果，不知道真实的tid，可以让tid=0来获取全部的交易数据。
-func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
+func (a *API) MyTransRecords(money, coin string, tid int64) (exchanges.Trades, error) {
 	next := nextECTrades(a, money, coin)
 	res := exchanges.Trades{}
 	done := false
@@ -308,10 +308,10 @@ func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
 }
 
 // nextECTrades
-func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
+func nextECTrades(a *API, money, coin string) func() (exchanges.Trades, error) {
 	page := 0
 
-	return func() (ec.Trades, error) {
+	return func() (exchanges.Trades, error) {
 		mts, err := a.MyTradeList(money, coin, page)
 		if err != nil {
 			msg := fmt.Sprintf("nextPageList 无法获取%s.MyTradeList(%s, %s, %d)的数据: %s", a.Name(), money, coin, page, err)
@@ -320,7 +320,7 @@ func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
 
 		res, err := myTrades2ECTrades(mts, a.ID)
 		if err != nil {
-			msg := fmt.Sprintf("无法把nextECTrades获取的%s转换成ec.Trades: %s", mts, err)
+			msg := fmt.Sprintf("无法把nextECTrades获取的%s转换成exchanges.Trades: %s", mts, err)
 			return nil, errors.New(msg)
 		}
 
@@ -329,23 +329,23 @@ func nextECTrades(a *API, money, coin string) func() (ec.Trades, error) {
 	}
 }
 
-func myTrades2ECTrades(mts []MyTrade, ID int) (ec.Trades, error) {
-	res := make(ec.Trades, len(mts))
+func myTrades2ECTrades(mts []MyTrade, ID int) (exchanges.Trades, error) {
+	res := make(exchanges.Trades, len(mts))
 	for i, mt := range mts {
 		et, err := mt.normalize(ID)
 		if err != nil {
-			msg := fmt.Sprintf("无法把%s转换成ec.Trade: %s", mt, err)
+			msg := fmt.Sprintf("无法把%s转换成exchanges.Trade: %s", mt, err)
 			return nil, errors.New(msg)
 		}
 		res[i] = et
 	}
 
-	//mts是降序，ec.Trades是升序，所以res要进行排序。
+	//mts是降序，exchanges.Trades是升序，所以res要进行排序。
 	res.Sort()
 	return res, nil
 }
 
-func appendECTrades(res, temp exchanges.Trades, tid int64) (ec.Trades, bool) {
+func appendECTrades(res, temp exchanges.Trades, tid int64) (exchanges.Trades, bool) {
 	temp.Sort()
 	switch {
 	case tid < temp[0].Tid:
