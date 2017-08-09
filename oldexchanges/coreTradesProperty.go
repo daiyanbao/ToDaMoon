@@ -77,7 +77,6 @@ func updatePropertyAndSaveToDB(a API, money, coin string, p observer.Property, d
 			}
 
 			if len(th) > 0 {
-
 				p.Update(th)
 
 				if err := db.Insert(th); err != nil {
