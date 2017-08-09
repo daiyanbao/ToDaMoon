@@ -14,7 +14,7 @@ import (
 
 // watching 观察最新的TransOrders数据
 func (b *BTC38) watching() {
-	if !b.ShowDetail {
+	if !b.IsLog {
 		return
 	}
 	notify.Info("BTC38 的 watching 开始工作了～～～")

@@ -10,6 +10,7 @@ import (
 
 //DBer 是定制数据库的接口
 type DBer interface {
+	// Name() -> 数据库文件存放的位置
 	Name() string
 	Insert(statement string, data interface{}) error
 	GetRows(statement string, structPtr interface{}) ([]interface{}, error)
