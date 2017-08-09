@@ -74,7 +74,7 @@ var orderTypeMap = map[ec.OrderType]int{
 }
 
 // Order 下单交易
-func (a *API) Order(t ec.OrderType, money, coin string, price, amount float64) (int64, error) {
+func (a *API) Order(t exchanges.OrderType, money, coin string, price, amount float64) (int64, error) {
 	ot := orderTypeMap[t]
 	rawData, err := a.orderRawData(ot, money, coin, price, amount)
 	if err != nil {
@@ -283,9 +283,9 @@ func (a *API) handleMyOrdersRawData(rawData []byte, money string) ([]ec.Order, e
 // 如果，不知道真实的tid，可以让tid=0来获取全部的交易数据。
 func (a *API) MyTransRecords(money, coin string, tid int64) (ec.Trades, error) {
 	next := nextECTrades(a, money, coin)
-	res := ec.Trades{}
+	res := exchanges.Trades{}
 	done := false
-	//res := ec.Trades{}
+	//res := exchanges.Trades{}
 
 	for !done {
 		temp, err := next()
@@ -345,7 +345,7 @@ func myTrades2ECTrades(mts []MyTrade, ID int) (ec.Trades, error) {
 	return res, nil
 }
 
-func appendECTrades(res, temp ec.Trades, tid int64) (ec.Trades, bool) {
+func appendECTrades(res, temp exchanges.Trades, tid int64) (ec.Trades, bool) {
 	temp.Sort()
 	switch {
 	case tid < temp[0].Tid:
@@ -430,6 +430,6 @@ func CheckMyTradeList(a *API, money, coin string, page int) (result string) {
 
 func (a *API) md5(time string) string {
 	md := fmt.Sprintf("%s_%d_%s_%s", a.PublicKey, a.ID, a.SecretKey, time)
-	md5 := ec.MD5([]byte(md))
-	return ec.HexEncodeToString(md5)
+	md5 := exchanges.MD5([]byte(md))
+	return exchanges.HexEncodeToString(md5)
 }

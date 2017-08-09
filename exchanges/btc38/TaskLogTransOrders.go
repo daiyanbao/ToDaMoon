@@ -8,6 +8,7 @@ import (
 
 	"sync"
 
+	"github.com/aQuaYi/GoKit"
 	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 	observer "github.com/imkira/go-observer"
 )
@@ -47,7 +48,7 @@ func logTransOrders(name, money, coin string, stream observer.Stream, updateCycl
 		for {
 			ts, ok := stream.WaitNext().(ec.Trades)
 			if ok && ts.Len() > 0 {
-				log.Printf(format, ts.LastTID(), util.DateOf(ts.LastDate()))
+				log.Printf(format, ts.LastTID(), GoKit.DateOf(ts.LastDate()))
 
 			}
 
@@ -57,7 +58,7 @@ func logTransOrders(name, money, coin string, stream observer.Stream, updateCycl
 				once.Do(func() {
 					done <- struct{}{}
 					msg := "又收集到一个最新数据\n"
-					msg += fmt.Sprintf(format, ts.LastTID(), util.DateOf(ts.LastDate()))
+					msg += fmt.Sprintf(format, ts.LastTID(), GoKit.DateOf(ts.LastDate()))
 					notify.Good(msg)
 				})
 			}

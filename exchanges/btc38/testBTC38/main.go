@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	ec "github.com/aQuaYi/ToDaMoon/exchanges"
+	"github.com/aQuaYi/ToDaMoon/exchanges"
 	"github.com/aQuaYi/ToDaMoon/exchanges/btc38"
 )
 
@@ -11,24 +11,24 @@ func main() {
 	a := btc38.NewAPI()
 	fmt.Printf("===开始===%s的API测试===\n", a.Name())
 
-	price, result := ec.CheckTicker(a, "cny", "btc")
+	price, result := exchanges.CheckTicker(a, "cny", "btc")
 
-	result += ec.CheckDepth(a, "cny", "btc")
+	result += exchanges.CheckDepth(a, "cny", "btc")
 
-	result += ec.CheckTransRecords(a, "cny", "btc", 1)
+	result += exchanges.CheckTransRecords(a, "cny", "btc", 1)
 
-	result += ec.CheckMyAccount(a)
+	result += exchanges.CheckMyAccount(a)
 
 	price = price * 0.8
 	amount := 20 / price
-	orderID, res := ec.CheckOrder(a, ec.BUY, "cny", "btc", price, amount)
+	orderID, res := exchanges.CheckOrder(a, exchanges.BUY, "cny", "btc", price, amount)
 	result += res
 
-	result += ec.CheckMyOrders(a, "cny", "btc")
+	result += exchanges.CheckMyOrders(a, "cny", "btc")
 
-	result += ec.CheckCancelOrder(a, "cny", "btc", orderID)
+	result += exchanges.CheckCancelOrder(a, "cny", "btc", orderID)
 
-	result += ec.CheckMyTransRecords(a, "cny", "doge", 1)
+	result += exchanges.CheckMyTransRecords(a, "cny", "doge", 1)
 
 	result += btc38.CheckAllTicker(a, "cny")
 

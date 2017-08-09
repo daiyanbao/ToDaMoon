@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/aQuaYi/ToDaMoon/apollo"
+	"github.com/aQuaYi/pubu.im"
 )
 
 var onceMain sync.Once

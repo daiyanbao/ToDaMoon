@@ -44,7 +44,7 @@ func NewAPI() *API {
 			//根据配置生成*API实例
 			api = &API{
 				config: cfg,
-				Net:    ec.NewNet(cfg.APISleepMS),
+				Net:    exchanges.NewNet(cfg.APISleepMS),
 			}
 		})
 
@@ -53,6 +53,7 @@ func NewAPI() *API {
 
 type config struct {
 	Name       string
+	DBDir      string
 	IsLog      bool
 	APISleepMS int //两次API访问的最小间隔时间，单位为毫秒
 	ID         int
@@ -63,7 +64,7 @@ type config struct {
 }
 
 func getConfig() *config {
-	filename := ec.Config(name)
+	filename := exchanges.Config(name)
 
 	cfg := new(config)
 	if _, err := toml.DecodeFile(filename, cfg); err != nil {

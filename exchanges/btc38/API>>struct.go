@@ -39,10 +39,10 @@ type depth struct {
 	Bids [][2]float64
 }
 
-func quotations(depthData [][2]float64) ec.Quotations {
+func quotations(depthData [][2]float64) exchanges.Quotations {
 	res := make(ec.Quotations, len(depthData))
 	for i, d := range depthData {
-		res[i] = ec.Quotation{
+		res[i] = exchanges.Quotation{
 			Price:  d[0],
 			Amount: d[1],
 		}
@@ -61,7 +61,7 @@ func (m myBalance) normalize(coins []string) (*ec.Account, error) {
 		return nil, errors.New(msg)
 	}
 
-	a := ec.NewAccount()
+	a := exchanges.NewAccount()
 	a.TotalCNY = mba["cny_balance"]
 
 	coins = append(coins, "cny")
@@ -71,7 +71,7 @@ func (m myBalance) normalize(coins []string) (*ec.Account, error) {
 		total := mba[tKey]
 		freezed := mba[fKey]
 		available := total - freezed
-		a.Coins[coin] = ec.CoinStatus{
+		a.Coins[coin] = exchanges.CoinStatus{
 			Total:     total,
 			Freezed:   freezed,
 			Available: available,

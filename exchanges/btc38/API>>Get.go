@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/aQuaYi/GoKit"
+	"github.com/aQuaYi/aQuaGo/exchanges"
 
 	ec "github.com/aQuaYi/ToDaMoon/exchanges"
 )
@@ -176,7 +177,7 @@ func (a *API) TransRecords(money, coin string, tid int64) (ec.Trades, error) {
 		log.Println()
 	}
 
-	resp := ec.Trades{}
+	resp := exchanges.Trades{}
 	err = json.Unmarshal(rawData, &resp)
 	if err != nil {
 		return nil, err
@@ -207,5 +208,5 @@ func urlMaker(URL string, money, coin string) string {
 	v.Set("c", coin)
 	v.Set("mk_type", money)
 
-	return ec.Path(URL, v)
+	return exchanges.Path(URL, v)
 }
