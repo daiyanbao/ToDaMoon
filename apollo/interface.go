@@ -1,4 +1,4 @@
-package Interface
+package apollo
 
 //Notifier 是通知类型的接口
 type Notifier interface {

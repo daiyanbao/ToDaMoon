@@ -13,7 +13,16 @@ var tomlFileanme = "apollo.toml"
 //contrller 用来读取tomlFilename的内容
 //并根据tomlFilename中的内容，来启动相应的交易所
 func controller() {
+	ecs := getExchanges()
+	for _, e := range ecs.Names {
+		fmt.Println(e)
+		// switch e {
+		// 	case "btc38":
 
+		// 	default:
+		// 	log.f
+		// }
+	}
 }
 
 type exchanges struct {
