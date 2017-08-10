@@ -30,7 +30,7 @@ var once sync.Once
 
 //API 包含了btc38.com的所有API的wrapper
 type API struct {
-	*config
+	*apiConfig
 	exchanges.Net
 }
 
@@ -43,8 +43,8 @@ func NewAPI() *API {
 
 			//根据配置生成*API实例
 			api = &API{
-				config: cfg,
-				Net:    exchanges.NewNet(cfg.APISleepMS),
+				apiConfig: &cfg.API,
+				Net:       exchanges.NewNet(cfg.API.SleepMS),
 			}
 		})
 
@@ -52,15 +52,30 @@ func NewAPI() *API {
 }
 
 type config struct {
-	Name       string
-	DBDir      string
-	IsLog      bool
-	APISleepMS int //两次API访问的最小间隔时间，单位为毫秒
-	ID         int
-	IP         string
-	PublicKey  string
-	SecretKey  string
-	Markets    map[string][]string //key是money，value是coins
+	Name     string
+	IsLog    bool
+	Markets  map[string][]string //key是money，value是coins
+	API      apiConfig
+	Database dbConfig
+}
+
+type apiConfig struct {
+	Name      string
+	IsLog     bool
+	SleepMS   int //两次API访问的最小间隔时间，单位为毫秒
+	ID        int
+	IP        string
+	PublicKey string
+	SecretKey string
+	Markets   map[string][]string //key是money，value是coins
+}
+
+type dbConfig struct {
+	IsLog            bool
+	MinUpdateCycleMS int //  。单位，毫秒
+	Dir              string
+	// 从config中复制过来，无需设置
+	Markets map[string][]string //key是money，value是coins
 }
 
 func getConfig() *config {
@@ -72,21 +87,25 @@ func getConfig() *config {
 		log.Fatalf(msg)
 	}
 
+	cfg.API.Markets = cfg.Markets
+	cfg.API.Name = cfg.Name
+
+	cfg.Database.Markets = cfg.Markets
 	cfg.check()
 	return cfg
 }
 
 // check Config for setting mistakes
 func (c *config) check() {
-	if len(c.PublicKey) != 32 {
+	if len(c.API.PublicKey) != 32 {
 		log.Fatalln("btc38的PublicKey长度应为32位")
 	}
 
-	if len(c.SecretKey) != 64 {
+	if len(c.API.SecretKey) != 64 {
 		log.Fatalln("btc38的SecretKey长度应为64位")
 	}
 
-	if c.APISleepMS < 10 {
+	if c.API.SleepMS < 10 {
 		log.Fatalln("btc38的API访问间隔等待时间过短，请核查")
 	}
 
@@ -95,13 +114,13 @@ func (c *config) check() {
 		log.Fatal("无法获取本机的外网IP:", err)
 	}
 
-	if myIP != c.IP {
-		text := fmt.Sprintf("本机IP没在%s注册:%s", c.IP, myIP)
+	if myIP != c.API.IP {
+		text := fmt.Sprintf("本机IP没在%s注册:%s", c.API.IP, myIP)
 		log.Fatalf(text)
 	}
 }
 
 //Name 返回API所在交易所的名字
 func (a *API) Name() string {
-	return a.config.Name
+	return a.apiConfig.Name
 }

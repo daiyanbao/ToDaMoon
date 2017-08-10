@@ -71,7 +71,7 @@ func changeUpdateCycle(b *BTC38, sum int, done <-chan struct{}) {
 		for {
 			for _, coins := range b.TradesCenter {
 				for _, property := range coins {
-					property.UpdateCycleCh <- time.Duration(sum*b.API.MinAccessPeriodMS) * time.Millisecond
+					property.UpdateCycleCh <- time.Duration(sum*b.Database.MinUpdateCycleMS) * time.Millisecond
 				}
 			}
 			<-done

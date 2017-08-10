@@ -54,6 +54,7 @@ func quotations(depthData [][2]float64) exchanges.Quotations {
 //MyBalance 是btc38的账户信息
 type myBalance map[string]string
 
+// TODO: 去掉coins， 不需要输入参数
 func (m myBalance) normalize(coins []string) (*exchanges.Account, error) {
 	mba, err := convertMyBalanceAmount(m)
 	if err != nil {

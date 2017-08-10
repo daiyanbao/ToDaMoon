@@ -12,7 +12,7 @@ var onceBTC38 sync.Once
 
 // BTC38 包含了btc38.com的API所需的所有数据
 type BTC38 struct {
-	*API
+	*config
 	exchanges.TransRecordsDB
 	exchanges.TradesCenter
 	*exchanges.Account
@@ -30,12 +30,12 @@ func buildBTC38() {
 
 	//产生api的实例
 	a := NewAPI()
-
+	cfg := getConfig()
 	// 产生btc38的实例
-	btc38 = &BTC38{API: a}
+	btc38 = &BTC38{config: cfg}
 
 	//配置tradesDB
-	btc38.TransRecordsDB = exchanges.MakeTradesDBs(a.DBDir, a.Name(), a.Markets)
+	btc38.TransRecordsDB = exchanges.MakeTradesDBs(cfg.Database.Dir, cfg.Name, a.Markets)
 
 	//获取btc38各个coin的全局交易的最新数据到数据库，然后，发布最新全局交易数据订阅
 	btc38.TradesCenter = exchanges.MakeTradesCenter(a, btc38.TransRecordsDB, time.Millisecond*100, time.Minute)
@@ -43,5 +43,5 @@ func buildBTC38() {
 
 //Name 返回BTC38的name
 func (b *BTC38) Name() string {
-	return b.API.config.Name
+	return b.config.Name
 }

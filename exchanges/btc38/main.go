@@ -26,6 +26,4 @@ func tasks() {
 	New()
 
 	// 执行btc38的各项任务
-	btc38.checkNewCoin()
-	btc38.watching()
 }
